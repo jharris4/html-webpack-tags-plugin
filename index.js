@@ -2,7 +2,15 @@
 var assert = require('assert');
 
 function HtmlWebpackIncludeAssetsPlugin (options) {
-  assert.equal(options, undefined, 'The HtmlWebpackIncludeAssetsPlugin does not accept any options');
+  assert(typeof options === 'object', 'HtmlWebpackIncludeAssetsPlugin options are required');
+  assert(Array.isArray(options.assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array value');
+  assert(typeof options.append === 'boolean', 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
+  var assets = options.assets;
+  var assetsCount = assets.length;
+  for (var i = 0; i < assetsCount; i++) {
+    this.validateAsset(assets[i]);
+  }
+  this.options = options;
 }
 
 HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
@@ -11,7 +19,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   // Hook into the html-webpack-plugin processing
   compiler.plugin('compilation', function (compilation) {
     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
-      var includeAssets = htmlPluginData.plugin.options.includeAssets;
+      var includeAssets = self.options.assets;
+      var appendAssets = self.options.append;
       var assets = htmlPluginData.assets;
       // Skip if the plugin configuration didn't set `includeAssets`
       if (!includeAssets) {
@@ -29,12 +38,20 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         self.validateAsset(includeAsset);
         if (self.hasExtension(includeAsset, '.js')) {
           if (assets.js.indexOf(includeAsset) === -1) {
-            assets.js.push(includeAsset);
+            if (appendAssets) {
+              assets.js.push(includeAsset);
+            } else {
+              assets.js.unshift(includeAsset);
+            }
           }
         }
         if (self.hasExtension(includeAsset, '.css')) {
           if (assets.css.indexOf(includeAsset) === -1) {
-            assets.css.push(includeAsset);
+            if (appendAssets) {
+              assets.css.push(includeAsset);
+            } else {
+              assets.css.unshift(includeAsset);
+            }
           }
         }
       }
