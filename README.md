@@ -3,7 +3,7 @@ Include Assets extension for the HTML Webpack Plugin
 [![npm version](https://badge.fury.io/js/html-webpack-include-assets-plugin.svg)](https://badge.fury.io/js/html-webpack-include-assets-plugin) [![Build Status](https://travis-ci.org/jharris4/html-webpack-include-assets-plugin.svg?branch=master)](https://travis-ci.org/jharris4/html-webpack-include-assets-plugin) [![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard)
 
 Enhances [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin)
-functionality by adding the `{includeAssets: String | [String]}` option to allow you to include assets.
+functionality by allowing you to specify js or css assets to be included.
 
 When using a plugin such as [copy-webpack-plugin](https://github.com/kevlened/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
@@ -32,13 +32,13 @@ Add the plugin to your webpack config as follows:
 ```javascript
 plugins: [
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin()
+  new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true })
 ]  
 ```
 
-The above configuration will actually do nothing due to the configuration defaults.
+When you set `option.assets` to an array of strings, the matched assets will be output into your html-webpack-plugin template.
 
-When you set `includeAssets` to an array of strings or a single string, the matched assets will be output into your html-webpack-plugin template.
+The `option.append` must be a boolean, specifying whether the assets should be prepended before any existing assets, or appended after them.
 
 Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
 
@@ -48,9 +48,9 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
-  new HtmlWebpackPlugin({
-    includeAssets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css']
-  }),
-  new HtmlWebpackIncludeAssetsPlugin()
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'], append: false
+  })
 ]  
 ```
