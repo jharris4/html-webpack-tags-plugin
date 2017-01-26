@@ -1,16 +1,62 @@
 'use strict';
 var assert = require('assert');
 
+var defaultOptions = {
+  publicPath: true
+};
+
+function isObject (v) {
+  return v !== null && v !== undefined && typeof v === 'object';
+}
+
+function isBoolean (v) {
+  return v === true || v === false;
+}
+
+function isString (v) {
+  return v !== null && v !== undefined && (typeof v === 'string' || v instanceof String);
+}
+
+function isArray (v) {
+  return Array.isArray(v);
+}
+
+function endsWith (v, ending) {
+  var lastIndex = v.lastIndexOf(ending);
+  return lastIndex !== -1 && lastIndex === v.length - ending.length;
+}
+
 function HtmlWebpackIncludeAssetsPlugin (options) {
-  assert(typeof options === 'object', 'HtmlWebpackIncludeAssetsPlugin options are required');
-  assert(Array.isArray(options.assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array value');
-  assert(typeof options.append === 'boolean', 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
-  var assets = options.assets;
-  var assetsCount = assets.length;
-  for (var i = 0; i < assetsCount; i++) {
-    this.validateAsset(assets[i]);
+  assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
+  var assets;
+  if (isString(options.assets)) {
+    assets = [options.assets];
+  } else {
+    assets = options.assets;
   }
-  this.options = options;
+  assert(isArray(assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array or string value');
+  var assetCount = assets.length;
+  var asset;
+  for (var i = 0; i < assetCount; i++) {
+    asset = assets[i];
+    assert(isString(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain non-strings (' + asset + ')');
+    assert(endsWith(asset, '.js') || endsWith(asset, '.css'),
+      'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending in .js or .css (' + asset + ')');
+  }
+  assert(isBoolean(options.append), 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
+  var publicPath;
+  if (options.publicPath !== undefined) {
+    assert(isBoolean(options.publicPath) || isString(options.publicPath),
+      'HtmlWebpackIncludeAssetsPlugin options should specify a publicPath that is either a boolean or a string');
+    publicPath = options.publicPath;
+  } else {
+    publicPath = defaultOptions.publicPath;
+  }
+  this.options = {
+    assets: assets,
+    append: options.append,
+    publicPath: publicPath
+  };
 }
 
 HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
@@ -21,11 +67,9 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
       var includeAssets = self.options.assets;
       var appendAssets = self.options.append;
+      var publicPath = self.options.publicPath;
       var assets = htmlPluginData.assets;
-      // Skip if the plugin configuration didn't set `includeAssets`
-      if (!includeAssets) {
-        return callback(null);
-      }
+      var includeAssetPrefix = publicPath === true ? assets.publicPath : isString(publicPath) ? publicPath : '';
 
       if (includeAssets.constructor !== Array) {
         includeAssets = [includeAssets];
@@ -34,9 +78,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAsset;
       var includeCount = includeAssets.length;
       for (var i = 0; i < includeCount; i++) {
-        includeAsset = includeAssets[i];
-        self.validateAsset(includeAsset);
-        if (self.hasExtension(includeAsset, '.js')) {
+        includeAsset = includeAssetPrefix + includeAssets[i];
+        if (endsWith(includeAsset, '.js')) {
           if (assets.js.indexOf(includeAsset) === -1) {
             if (appendAssets) {
               assets.js.push(includeAsset);
@@ -44,8 +87,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
               assets.js.unshift(includeAsset);
             }
           }
-        }
-        if (self.hasExtension(includeAsset, '.css')) {
+        } else if (endsWith(includeAsset, '.css')) {
           if (assets.css.indexOf(includeAsset) === -1) {
             if (appendAssets) {
               assets.css.push(includeAsset);
@@ -58,17 +100,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       callback(null);
     });
   });
-};
-
-HtmlWebpackIncludeAssetsPlugin.prototype.hasExtension = function (asset, extension) {
-  var lastIndex = asset.lastIndexOf(extension);
-  return lastIndex !== -1 && lastIndex === asset.length - extension.length;
-};
-
-HtmlWebpackIncludeAssetsPlugin.prototype.validateAsset = function (asset) {
-  assert.equal(typeof asset, 'string', 'The HtmlWebpackIncludeAssetsPlugin requires that all includeAssets be strings (' + asset + ')');
-  var hasValidExtension = this.hasExtension(asset, '.js') || this.hasExtension(asset, '.css');
-  assert.equal(hasValidExtension, true, 'The HtmlWebpackIncludeAssetsPlugin requires that all includeAssets have a js or css extension (' + asset + ')');
 };
 
 module.exports = HtmlWebpackIncludeAssetsPlugin;
