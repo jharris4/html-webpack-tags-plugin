@@ -3,7 +3,7 @@ var path = require('path');
 var fs = require('fs');
 var cheerio = require('cheerio');
 var webpack = require('webpack');
-var rm_rf = require('rimraf');
+var rimraf = require('rimraf');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackIncludeAssetsPlugin = require('../');
@@ -12,7 +12,7 @@ var OUTPUT_DIR = path.join(__dirname, '../dist');
 
 describe('HtmlWebpackIncludeAssetsPlugin', function () {
   beforeEach(function (done) {
-    rm_rf(OUTPUT_DIR, done);
+    rimraf(OUTPUT_DIR, done);
   });
 
   it('should throw an error if no options are provided', function (done) {
