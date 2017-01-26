@@ -38,9 +38,9 @@ plugins: [
 
 When you set `option.assets` to an array of strings, the matched assets will be output into your html-webpack-plugin template.
 
-The `option.append` must be a boolean, specifying whether the assets should be prepended before any existing assets, or appended after them.
-
 Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
+
+The `option.append` must be a boolean, specifying whether the assets should be prepended before any existing assets, or appended after them.
 
 The `option.publicPath` may be a boolean or string, specifying whether the assets should be prepended with webpack's public path or a custom publicPath.
 
