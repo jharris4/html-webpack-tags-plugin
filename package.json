@@ -36,7 +36,7 @@
     "html-webpack-plugin": "^2.26.0",
     "jasmine": "^2.5.3",
     "rimraf": "^2.5.4",
-    "semistandard": "^9.2.1",
+    "semistandard": "^7.0.5",
     "style-loader": "^0.13.1",
     "webpack": "^1.14.0"
   }
