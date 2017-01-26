@@ -42,6 +42,11 @@ The `option.append` must be a boolean, specifying whether the assets should be p
 
 Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
 
+The `option.publicPath` may be a boolean or string, specifying whether the assets should be prepended with webpack's public path or a custom publicPath.
+
+The publicPath defaults to `true`. A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/`
+may be used to prefix all assets with the given string.
+
 ```javascript
 plugins: [
   new CopyWebpackPlugin([
@@ -54,4 +59,19 @@ plugins: [
     append: false
   })
 ]  
+```
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    append: false,
+    publicPath: 'myPublicPath/'
+  })
+]
 ```
