@@ -5,6 +5,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(typeof options === 'object', 'HtmlWebpackIncludeAssetsPlugin options are required');
   assert(Array.isArray(options.assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array value');
   assert(typeof options.append === 'boolean', 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
+  assert(typeof options.publicPath === 'boolean' || typeof options.publicPath === 'string', 'HtmlWebpackIncludeAssetsPlugin option publicPath must be a string or boolean');
   var assets = options.assets;
   var assetsCount = assets.length;
   for (var i = 0; i < assetsCount; i++) {
@@ -21,6 +22,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
       var includeAssets = self.options.assets;
       var appendAssets = self.options.append;
+      var publicPath = self.options.publicPath;
       var assets = htmlPluginData.assets;
       // Skip if the plugin configuration didn't set `includeAssets`
       if (!includeAssets) {
@@ -35,6 +37,10 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeCount = includeAssets.length;
       for (var i = 0; i < includeCount; i++) {
         includeAsset = includeAssets[i];
+        // Prepend public path to asset
+        if (publicPath) {
+          includeAsset = ((typeof publicPath === 'string') ? publicPath : assets.publicPath ) + includeAsset;
+        }
         self.validateAsset(includeAsset);
         if (self.hasExtension(includeAsset, '.js')) {
           if (assets.js.indexOf(includeAsset) === -1) {
