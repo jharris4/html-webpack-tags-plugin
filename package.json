@@ -31,13 +31,13 @@
   "homepage": "https://github.com/jharris4/html-webpack-include-assets-plugin",
   "devDependencies": {
     "cheerio": "^0.22.0",
-    "css-loader": "^0.25.0",
+    "css-loader": "^0.26.1",
     "extract-text-webpack-plugin": "^1.0.1",
-    "html-webpack-plugin": "^2.16.0",
-    "jasmine": "^2.4.1",
+    "html-webpack-plugin": "^2.26.0",
+    "jasmine": "^2.5.3",
     "rimraf": "^2.5.4",
-    "semistandard": "^7.0.5",
+    "semistandard": "^9.2.1",
     "style-loader": "^0.13.1",
-    "webpack": "^1.13.0"
+    "webpack": "^1.14.0"
   }
 }
