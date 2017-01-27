@@ -3,7 +3,7 @@ var assert = require('assert');
 
 var defaultOptions = {
   publicPath: true,
-  hash: false,
+  hash: false
 };
 
 function isObject (v) {
@@ -67,7 +67,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     assets: assets,
     append: options.append,
     publicPath: publicPath,
-    hash: hash,
+    hash: hash
   };
 }
 
