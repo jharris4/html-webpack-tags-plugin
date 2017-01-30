@@ -62,7 +62,7 @@ The available options are:
 
 Example
 -------
-Using `HtmlWebpackIncludeAssetsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template:
+Using `HtmlWebpackIncludeAssetsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template :
 
 ```javascript
 plugins: [
@@ -76,6 +76,26 @@ plugins: [
     append: false
   })
 ]  
+```
+
+Appending and prepending at the same time :
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    append: false
+  }),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['css/custom.css'],
+    append: true
+  })
+]
 ```
 
 Using custom `publicPath` :
