@@ -2,7 +2,8 @@
 var assert = require('assert');
 
 var defaultOptions = {
-  publicPath: true
+  publicPath: true,
+  hash: false
 };
 
 function isObject (v) {
@@ -22,6 +23,9 @@ function isArray (v) {
 }
 
 function endsWith (v, ending) {
+  // Remove anything after `?`
+  if (v.indexOf('?') !== -1) v = v.substr(0, v.indexOf('?'));
+
   var lastIndex = v.lastIndexOf(ending);
   return lastIndex !== -1 && lastIndex === v.length - ending.length;
 }
@@ -52,10 +56,18 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   } else {
     publicPath = defaultOptions.publicPath;
   }
+  var hash;
+  if (options.hash !== undefined) {
+    assert(isBoolean(options.hash), 'HtmlWebpackIncludeAssetsPlugin options must have an hash key with a boolean value');
+    hash = options.hash;
+  } else {
+    hash = defaultOptions.hash;
+  }
   this.options = {
     assets: assets,
     append: options.append,
-    publicPath: publicPath
+    publicPath: publicPath,
+    hash: hash
   };
 }
 
@@ -68,8 +80,10 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAssets = self.options.assets;
       var appendAssets = self.options.append;
       var publicPath = self.options.publicPath;
+      var hash = self.options.hash;
       var assets = htmlPluginData.assets;
       var includeAssetPrefix = publicPath === true ? assets.publicPath : isString(publicPath) ? publicPath : '';
+      var includeAssetHash = hash === true ? '?' + compilation.hash : '';
 
       if (includeAssets.constructor !== Array) {
         includeAssets = [includeAssets];
@@ -78,7 +92,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAsset;
       var includeCount = includeAssets.length;
       for (var i = 0; i < includeCount; i++) {
-        includeAsset = includeAssetPrefix + includeAssets[i];
+        includeAsset = includeAssetPrefix + includeAssets[i] + includeAssetHash;
         if (endsWith(includeAsset, '.js')) {
           if (assets.js.indexOf(includeAsset) === -1) {
             if (appendAssets) {

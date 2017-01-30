@@ -36,16 +36,33 @@ plugins: [
 ]  
 ```
 
-When you set `option.assets` to an array of strings, the matched assets will be output into your html-webpack-plugin template.
+Options
+-------
+The available options are:
 
-Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
+- `assets`: `string` or `array`
+  
+  Assets that will be output into your html-webpack-plugin template. 
 
-The `option.append` must be a boolean, specifying whether the assets should be prepended before any existing assets, or appended after them.
+  Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
 
-The `option.publicPath` may be a boolean or string, specifying whether the assets should be prepended with webpack's public path or a custom publicPath.
+- `append`: `boolean`
 
-The publicPath defaults to `true`. A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/`
-may be used to prefix all assets with the given string.
+  Specifying whether the assets should be prepended (`false`) before any existing assets, or appended (`true`) after them.
+
+- `publicPath`: `boolean` or `string`
+
+  Specifying whether the assets should be prepended with webpack's public path or a custom publicPath (`string`).
+  
+  A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all assets with the given string. Default is `true`.
+
+- `hash`: `boolean`
+
+  Specifying whether the assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
+
+Example
+-------
+Using `HtmlWebpackIncludeAssetsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template:
 
 ```javascript
 plugins: [
@@ -61,6 +78,8 @@ plugins: [
 ]  
 ```
 
+Using custom `publicPath` :
+
 ```javascript
 plugins: [
   new CopyWebpackPlugin([
@@ -72,6 +91,23 @@ plugins: [
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     publicPath: 'myPublicPath/'
+  })
+]
+```
+
+Using `hash` option :
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    append: false,
+    hash: true
   })
 ]
 ```
