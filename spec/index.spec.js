@@ -303,6 +303,84 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         });
       });
     });
+
+    it('should include multiple css files and append them in order', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader') }]
+        },
+        plugins: [
+          new ExtractTextPlugin('[name].css'),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css'], append: true, publicPath: false })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(3);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
+          expect($('link[href="bar.css"]').toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          expect($($('link').get(1)).toString()).toBe('<link href="foo.css" rel="stylesheet">');
+          expect($($('link').get(2)).toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+
+    it('should include multiple css files and prepend them in order', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader') }]
+        },
+        plugins: [
+          new ExtractTextPlugin('[name].css'),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css'], append: false, publicPath: false })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(3);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
+          expect($('link[href="bar.css"]').toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          expect($($('link').get(0)).toString()).toBe('<link href="foo.css" rel="stylesheet">');
+          expect($($('link').get(1)).toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
   });
 
   describe('option.assets', function () {

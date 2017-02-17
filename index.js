@@ -87,25 +87,26 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
       var includeAsset;
       var includeCount = includeAssets.length;
+      var jsAssets = [];
+      var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
         includeAsset = includeAssetPrefix + includeAssets[i] + includeAssetHash;
         if (hasExtension(includeAsset, '.js')) {
-          if (assets.js.indexOf(includeAsset) === -1) {
-            if (appendAssets) {
-              assets.js.push(includeAsset);
-            } else {
-              assets.js.unshift(includeAsset);
-            }
+          if (assets.js.indexOf(includeAsset) === -1 && jsAssets.indexOf(includeAsset) === -1) {
+            jsAssets.push(includeAsset);
           }
         } else if (hasExtension(includeAsset, '.css')) {
-          if (assets.css.indexOf(includeAsset) === -1) {
-            if (appendAssets) {
-              assets.css.push(includeAsset);
-            } else {
-              assets.css.unshift(includeAsset);
-            }
+          if (assets.css.indexOf(includeAsset) === -1 && cssAssets.indexOf(includeAsset) === -1) {
+            cssAssets.push(includeAsset);
           }
         }
+      }
+      if (appendAssets) {
+        assets.js = assets.js.concat(jsAssets);
+        assets.css = assets.css.concat(cssAssets);
+      } else {
+        assets.js = jsAssets.concat(assets.js);
+        assets.css = cssAssets.concat(assets.css);
       }
       callback(null, htmlPluginData);
     });
