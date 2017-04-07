@@ -1,5 +1,6 @@
 'use strict';
 var assert = require('assert');
+var minimatch = require('minimatch');
 
 var defaultOptions = {
   publicPath: true,
@@ -63,11 +64,18 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   } else {
     hash = defaultOptions.hash;
   }
+  var files;
+  if (isString(options.files)) {
+    files = [options.files];
+  } else {
+    files = options.files;
+  }
   this.options = {
     assets: assets,
     append: options.append,
     publicPath: publicPath,
-    hash: hash
+    hash: hash,
+    files: files
   };
 }
 
@@ -77,6 +85,15 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   // Hook into the html-webpack-plugin processing
   compiler.plugin('compilation', function (compilation) {
     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
+      var files = self.options.files;
+      var shouldSkip = files && !files.some(function (file) {
+        return minimatch(htmlPluginData.outputName, file);
+      });
+
+      if (shouldSkip) {
+        return callback(null, htmlPluginData);
+      }
+
       var includeAssets = self.options.assets;
       var appendAssets = self.options.append;
       var publicPath = self.options.publicPath;
