@@ -39,5 +39,8 @@
     "semistandard": "^7.0.5",
     "style-loader": "^0.13.1",
     "webpack": "^1.14.0"
+  },
+  "dependencies": {
+    "minimatch": "^3.0.3"
   }
 }

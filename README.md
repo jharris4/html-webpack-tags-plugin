@@ -41,8 +41,8 @@ Options
 The available options are:
 
 - `assets`: `string` or `array`
-  
-  Assets that will be output into your html-webpack-plugin template. 
+
+  Assets that will be output into your html-webpack-plugin template.
 
   Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
 
@@ -53,12 +53,18 @@ The available options are:
 - `publicPath`: `boolean` or `string`
 
   Specifying whether the assets should be prepended with webpack's public path or a custom publicPath (`string`).
-  
+
   A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all assets with the given string. Default is `true`.
 
 - `hash`: `boolean`
 
   Specifying whether the assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
+
+- `files`: `string` or `array`
+
+  Files that the assets will be added to.
+
+  By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs.
 
 Example
 -------
@@ -128,6 +134,33 @@ plugins: [
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     hash: true
+  })
+]
+```
+
+Specifying specific `files`
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin({
+    filename: 'a/index.html'
+  }),
+  new HtmlWebpackPlugin({
+    filename: 'b/index.html'
+  }),
+  new HtmlWebpackIncludeAssetsPlugin({
+    files: ['a/**/*.html'],
+    assets: ['css/a.css'],
+    append: true
+  }),
+  new HtmlWebpackIncludeAssetsPlugin({
+    files: ['b/**/*.html'],
+    assets: ['css/b.css'],
+    append: true
   })
 ]
 ```
