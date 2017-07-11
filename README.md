@@ -42,11 +42,11 @@ The available options are:
 
 - `jsExtensions`: `string` or `array`
 
-  Specifies the file extensions to use to determine if assets are script assets. Defaults is `['.js']`.
+  Specifies the file extensions to use to determine if assets are script assets. Default is `['.js']`.
 
 - `cssExtensions`: `string` or `array`
 
-  Specifies the file extensions to use to determine if assets are style assets. Defaults is `['.css']`.
+  Specifies the file extensions to use to determine if assets are style assets. Default is `['.css']`.
 
 - `assets`: `string` or `array`
 
