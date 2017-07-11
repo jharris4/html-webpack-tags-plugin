@@ -40,11 +40,19 @@ Options
 -------
 The available options are:
 
+- `jsExtensions`: `string` or `array`
+
+  Specifies the file extensions to use to determine if assets are script assets. Defaults is `['.js']`.
+
+- `cssExtensions`: `string` or `array`
+
+  Specifies the file extensions to use to determine if assets are style assets. Defaults is `['.css']`.
+
 - `assets`: `string` or `array`
 
   Assets that will be output into your html-webpack-plugin template.
 
-  Only assets ending in `.js` or `.css` are supported. The presence of assets that do not end in these extensions will cause an error.
+  Only assets ending in one of the `jsExtenions` or `cssExtensions` are allowed. The presence of assets that do not end in these extensions will cause an error.
 
 - `append`: `boolean`
 
@@ -100,6 +108,19 @@ plugins: [
   new HtmlWebpackIncludeAssetsPlugin({
     assets: ['css/custom.css'],
     append: true
+  })
+]
+```
+
+Using custom `jsExtensions` :
+
+```javascript
+plugins: [
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['dist/output.js', 'lib/content.jsx'],
+    append: false,
+    jsExtensions: ['.js', '.jsx']
   })
 ]
 ```

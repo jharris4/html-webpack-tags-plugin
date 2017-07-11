@@ -64,7 +64,39 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bad.txt', 'bar.js'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array should not contain strings not ending in .js or .css)/);
+      expect(theFunction).toThrowError(/(options assets key array should not contain strings not ending with the js or css extensions)/);
+      done();
+    });
+
+    it('should throw an error if the jsExtensions is not an array or string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, jsExtensions: 123 });
+      };
+      expect(theFunction).toThrowError(/(options jsExtensions key should be a string or array of strings)/);
+      done();
+    });
+
+    it('should throw an error if any of the jsExtensions are not a string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, jsExtensions: ['a', 123, 'b'] });
+      };
+      expect(theFunction).toThrowError(/(options jsExtensions key array should not contain non-strings)/);
+      done();
+    });
+
+    it('should throw an error if the csssExtensions is not an array or string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, cssExtensions: 123 });
+      };
+      expect(theFunction).toThrowError(/(options cssExtensions key should be a string or array of strings)/);
+      done();
+    });
+
+    it('should throw an error if any of the cssExtensions are not a string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, cssExtensions: ['a', 123, 'b'] });
+      };
+      expect(theFunction).toThrowError(/(options cssExtensions key array should not contain non-strings)/);
       done();
     });
 
@@ -537,6 +569,84 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="bar.js"]').toString()).toBe('<script type="text/javascript" src="bar.js"></script>');
           expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($('link[href="bar.css"]').toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('option.jsExtensions', function () {
+    it('should include all js type files when multiple jsExtensions are specified', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'foo.jsx'], append: true, jsExtensions: ['.js', '.jsx'] })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(4);
+          expect($('link').length).toBe(1);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('script[src="foo.js"]').toString()).toBe('<script type="text/javascript" src="foo.js"></script>');
+          expect($('script[src="foo.jsx"]').toString()).toBe('<script type="text/javascript" src="foo.jsx"></script>');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('option.cssExtensions', function () {
+    it('should include all css type files when multiple cssExtensions are specified', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'foo.style'], append: true, cssExtensions: ['.css', '.style'] })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(3);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
+          expect($('link[href="foo.style"]').toString()).toBe('<link href="foo.style" rel="stylesheet">');
           done();
         });
       });

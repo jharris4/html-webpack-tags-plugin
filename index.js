@@ -4,7 +4,9 @@ var minimatch = require('minimatch');
 
 var defaultOptions = {
   publicPath: true,
-  hash: false
+  hash: false,
+  jsExtensions: ['.js'],
+  cssExtensions: ['.css']
 };
 
 function isObject (v) {
@@ -31,6 +33,19 @@ function hasExtension (v, ending) {
   return lastIndex !== -1 && lastIndex === v.length - ending.length;
 }
 
+function hasExtensions (v, extensions) {
+  var found = false;
+  var i;
+  var count = extensions.length;
+  for (i = 0; i < count; i++) {
+    found = hasExtension(v, extensions[i]);
+    if (found) {
+      break;
+    }
+  }
+  return found;
+}
+
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
@@ -40,13 +55,47 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     assets = options.assets;
   }
   assert(isArray(assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array or string value');
+  var jsExtensions;
+  if (options.jsExtensions !== undefined) {
+    if (isString(options.jsExtensions)) {
+      jsExtensions = [options.jsExtensions];
+    } else {
+      jsExtensions = options.jsExtensions;
+      assert(isArray(jsExtensions), 'HtmlWebpackIncludeAssetsPlugin options jsExtensions key should be a string or array of strings (' + jsExtensions + ')');
+      var jsExtensionCount = jsExtensions.length;
+      var jsExtension;
+      for (var j = 0; j < jsExtensionCount; j++) {
+        jsExtension = jsExtensions[j];
+        assert(isString(jsExtension), 'HtmlWebpackIncludeAssetsPlugin options jsExtensions key array should not contain non-strings (' + jsExtension + ')');
+      }
+    }
+  } else {
+    jsExtensions = defaultOptions.jsExtensions;
+  }
+  var cssExtensions;
+  if (options.cssExtensions !== undefined) {
+    if (isString(options.cssExtensions)) {
+      cssExtensions = [options.cssExtensions];
+    } else {
+      cssExtensions = options.cssExtensions;
+      assert(isArray(cssExtensions), 'HtmlWebpackIncludeAssetsPlugin options cssExtensions key should be a string or array of strings (' + cssExtensions + ')');
+      var cssExtensionCount = cssExtensions.length;
+      var cssExtension;
+      for (var c = 0; c < cssExtensionCount; c++) {
+        cssExtension = cssExtensions[c];
+        assert(isString(cssExtension), 'HtmlWebpackIncludeAssetsPlugin options cssExtensions key array should not contain non-strings (' + cssExtension + ')');
+      }
+    }
+  } else {
+    cssExtensions = defaultOptions.cssExtensions;
+  }
   var assetCount = assets.length;
   var asset;
   for (var i = 0; i < assetCount; i++) {
     asset = assets[i];
     assert(isString(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain non-strings (' + asset + ')');
-    assert(hasExtension(asset, '.js') || hasExtension(asset, '.css'),
-      'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending in .js or .css (' + asset + ')');
+    assert(hasExtensions(asset, jsExtensions) || hasExtensions(asset, cssExtensions),
+      'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
   }
   assert(isBoolean(options.append), 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
   var publicPath;
@@ -72,6 +121,8 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   this.options = {
     assets: assets,
+    jsExtensions: jsExtensions,
+    cssExtensions: cssExtensions,
     append: options.append,
     publicPath: publicPath,
     hash: hash,
@@ -95,6 +146,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       }
 
       var includeAssets = self.options.assets;
+      var jsExtensions = self.options.jsExtensions;
+      var cssExtensions = self.options.cssExtensions;
       var appendAssets = self.options.append;
       var publicPath = self.options.publicPath;
       var hash = self.options.hash;
@@ -108,11 +161,11 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
         includeAsset = includeAssetPrefix + includeAssets[i] + includeAssetHash;
-        if (hasExtension(includeAsset, '.js')) {
+        if (hasExtensions(includeAsset, jsExtensions)) {
           if (assets.js.indexOf(includeAsset) === -1 && jsAssets.indexOf(includeAsset) === -1) {
             jsAssets.push(includeAsset);
           }
-        } else if (hasExtension(includeAsset, '.css')) {
+        } else if (hasExtensions(includeAsset, cssExtensions)) {
           if (assets.css.indexOf(includeAsset) === -1 && cssAssets.indexOf(includeAsset) === -1) {
             cssAssets.push(includeAsset);
           }
