@@ -43,7 +43,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the assets are not an array or string', function (done) {
+    it('should throw an error if the assets are not an array or string or object', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: 123, append: false });
       };
@@ -63,6 +63,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     it('should throw an error if any of the asset options are objects missing the path property', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { type: 'js' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array objects must contain a string path property)/);
+      done();
+    });
+
+    it('should throw an error if any of the asset options are objects with a path property that is not a string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 123, type: 'js' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options assets key array objects must contain a string path property)/);
       done();

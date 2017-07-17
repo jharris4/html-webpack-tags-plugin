@@ -10,7 +10,7 @@ var defaultOptions = {
 };
 
 function isObject (v) {
-  return v !== null && v !== undefined && typeof v === 'object';
+  return v !== null && v !== undefined && typeof v === 'object' && !isArray(v);
 }
 
 function isBoolean (v) {
@@ -46,14 +46,14 @@ function hasExtensions (v, extensions) {
   return found;
 }
 
-function matchesEnum (v, values) {
+function isOneOf (v, values) {
   return values.indexOf(v) !== -1;
 }
 
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
-  if (isString(options.assets)) {
+  if (isString(options.assets) || isObject(options.assets)) {
     assets = [options.assets];
   } else {
     assets = options.assets;
@@ -104,7 +104,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       assert(isObject(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
       assert(isString(asset.path),
         'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + asset.path + ')');
-      assert(matchesEnum(asset.type, ['js', 'css']),
+      assert(isOneOf(asset.type, ['js', 'css']),
         'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string type property set to either `js` or `css` (' + asset.type + ')');
     }
   }
@@ -173,8 +173,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var jsAssets = [];
       var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
-        includeAssetPath = typeof includeAssets[i] === 'string' ? includeAssets[i] : includeAssets[i].path;
-        includeAssetType = typeof includeAssets[i] === 'object' ? includeAssets[i].type : null;
+        includeAssetPath = isString(includeAssets[i]) ? includeAssets[i] : includeAssets[i].path;
+        includeAssetType = isObject(includeAssets[i]) ? includeAssets[i].type : null;
         includeAsset = includeAssetPrefix + includeAssetPath + includeAssetHash;
         if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAsset, jsExtensions)) {
           if (assets.js.indexOf(includeAsset) === -1 && jsAssets.indexOf(includeAsset) === -1) {
