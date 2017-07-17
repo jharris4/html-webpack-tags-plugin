@@ -76,14 +76,6 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if any of the asset options are objects missing the type property', function (done) {
-      var theFunction = function () {
-        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'baz.js' }, 'bar.css'], append: false });
-      };
-      expect(theFunction).toThrowError(/(options assets key array objects must contain a string type property)/);
-      done();
-    });
-
     it('should throw an error if any of the asset options are objects with an invalid type property', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'baz.js', type: 'foo' }, 'bar.css'], append: false });

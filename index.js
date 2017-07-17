@@ -95,16 +95,20 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   var assetCount = assets.length;
   var asset;
+  var assetPath;
   for (var i = 0; i < assetCount; i++) {
     asset = assets[i];
-    if (isString(asset)) {
-      assert(hasExtensions(asset, jsExtensions) || hasExtensions(asset, cssExtensions),
+    if (isString(asset) || (isObject(asset) && !asset.type)) {
+      assetPath = isString(asset) ? asset : asset.path;
+      assert(isString(assetPath),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + assetPath + ')');
+      assert(hasExtensions(assetPath, jsExtensions) || hasExtensions(assetPath, cssExtensions),
         'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
     } else {
       assert(isObject(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
       assert(isString(asset.path),
         'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + asset.path + ')');
-      assert(isOneOf(asset.type, [null, undefined, 'js', 'css']),
+      assert(isOneOf(asset.type, ['js', 'css']),
         'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string type property set to either `js` or `css` (' + asset.type + ')');
     }
   }
