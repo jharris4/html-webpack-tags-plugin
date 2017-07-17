@@ -92,6 +92,22 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
+    it('should throw an error if any of the asset options are objects without a type property that cannot be inferred', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithoutExtension' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array should not contain strings not ending with the js or css extensions)/);
+      done();
+    });
+
+    it('should not throw an error if any of the asset options are objects without a type property that can be inferred', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
     it('should throw an error if the jsExtensions is not an array or string', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, jsExtensions: 123 });
@@ -376,7 +392,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         plugins: [
           new ExtractTextPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css'], append: true, publicPath: false })
+          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css', { path: 'baz.css' }], append: true, publicPath: false })
         ]
       }, function (err, result) {
         expect(err).toBeFalsy();
@@ -386,14 +402,16 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect(er).toBeFalsy();
           var $ = cheerio.load(data);
           expect($('script').length).toBe(2);
-          expect($('link').length).toBe(3);
+          expect($('link').length).toBe(4);
           expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
           expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
           expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($('link[href="bar.css"]').toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          expect($('link[href="baz.css"]').toString()).toBe('<link href="baz.css" rel="stylesheet">');
           expect($($('link').get(1)).toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($($('link').get(2)).toString()).toBe('<link href="bar.css" rel="stylesheet">');
+          expect($($('link').get(3)).toString()).toBe('<link href="baz.css" rel="stylesheet">');
           done();
         });
       });
@@ -575,7 +593,18 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         plugins: [
           new ExtractTextPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'foo.css', { path: 'baz', type: 'css' }, 'bar.js', 'bar.css', { path: 'qux', type: 'js' }], append: true, publicPath: false })
+          new HtmlWebpackIncludeAssetsPlugin({
+            assets: [
+              'foo.js',
+              'foo.css',
+              { path: 'baz', type: 'css' },
+              { path: 'bar.js' },
+              'bar.css',
+              { path: 'qux', type: 'js' }
+            ],
+            append: true,
+            publicPath: false
+          })
         ]
       }, function (err, result) {
         expect(err).toBeFalsy();
