@@ -46,6 +46,10 @@ function hasExtensions (v, extensions) {
   return found;
 }
 
+function matchesEnum (v, values) {
+  return values.indexOf(v) !== -1;
+}
+
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
@@ -93,9 +97,16 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   var asset;
   for (var i = 0; i < assetCount; i++) {
     asset = assets[i];
-    assert(isString(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain non-strings (' + asset + ')');
-    assert(hasExtensions(asset, jsExtensions) || hasExtensions(asset, cssExtensions),
-      'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
+    if (isString(asset)) {
+      assert(hasExtensions(asset, jsExtensions) || hasExtensions(asset, cssExtensions),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
+    } else {
+      assert(isObject(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
+      assert(isString(asset.path),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + asset.path + ')');
+      assert(matchesEnum(asset.type, ['js', 'css']),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string type property set to either `js` or `css` (' + asset.type + ')');
+    }
   }
   assert(isBoolean(options.append), 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
   var publicPath;
@@ -156,16 +167,20 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
 
       var includeAsset;
+      var includeAssetPath;
+      var includeAssetType;
       var includeCount = includeAssets.length;
       var jsAssets = [];
       var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
-        includeAsset = includeAssetPrefix + includeAssets[i] + includeAssetHash;
-        if (hasExtensions(includeAsset, jsExtensions)) {
+        includeAssetPath = typeof includeAssets[i] === 'string' ? includeAssets[i] : includeAssets[i].path;
+        includeAssetType = typeof includeAssets[i] === 'object' ? includeAssets[i].type : null;
+        includeAsset = includeAssetPrefix + includeAssetPath + includeAssetHash;
+        if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAsset, jsExtensions)) {
           if (assets.js.indexOf(includeAsset) === -1 && jsAssets.indexOf(includeAsset) === -1) {
             jsAssets.push(includeAsset);
           }
-        } else if (hasExtensions(includeAsset, cssExtensions)) {
+        } else if ((includeAssetType && includeAssetType === 'css') || hasExtensions(includeAsset, cssExtensions)) {
           if (assets.css.indexOf(includeAsset) === -1 && cssAssets.indexOf(includeAsset) === -1) {
             cssAssets.push(includeAsset);
           }

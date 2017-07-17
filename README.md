@@ -48,11 +48,15 @@ The available options are:
 
   Specifies the file extensions to use to determine if assets are style assets. Default is `['.css']`.
 
-- `assets`: `string` or `array`
+- `assets`: `string` or `array` or `object`
 
   Assets that will be output into your html-webpack-plugin template.
 
-  Only assets ending in one of the `jsExtenions` or `cssExtensions` are allowed. The presence of assets that do not end in these extensions will cause an error.
+  To specify just one asset, simply pass a string or object. To specify multiple, pass an array of strings or objects.
+
+  If the asset path ends in one of the `jsExtensions` or `cssExtensions` values, simply use a string value.
+
+  If the asset does not have a valid extension, you can instead pass an object with properties `path` and `type`, where `path` is the asset href/src and `type` is one of `js` or `css`.
 
 - `append`: `boolean`
 
@@ -138,6 +142,27 @@ plugins: [
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     publicPath: 'myPublicPath/'
+  })
+]
+```
+
+Manually specifying asset types :
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: [
+      '/css/bootstrap.min.css',
+      '/css/bootstrap-theme.min.css',
+      { path: 'https://fonts.googleapis.com/css?family=Material+Icons', type: 'css' }
+    ],
+    append: false,
+    publicPath: ''
   })
 ]
 ```
