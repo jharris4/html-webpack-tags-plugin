@@ -10,7 +10,7 @@ var defaultOptions = {
 };
 
 function isObject (v) {
-  return v !== null && v !== undefined && typeof v === 'object';
+  return v !== null && v !== undefined && typeof v === 'object' && !isArray(v);
 }
 
 function isBoolean (v) {
@@ -46,10 +46,14 @@ function hasExtensions (v, extensions) {
   return found;
 }
 
+function isOneOf (v, values) {
+  return values.indexOf(v) !== -1;
+}
+
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
-  if (isString(options.assets)) {
+  if (isString(options.assets) || isObject(options.assets)) {
     assets = [options.assets];
   } else {
     assets = options.assets;
@@ -91,11 +95,22 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   var assetCount = assets.length;
   var asset;
+  var assetPath;
   for (var i = 0; i < assetCount; i++) {
     asset = assets[i];
-    assert(isString(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain non-strings (' + asset + ')');
-    assert(hasExtensions(asset, jsExtensions) || hasExtensions(asset, cssExtensions),
-      'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
+    if (isString(asset) || (isObject(asset) && !asset.type)) {
+      assetPath = isString(asset) ? asset : asset.path;
+      assert(isString(assetPath),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + assetPath + ')');
+      assert(hasExtensions(assetPath, jsExtensions) || hasExtensions(assetPath, cssExtensions),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
+    } else {
+      assert(isObject(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
+      assert(isString(asset.path),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + asset.path + ')');
+      assert(isOneOf(asset.type, ['js', 'css']),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string type property set to either `js` or `css` (' + asset.type + ')');
+    }
   }
   assert(isBoolean(options.append), 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
   var publicPath;
@@ -156,16 +171,20 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
 
       var includeAsset;
+      var includeAssetPath;
+      var includeAssetType;
       var includeCount = includeAssets.length;
       var jsAssets = [];
       var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
-        includeAsset = includeAssetPrefix + includeAssets[i] + includeAssetHash;
-        if (hasExtensions(includeAsset, jsExtensions)) {
+        includeAssetPath = isString(includeAssets[i]) ? includeAssets[i] : includeAssets[i].path;
+        includeAssetType = isObject(includeAssets[i]) ? includeAssets[i].type : null;
+        includeAsset = includeAssetPrefix + includeAssetPath + includeAssetHash;
+        if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAsset, jsExtensions)) {
           if (assets.js.indexOf(includeAsset) === -1 && jsAssets.indexOf(includeAsset) === -1) {
             jsAssets.push(includeAsset);
           }
-        } else if (hasExtensions(includeAsset, cssExtensions)) {
+        } else if ((includeAssetType && includeAssetType === 'css') || hasExtensions(includeAsset, cssExtensions)) {
           if (assets.css.indexOf(includeAsset) === -1 && cssAssets.indexOf(includeAsset) === -1) {
             cssAssets.push(includeAsset);
           }
