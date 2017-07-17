@@ -104,7 +104,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       assert(isObject(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
       assert(isString(asset.path),
         'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + asset.path + ')');
-      assert(isOneOf(asset.type, ['js', 'css']),
+      assert(isOneOf(asset.type, [null, undefined, 'js', 'css']),
         'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string type property set to either `js` or `css` (' + asset.type + ')');
     }
   }
