@@ -1,6 +1,8 @@
 'use strict';
 var assert = require('assert');
 var minimatch = require('minimatch');
+var glob = require('glob');
+var path = require('path');
 
 var defaultOptions = {
   publicPath: true,
@@ -95,21 +97,32 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   var assetCount = assets.length;
   var asset;
-  var assetPath;
   for (var i = 0; i < assetCount; i++) {
     asset = assets[i];
-    if (isString(asset) || (isObject(asset) && !asset.type)) {
-      assetPath = isString(asset) ? asset : asset.path;
-      assert(isString(assetPath),
-        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + assetPath + ')');
-      assert(hasExtensions(assetPath, jsExtensions) || hasExtensions(assetPath, cssExtensions),
-        'HtmlWebpackIncludeAssetsPlugin options assets key array should not contain strings not ending with the js or css extensions (' + asset + ')');
-    } else {
-      assert(isObject(asset), 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
+    if (isString(asset)) {
+      assert(hasExtensions(asset, jsExtensions) || hasExtensions(asset, cssExtensions),
+        'HtmlWebpackIncludeAssetsPlugin options assets key array should only contain strings ending with the js or css extensions (' + asset + ')');
+    } else if (isObject(asset)) {
       assert(isString(asset.path),
-        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string path property (' + asset.path + ')');
-      assert(isOneOf(asset.type, ['js', 'css']),
-        'HtmlWebpackIncludeAssetsPlugin options assets key array objects must contain a string type property set to either `js` or `css` (' + asset.type + ')');
+        'HtmlWebpackIncludeAssetsPlugin options assets key array objects path property must be a string (' + asset.path + ')');
+      if (asset.glob !== undefined) {
+        assert(isString(asset.glob),
+          'HtmlWebpackIncludeAssetsPlugin options assets key array objects glob property should be a string (' + asset.glob + ')');
+      }
+      if (asset.type !== undefined) {
+        assert(isOneOf(asset.type, ['js', 'css']),
+          'HtmlWebpackIncludeAssetsPlugin options assets key array objects type property should be a string set to either `js` or `css` (' + asset.type + ')');
+      } else {
+        if (asset.glob !== undefined) {
+          assert(hasExtensions(asset.glob, jsExtensions) || hasExtensions(asset.glob, cssExtensions),
+            'HtmlWebpackIncludeAssetsPlugin options assets key array objects glob property should only contain strings ending with the js or css extensions if the type property is not set (' + asset + ')');
+        } else {
+          assert(hasExtensions(asset.path, jsExtensions) || hasExtensions(asset.path, cssExtensions),
+            'HtmlWebpackIncludeAssetsPlugin options assets key array objects path property should only contain strings ending with the js or css extensions if the type property is not set (' + asset + ')');
+        }
+      }
+    } else {
+      assert(false, 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
     }
   }
   assert(isBoolean(options.append), 'HtmlWebpackIncludeAssetsPlugin options must have an append key with a boolean value');
@@ -181,22 +194,44 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
 
       var includeAsset;
+      var includeAssetString;
+      var includeAssetPaths;
+      var includeAssetCount;
       var includeAssetPath;
       var includeAssetType;
       var includeCount = includeAssets.length;
       var jsAssets = [];
       var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
-        includeAssetPath = isString(includeAssets[i]) ? includeAssets[i] : includeAssets[i].path;
-        includeAssetType = isObject(includeAssets[i]) ? includeAssets[i].type : null;
-        includeAsset = includeAssetPrefix + includeAssetPath + includeAssetHash;
-        if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAsset, jsExtensions)) {
-          if (assets.js.indexOf(includeAsset) === -1 && jsAssets.indexOf(includeAsset) === -1) {
-            jsAssets.push(includeAsset);
+        includeAsset = includeAssets[i];
+        if (isObject(includeAsset)) {
+          includeAssetType = includeAsset.type;
+          if (includeAsset.glob === undefined) {
+            includeAssetPaths = [includeAsset.path];
+          } else {
+            // default cwd is process.cwd() if you don't pass in globOptions
+            var globOptions = { cwd: path.resolve(includeAsset.path) };
+
+            // assets will be an array of strings with all matching asset file names
+            includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
+              function (globAsset) { return path.join(includeAsset.path, globAsset); });
           }
-        } else if ((includeAssetType && includeAssetType === 'css') || hasExtensions(includeAsset, cssExtensions)) {
-          if (assets.css.indexOf(includeAsset) === -1 && cssAssets.indexOf(includeAsset) === -1) {
-            cssAssets.push(includeAsset);
+        } else {
+          includeAssetType = null;
+          includeAssetPaths = [includeAsset];
+        }
+        includeAssetCount = includeAssetPaths.length;
+        for (var a = 0; a < includeAssetCount; a++) {
+          includeAssetPath = includeAssetPaths[a];
+          includeAssetString = includeAssetPrefix + includeAssetPath + includeAssetHash;
+          if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAssetString, jsExtensions)) {
+            if (assets.js.indexOf(includeAssetString) === -1 && jsAssets.indexOf(includeAssetString) === -1) {
+              jsAssets.push(includeAssetString);
+            }
+          } else if ((includeAssetType && includeAssetType === 'css') || hasExtensions(includeAssetString, cssExtensions)) {
+            if (assets.css.indexOf(includeAssetString) === -1 && cssAssets.indexOf(includeAssetString) === -1) {
+              cssAssets.push(includeAssetString);
+            }
           }
         }
       }
