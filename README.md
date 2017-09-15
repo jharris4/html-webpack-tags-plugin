@@ -54,9 +54,9 @@ The available options are:
 
   To specify just one asset, simply pass a string or object. To specify multiple, pass an array of strings or objects.
 
-  If the asset path ends in one of the `jsExtensions` or `cssExtensions` values, simply use a string value.
+  If the asset path is static and ends in one of the `jsExtensions` or `cssExtensions` values, simply use a string value.
 
-  If the asset does not have a valid extension, you can instead pass an object with properties `path` and `type`, where `path` is the asset href/src and `type` is one of `js` or `css`.
+  If the asset is not static or does not have a valid extension, you can instead pass an object with properties `path` (required) and `type` or `glob` (optional). In this case `path` is the asset href/src, `type` is one of `js` or `css`, and `glob` is a wildcard to use to match all files in the path (uses the [glob](https://github.com/isaacs/node-glob) package).
 
 - `append`: `boolean`
 
@@ -76,7 +76,7 @@ The available options are:
 
   Files that the assets will be added to.
 
-  By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs.
+  By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs (uses the [minimatch](https://github.com/isaacs/minimatch) package).
 
 Example
 -------
@@ -182,6 +182,8 @@ plugins: [
     hash: true
   })
 ]
+
+// all asset paths will be appended with a hash query parameter (?hash=<the_hash>)
 ```
 
 Specifying specific `files`
@@ -206,6 +208,22 @@ plugins: [
   new HtmlWebpackIncludeAssetsPlugin({
     files: ['b/**/*.html'],
     assets: ['css/b.css'],
+    append: true
+  })
+]
+```
+
+Specifying assets usings a `glob`
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: [{ path: 'css', glob: '*.css' }],
     append: true
   })
 ]
