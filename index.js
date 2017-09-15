@@ -109,6 +109,10 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
         assert(isString(asset.glob),
           'HtmlWebpackIncludeAssetsPlugin options assets key array objects glob property should be a string (' + asset.glob + ')');
       }
+      if (asset.globPath !== undefined) {
+        assert(isString(asset.globPath),
+          'HtmlWebpackIncludeAssetsPlugin options assets key array objects globPath property should be a string (' + asset.globPath + ')');
+      }
       if (asset.type !== undefined) {
         assert(isOneOf(asset.type, ['js', 'css']),
           'HtmlWebpackIncludeAssetsPlugin options assets key array objects type property should be a string set to either `js` or `css` (' + asset.type + ')');
@@ -209,8 +213,9 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
           if (includeAsset.glob === undefined) {
             includeAssetPaths = [includeAsset.path];
           } else {
-            // default cwd is process.cwd() if you don't pass in globOptions
-            var globOptions = { cwd: path.resolve(includeAsset.path) };
+            var cwd = includeAsset.globPath !== undefined ? includeAsset.globPath : path.join(compiler.options.output.path, includeAsset.path);
+
+            var globOptions = { cwd: cwd };
 
             // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(

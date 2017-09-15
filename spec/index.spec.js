@@ -5,6 +5,7 @@ var cheerio = require('cheerio');
 var webpack = require('webpack');
 var rimraf = require('rimraf');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackIncludeAssetsPlugin = require('../');
 
@@ -772,7 +773,43 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         plugins: [
           new ExtractTextPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'spec/fixtures/', glob: 'g*.js' }, { path: 'spec/fixtures/', glob: 'g*.css' }], append: true })
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.css' }], append: true })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(1);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+
+    it('should include any files for a glob that does match files', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }], append: true })
         ]
       }, function (err, result) {
         expect(err).toBeFalsy();
@@ -786,8 +823,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
           expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
-          expect($('link[href="spec/fixtures/glob.css"]').toString()).toBe('<link href="spec/fixtures/glob.css" rel="stylesheet">');
-          expect($('script[src="spec/fixtures/glob.js"]').toString()).toBe('<script type="text/javascript" src="spec/fixtures/glob.js"></script>');
+          expect($('link[href="assets/glob.css"]').toString()).toBe('<link href="assets/glob.css" rel="stylesheet">');
+          expect($('script[src="assets/glob.js"]').toString()).toBe('<script type="text/javascript" src="assets/glob.js"></script>');
           done();
         });
       });
