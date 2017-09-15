@@ -41,6 +41,7 @@
     "webpack": "^3.6.0"
   },
   "dependencies": {
+    "glob": "^7.1.2",
     "minimatch": "^3.0.4"
   }
 }
