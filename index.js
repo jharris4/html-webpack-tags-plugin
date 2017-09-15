@@ -134,6 +134,16 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   } else {
     files = options.files;
   }
+  if (files !== undefined) {
+    assert(isArray(files), 'HtmlWebpackIncludeAssetsPlugin options should specify a files key with an array or string value');
+    var fileCount = files.length;
+    var file;
+    for (var f = 0; f < fileCount; f++) {
+      file = files[f];
+      assert(isString(file),
+        'HtmlWebpackIncludeAssetsPlugin options files key array must contain only strings (' + file + ')');
+    }
+  }
   this.options = {
     assets: assets,
     jsExtensions: jsExtensions,
@@ -152,7 +162,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   compiler.plugin('compilation', function (compilation) {
     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
       var files = self.options.files;
-      var shouldSkip = files && !files.some(function (file) {
+      var shouldSkip = files !== undefined && !files.some(function (file) {
         return minimatch(htmlPluginData.outputName, file);
       });
 

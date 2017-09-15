@@ -167,6 +167,29 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
+    it('should throw an error if the files option is not a string', function (done) {
+      var theError = /(options should specify a files key with an array or string value)/;
+      var nonStringCheck = [123, true, /regex/, {}];
+
+      nonStringCheck.forEach(function (val) {
+        var theCheck = function () {
+          return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: true, files: val });
+        };
+
+        expect(theCheck).toThrowError(theError);
+      });
+
+      done();
+    });
+
+    it('should throw an error if any of the files options are not strings', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'bar.css'], append: false, files: ['abc', true, 'def'] });
+      };
+      expect(theFunction).toThrowError(/(options files key array must contain only strings)/);
+      done();
+    });
+
     it('should throw an error if the hash option is not a boolean', function (done) {
       var theError = /(options should specify a hash key with a boolean value)/;
       var nonBooleanCheck = [123, 'not a boolean', /regex/, [], {}];
