@@ -56,7 +56,9 @@ The available options are:
 
   If the asset path is static and ends in one of the `jsExtensions` or `cssExtensions` values, simply use a string value.
 
-  If the asset is not static or does not have a valid extension, you can instead pass an object with properties `path` (required) and `type` or `glob` or `globPath` (optional). In this case `path` is the asset href/src, `type` is one of `js` or `css`, and `glob` is a wildcard to use to match all files in the path (uses the [glob](https://github.com/isaacs/node-glob) package). The `globPath` can be used to specify the directory from which the `glob` should search for filename matches (the default is to use `path` within webpack's output directory).
+  If the asset is not static or does not have a valid extension, you can instead pass an object with properties `path` (required) and `type` or `glob` or `globPath` or `attributes` (optional). In this case `path` is the asset href/src, `type` is one of `js` or `css`, and `glob` is a wildcard to use to match all files in the path (uses the [glob](https://github.com/isaacs/node-glob) package). The `globPath` can be used to specify the directory from which the `glob` should search for filename matches (the default is to use `path` within webpack's output directory).
+  
+  The `attributes` property may be used to add additional attributes to the link or script element that is injected. The keys of this object are attribute names and the values are the attribute values.
 
 - `append`: `boolean`
 
@@ -160,6 +162,26 @@ plugins: [
       '/css/bootstrap.min.css',
       '/css/bootstrap-theme.min.css',
       { path: 'https://fonts.googleapis.com/css?family=Material+Icons', type: 'css' }
+    ],
+    append: false,
+    publicPath: ''
+  })
+]
+```
+
+Adding custom attributes to asset tags :
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: [
+      '/css/bootstrap.min.css',
+      { path: '/css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }
     ],
     append: false,
     publicPath: ''

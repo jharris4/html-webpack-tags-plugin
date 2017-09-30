@@ -133,6 +133,38 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
+    it('should throw an error if any of the asset options are objects with an attributes property that is not an object', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: 'foobar' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array objects attributes property should be an object)/);
+      done();
+    });
+
+    it('should throw an error if any of the asset options are objects with an attributes property with non-string values', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: null } }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array objects attributes property should be an object with string values)/);
+      done();
+    });
+
+    it('should not throw an error if any of the asset options are objects with an attributes property with string values', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: 'test' } }, 'bar.css'], append: false });
+      };
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
+    it('should not throw an error if any of the asset options are objects without an attributes property', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
     it('should throw an error if the jsExtensions is not an array or string', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, jsExtensions: 123 });
@@ -825,6 +857,91 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
           expect($('link[href="assets/glob.css"]').toString()).toBe('<link href="assets/glob.css" rel="stylesheet">');
           expect($('script[src="assets/glob.js"]').toString()).toBe('<script type="text/javascript" src="assets/glob.js"></script>');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('option.assets.attributes', function () {
+    it('should add the given attributes to the matching tag', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/abc.js', attributes: { id: 'abc' } }, { path: 'assets/def.css', attributes: { id: 'def', media: 'screen' } }, { path: 'assets/ghi.css' }], append: false })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(3);
+          expect($('link').length).toBe(3);
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('script[src="assets/abc.js"]').toString()).toBe('<script type="text/javascript" src="assets/abc.js" id="abc"></script>');
+          expect($('link[href="assets/def.css"]').toString()).toBe('<link href="assets/def.css" rel="stylesheet" id="def" media="screen">');
+          expect($('link[href="assets/ghi.css"]').toString()).toBe('<link href="assets/ghi.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+
+    it('can match tags with an overridden publicPath and set hash', function (done) {
+      var appendHash = function (v, hash) {
+        if (hash.length > 0) hash = '?' + hash;
+        return v + hash;
+      };
+
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          publicPath: 'thePublicPath/',
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin({ hash: true }),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/abc.js', attributes: { id: 'abc' } }, { path: 'assets/def.css', attributes: { id: 'def', media: 'screen' } }, { path: 'assets/ghi.css' }], append: false, hash: true })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var hash = result.compilation.hash;
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(3);
+          expect($('link').length).toBe(3);
+          expect($('script[src^="thePublicPath/app.js"]').toString()).toBe('<script type="text/javascript" src="' + appendHash('thePublicPath/app.js', hash) + '"></script>');
+          expect($('script[src^="thePublicPath/style.js"]').toString()).toBe('<script type="text/javascript" src="' + appendHash('thePublicPath/style.js', hash) + '"></script>');
+          expect($('link[href^="thePublicPath/style.css"]').toString()).toBe('<link href="' + appendHash('thePublicPath/style.css', hash) + '" rel="stylesheet">');
+          expect($('script[src^="thePublicPath/assets/abc.js"]').toString()).toBe('<script type="text/javascript" src="' + appendHash('thePublicPath/assets/abc.js', hash) + '" id="abc"></script>');
+          expect($('link[href^="thePublicPath/assets/def.css"]').toString()).toBe('<link href="' + appendHash('thePublicPath/assets/def.css', hash) + '" rel="stylesheet" id="def" media="screen">');
+          expect($('link[href^="thePublicPath/assets/ghi.css"]').toString()).toBe('<link href="' + appendHash('thePublicPath/assets/ghi.css', hash) + '" rel="stylesheet">');
           done();
         });
       });
