@@ -53,10 +53,13 @@ function isOneOf (v, values) {
 }
 
 function forOwn (object, iterator) {
-  for (var property in object) {
-    if (Object.prototype.hasOwnProperty.call(object, property)) {
-      iterator(object[property], property, object);
-    }
+  var properties = Object.keys(object);
+  var propertyCount = properties.length;
+  var property;
+
+  for (var i = 0; i < propertyCount; i++) {
+    property = properties[i];
+    iterator(object[property], property, object);
   }
 }
 
