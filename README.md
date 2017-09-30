@@ -171,6 +171,8 @@ plugins: [
 
 Adding custom attributes to asset tags :
 
+The bootstrap-theme link tag will be given an id="bootstrapTheme" attribute.
+
 ```javascript
 plugins: [
   new CopyWebpackPlugin([
