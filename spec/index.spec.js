@@ -5,6 +5,7 @@ var cheerio = require('cheerio');
 var webpack = require('webpack');
 var rimraf = require('rimraf');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackIncludeAssetsPlugin = require('../');
 
@@ -64,7 +65,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { type: 'js' }, 'bar.css'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array objects must contain a string path property)/);
+      expect(theFunction).toThrowError(/(options assets key array objects path property must be a string)/);
       done();
     });
 
@@ -72,7 +73,15 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 123, type: 'js' }, 'bar.css'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array objects must contain a string path property)/);
+      expect(theFunction).toThrowError(/(options assets key array objects path property must be a string)/);
+      done();
+    });
+
+    it('should throw an error if any of the asset options are objects with a glob property that is not a string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: '', glob: 123, type: 'js' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array objects glob property should be a string)/);
       done();
     });
 
@@ -80,7 +89,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'baz.js', type: 'foo' }, 'bar.css'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array objects must contain a string type property)/);
+      expect(theFunction).toThrowError(/(options assets key array objects type property should be a string set to either `js` or `css`)/);
       done();
     });
 
@@ -88,21 +97,37 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bad.txt', 'bar.js'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array should not contain strings not ending with the js or css extensions)/);
+      expect(theFunction).toThrowError(/(options assets key array should only contain strings ending with the js or css extensions)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects without a type property that cannot be inferred', function (done) {
+    it('should throw an error if any of the asset options are objects without a type property that cannot be inferred from the path', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithoutExtension' }, 'bar.css'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array should not contain strings not ending with the js or css extensions)/);
+      expect(theFunction).toThrowError(/(options assets key array objects path property should only contain strings ending with the js or css extensions if the type property is not set)/);
       done();
     });
 
-    it('should not throw an error if any of the asset options are objects without a type property that can be inferred', function (done) {
+    it('should not throw an error if any of the asset options are objects without a type property that can be inferred from the path', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
+    it('should throw an error if any of the asset options are objects without a type property that cannot be inferred from the glob', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', glob: 'withoutExtensions*' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array objects glob property should only contain strings ending with the js or css extensions if the type property is not set)/);
+      done();
+    });
+
+    it('should not throw an error if any of the asset options are objects without a type property that can be inferred from the glob', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithoutExtension', glob: 'withExtensions*.js' }, 'bar.css'], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
@@ -164,6 +189,29 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       };
 
       expect(theFunction).toThrowError(/(options should specify a publicPath that is either a boolean or a string)/);
+      done();
+    });
+
+    it('should throw an error if the files option is not a string', function (done) {
+      var theError = /(options should specify a files key with an array or string value)/;
+      var nonStringCheck = [123, true, /regex/, {}];
+
+      nonStringCheck.forEach(function (val) {
+        var theCheck = function () {
+          return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: true, files: val });
+        };
+
+        expect(theCheck).toThrowError(theError);
+      });
+
+      done();
+    });
+
+    it('should throw an error if any of the files options are not strings', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'bar.css'], append: false, files: ['abc', true, 'def'] });
+      };
+      expect(theFunction).toThrowError(/(options files key array must contain only strings)/);
       done();
     });
 
@@ -702,6 +750,81 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
           expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($('link[href="foo.style"]').toString()).toBe('<link href="foo.style" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('option.assets.glob', function () {
+    it('should not include any files for a glob that does not match any files', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.css' }], append: true })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(1);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+
+    it('should include any files for a glob that does match files', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }], append: true })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(3);
+          expect($('link').length).toBe(2);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="assets/glob.css"]').toString()).toBe('<link href="assets/glob.css" rel="stylesheet">');
+          expect($('script[src="assets/glob.js"]').toString()).toBe('<script type="text/javascript" src="assets/glob.js"></script>');
           done();
         });
       });
