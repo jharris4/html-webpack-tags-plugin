@@ -946,44 +946,6 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         });
       });
     });
-
-    it('should include any files for a glob that does match files', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
-        },
-        plugins: [
-          new ExtractTextPlugin({ filename: '[name].css' }),
-          new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
-          new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }], append: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
-          expect($('script').length).toBe(3);
-          expect($('link').length).toBe(2);
-          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
-          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
-          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
-          expect($('link[href="assets/glob.css"]').toString()).toBe('<link href="assets/glob.css" rel="stylesheet">');
-          expect($('script[src="assets/glob.js"]').toString()).toBe('<script type="text/javascript" src="assets/glob.js"></script>');
-          done();
-        });
-      });
-    });
   });
 
   describe('option.publicPath', function () {
