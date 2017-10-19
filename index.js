@@ -48,6 +48,15 @@ function hasExtensions (v, extensions) {
   return found;
 }
 
+function normalizePath (input) {
+  var isExtendedLengthPath = /^\\\\\?\\/.test(input);
+  var hasNonAscii = /[^\u0000-\u0080]+/.test(input);
+  if (isExtendedLengthPath || hasNonAscii) {
+    return input;
+  }
+  return input.replace(/\\/g, '/');
+}
+
 function isOneOf (v, values) {
   return values.indexOf(v) !== -1;
 }
@@ -252,7 +261,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
             // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
-              function (globAsset) { return path.join(includeAsset.path, globAsset); });
+              function (globAsset) { return normalizePath(path.join(includeAsset.path, globAsset)); });
           }
         } else {
           includeAssetType = null;
