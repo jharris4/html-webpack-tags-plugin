@@ -3,6 +3,7 @@ var assert = require('assert');
 var minimatch = require('minimatch');
 var glob = require('glob');
 var path = require('path');
+var slash = require('slash');
 
 var defaultOptions = {
   publicPath: true,
@@ -46,15 +47,6 @@ function hasExtensions (v, extensions) {
     }
   }
   return found;
-}
-
-function normalizePath (input) {
-  var isExtendedLengthPath = /^\\\\\?\\/.test(input);
-  var hasNonAscii = /[^\u0000-\u0080]+/.test(input);
-  if (isExtendedLengthPath || hasNonAscii) {
-    return input;
-  }
-  return input.replace(/\\/g, '/');
 }
 
 function isOneOf (v, values) {
@@ -261,7 +253,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
             // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
-              function (globAsset) { return normalizePath(path.join(includeAsset.path, globAsset)); });
+              function (globAsset) { return slash(path.join(includeAsset.path, globAsset)); });
           }
         } else {
           includeAssetType = null;
