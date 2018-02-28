@@ -281,7 +281,12 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         assets.js = jsAssets.concat(assets.js);
         assets.css = cssAssets.concat(assets.css);
       }
-      callback(null, htmlPluginData);
+
+      if (callback) {
+        callback(null, htmlPluginData);
+      } else {
+        return Promise.resolve(htmlPluginData);
+      }
     });
 
     compilation.plugin('html-webpack-plugin-alter-asset-tags', function (htmlPluginData, callback) {
@@ -304,7 +309,11 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       };
 
       if (shouldSkip(htmlPluginData)) {
-        return callback(null, htmlPluginData);
+        if (callback) {
+          callback(null, htmlPluginData);
+        } else {
+          return Promise.resolve(htmlPluginData);
+        }
       }
 
       tags = htmlPluginData.head.concat(htmlPluginData.body);
@@ -317,7 +326,11 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
       }
 
-      callback(null, htmlPluginData);
+      if (callback) {
+        callback(null, htmlPluginData);
+      } else {
+        return Promise.resolve(htmlPluginData);
+      }
     });
   });
 };
