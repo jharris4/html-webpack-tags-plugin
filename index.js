@@ -221,7 +221,11 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
       if (shouldSkip(htmlPluginData)) {
-        return callback(null, htmlPluginData);
+        if (callback) {
+          return callback(null, htmlPluginData);
+        } else {
+          return Promise.resolve(htmlPluginData);
+        }
       }
 
       var includeAssets = self.options.assets;
@@ -310,7 +314,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
       if (shouldSkip(htmlPluginData)) {
         if (callback) {
-          callback(null, htmlPluginData);
+          return callback(null, htmlPluginData);
         } else {
           return Promise.resolve(htmlPluginData);
         }
