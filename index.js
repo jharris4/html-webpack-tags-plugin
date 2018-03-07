@@ -202,7 +202,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   var self = this;
 
   // Hook into the html-webpack-plugin processing
-  compiler.plugin('compilation', function (compilation) {
+  function onCompilation (compilation) {
     var shouldSkip = function (htmlPluginData) {
       var files = self.options.files;
       return files !== undefined && !files.some(function (file) {
@@ -219,7 +219,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       return includeAssetPrefix + includeAssetPath + includeAssetHash;
     };
 
-    compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
+    function onBeforeHtmlGeneration (htmlPluginData, callback) {
       if (shouldSkip(htmlPluginData)) {
         if (callback) {
           return callback(null, htmlPluginData);
@@ -253,11 +253,13 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
           } else {
             var cwd = includeAsset.globPath !== undefined ? includeAsset.globPath : path.join(compiler.options.output.path, includeAsset.path);
 
-            var globOptions = { cwd: cwd };
+            var globOptions = {cwd: cwd};
 
-            // assets will be an array of strings with all matching asset file names
+                    // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
-              function (globAsset) { return slash(path.join(includeAsset.path, globAsset)); });
+                        function (globAsset) {
+                          return slash(path.join(includeAsset.path, globAsset));
+                        });
           }
         } else {
           includeAssetType = null;
@@ -291,9 +293,9 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       } else {
         return Promise.resolve(htmlPluginData);
       }
-    });
+    }
 
-    compilation.plugin('html-webpack-plugin-alter-asset-tags', function (htmlPluginData, callback) {
+    function onAlterAssetTag (htmlPluginData, callback) {
       var tags;
       var tagCount;
       var tag;
@@ -335,8 +337,26 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       } else {
         return Promise.resolve(htmlPluginData);
       }
-    });
-  });
+    }
+
+    // Webpack 4+
+    if (compilation.hooks) {
+      compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
+      compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+    } else {
+        // Webpack 3
+      compilation.plugin('html-webpack-plugin-before-html-generation', onBeforeHtmlGeneration);
+      compilation.plugin('html-webpack-plugin-alter-asset-tags', onAlterAssetTag);
+    }
+  }
+
+  // Webpack 4+
+  if (compiler.hooks) {
+    compiler.hooks.compilation.tap('htmlWebpackIncludeAssetsPlugin', onCompilation);
+  } else {
+    // Webpack 3
+    compiler.plugin('compilation', onCompilation);
+  }
 };
 
 module.exports = HtmlWebpackIncludeAssetsPlugin;
