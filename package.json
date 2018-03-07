@@ -1,6 +1,6 @@
 {
   "name": "html-webpack-include-assets-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Add the ability to include assets based on a list of paths",
   "main": "index.js",
   "files": [
