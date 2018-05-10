@@ -341,7 +341,15 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
     // Webpack 4+
     if (compilation.hooks) {
-      compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
+      compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', (htmlPluginData, callback) =>  {
+        if (htmlPluginData instanceof Promise) {
+            htmlPluginData.then(data => {
+                onBeforeHtmlGeneration(data, callback);
+            })
+        } else {
+            onBeforeHtmlGeneration(htmlPluginData, callback);
+        }
+      });
       compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
     } else {
         // Webpack 3
