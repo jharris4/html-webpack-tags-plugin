@@ -1004,7 +1004,12 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         plugins: [
           new ExtractTextPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: false })
+          new HtmlWebpackIncludeAssetsPlugin(
+            { assets: 'local-with-public-path.js', append: false, publicPath: true }
+          ),
+          new HtmlWebpackIncludeAssetsPlugin(
+            { assets: ['local-without-public-path.js', 'http://www.foo.com/foobar.js'], append: false, publicPath: false }
+          )
         ]
       }, function (err, result) {
         expect(err).toBeFalsy();
@@ -1013,13 +1018,17 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         fs.readFile(htmlFile, 'utf8', function (er, data) {
           expect(er).toBeFalsy();
           var $ = cheerio.load(data);
-          expect($('script').length).toBe(3);
+          expect($('script').length).toBe(5);
           expect($('link').length).toBe(1);
           expect($('script[src="thePublicPath/style.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/style.js"></script>');
           expect($('script[src="thePublicPath/app.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/app.js"></script>');
           expect($('link[href="thePublicPath/style.css"]').toString()).toBe('<link href="thePublicPath/style.css" rel="stylesheet">');
-          expect($('script[src="foobar.js"]').toString()).toBe('<script type="text/javascript" src="foobar.js"></script>');
-          expect($($('script').get(0)).toString()).toBe('<script type="text/javascript" src="foobar.js"></script>');
+          expect($('script[src="thePublicPath/local-with-public-path.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/local-with-public-path.js"></script>');
+          expect($('script[src="local-without-public-path.js"]').toString()).toBe('<script type="text/javascript" src="local-without-public-path.js"></script>');
+          expect($('script[src="http://www.foo.com/foobar.js"]').toString()).toBe('<script type="text/javascript" src="http://www.foo.com/foobar.js"></script>');
+          expect($($('script').get(2)).toString()).toBe('<script type="text/javascript" src="thePublicPath/local-with-public-path.js"></script>');
+          expect($($('script').get(0)).toString()).toBe('<script type="text/javascript" src="local-without-public-path.js"></script>');
+          expect($($('script').get(1)).toString()).toBe('<script type="text/javascript" src="http://www.foo.com/foobar.js"></script>');
           done();
         });
       });
