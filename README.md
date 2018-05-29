@@ -33,7 +33,7 @@ Add the plugin to your webpack config as follows:
 plugins: [
   new HtmlWebpackPlugin(),
   new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true })
-]  
+]
 ```
 
 Options
@@ -57,7 +57,7 @@ The available options are:
   If the asset path is static and ends in one of the `jsExtensions` or `cssExtensions` values, simply use a string value.
 
   If the asset is not static or does not have a valid extension, you can instead pass an object with properties `path` (required) and `type` or `glob` or `globPath` or `attributes` (optional). In this case `path` is the asset href/src, `type` is one of `js` or `css`, and `glob` is a wildcard to use to match all files in the path (uses the [glob](https://github.com/isaacs/node-glob) package). The `globPath` can be used to specify the directory from which the `glob` should search for filename matches (the default is to use `path` within webpack's output directory).
-  
+
   The `attributes` property may be used to add additional attributes to the link or script element that is injected. The keys of this object are attribute names and the values are the attribute values.
 
 - `append`: `boolean`
@@ -95,7 +95,7 @@ plugins: [
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false
   })
-]  
+]
 ```
 
 Appending and prepending at the same time :
@@ -144,6 +144,19 @@ plugins: [
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     publicPath: 'myPublicPath/'
+  })
+]
+```
+
+Or to include assets without prepending the `publicPath`:
+
+```javascript
+plugins: [
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: ['css/no-public-path.min.css', 'http://some.domain.com.js'],
+    append: false,
+    publicPath: false
   })
 ]
 ```
