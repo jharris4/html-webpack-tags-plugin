@@ -1071,6 +1071,57 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         });
       });
     });
+    it("should ignore the publicPath option if asset's path is started with 'http(s)://' , 'file:///' or '//'", function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js',
+          publicPath: 'thePublicPath'
+        },
+        module: {
+          loaders: [{ test: /\.css$/, loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }]
+        },
+        plugins: [
+          new ExtractTextPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({
+            assets: [
+              { path: 'file:///fonts/test.css', type: 'css' },
+              { path: 'https://fonts.googleapis.com/css?family=Material+Icons', type: 'css' },
+              { path: 'http://fonts.googleapis.com/css?family=Material+Icons', type: 'css' },
+              { path: '//fonts.googleapis.com/css?family=Material+Icons', type: 'css' },
+              'foobar.js'
+            ],
+            append: false,
+            publicPath: 'abc/'
+          })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(3);
+          expect($('link').length).toBe(5);
+          expect($('script[src="thePublicPath/style.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/style.js"></script>');
+          expect($('script[src="thePublicPath/app.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/app.js"></script>');
+          expect($('link[href="thePublicPath/style.css"]').toString()).toBe('<link href="thePublicPath/style.css" rel="stylesheet">');
+          expect($('link[href="file:///fonts/test.css"]').toString()).toBe('<link href="file:///fonts/test.css" rel="stylesheet">');
+          expect($('link[href="https://fonts.googleapis.com/css?family=Material+Icons"]').toString()).toBe('<link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">');
+          expect($('link[href="http://fonts.googleapis.com/css?family=Material+Icons"]').toString()).toBe('<link href="http://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">');
+          expect($('link[href="//fonts.googleapis.com/css?family=Material+Icons"]').toString()).toBe('<link href="//fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">');
+          expect($('script[src="abc/foobar.js"]').toString()).toBe('<script type="text/javascript" src="abc/foobar.js"></script>');
+          expect($($('script').get(0)).toString()).toBe('<script type="text/javascript" src="abc/foobar.js"></script>');
+          done();
+        });
+      });
+    });
   });
 
   describe('option.hash', function () {
