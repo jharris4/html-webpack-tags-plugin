@@ -214,7 +214,12 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
     var getAssetPath = function (includeAssetPath) {
       var publicPath = self.options.publicPath;
       var hash = self.options.hash;
-      var includeAssetPrefix = publicPath === true ? defaultPublicPath : isString(publicPath) ? publicPath : '';
+      var includeAssetPrefix = '';
+      // Ignoring public path option when asset's path is started with 'http(s)://' , 'file:///' or '//'
+      var needIgnorePublicPath = /^((https?:|file:\/))?\/\//i.test(includeAssetPath);
+      if (!needIgnorePublicPath) {
+        includeAssetPrefix = publicPath === true ? defaultPublicPath : isString(publicPath) ? publicPath : '';
+      }
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
       return includeAssetPrefix + includeAssetPath + includeAssetHash;
     };
