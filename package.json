@@ -1,13 +1,12 @@
 {
-  "name": "html-webpack-include-assets-plugin",
-  "version": "1.0.4",
+  "name": "rrd-html-webpack-include-assets-plugin",
+  "version": "1.0.5",
   "description": "Add the ability to include assets based on a list of paths",
   "main": "index.js",
   "files": [
     "index.js"
   ],
   "scripts": {
-    "prepublish": "npm run test",
     "pretest": "semistandard",
     "test": "jasmine",
     "debug": "node-debug jasmine"
