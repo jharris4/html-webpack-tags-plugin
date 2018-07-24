@@ -217,7 +217,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var hash = self.options.hash;
       var includeAssetPrefix = publicPath === true ? defaultPublicPath : isString(publicPath) ? publicPath : '';
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
-      return includeAssetPrefix + includeAssetPath + includeAssetHash;
+      return path.resolve(includeAssetPrefix + includeAssetPath + includeAssetHash);
     };
 
     function onBeforeHtmlGeneration (htmlPluginData, callback) {
