@@ -148,7 +148,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       if (asset.attributes !== undefined) {
         assert(isObject(asset.attributes), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object');
         forOwn(asset.attributes, function (value) {
-          assert(isString(value), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object with string values');
+          assert(isString(value) || isBoolean(value), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object with string or boolean values');
         });
       }
     } else {

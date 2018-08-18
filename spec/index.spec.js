@@ -145,7 +145,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: null } }, 'bar.css'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array objects attributes property should be an object with string values)/);
+      expect(theFunction).toThrowError(/(options assets key array objects attributes property should be an object with string or boolean values)/);
       done();
     });
 
