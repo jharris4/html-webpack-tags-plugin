@@ -322,7 +322,13 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
       }
 
-      tags = htmlPluginData.head.concat(htmlPluginData.body);
+      // HtmlWebpackPlugin 3.x
+      if (htmlPluginData.head) {
+        tags = htmlPluginData.head.concat(htmlPluginData.body);
+      } else {
+        // HtmlWebpackPlugin 4.x
+        tags = htmlPluginData.headTags.concat(htmlPluginData.bodyTags);
+      }
       tagCount = tags.length;
       for (var i = 0; i < tagCount; i++) {
         tag = tags[i];
@@ -341,8 +347,17 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
     // Webpack 4+
     if (compilation.hooks) {
-      compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
-      compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+      // HtmlWebPackPlugin 3.x
+      if (compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration) {
+        compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
+        compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+      } else {
+        // HtmlWebPackPlugin 4.x
+        var HtmlWebpackPlugin = require('html-webpack-plugin');
+        var hooks = HtmlWebpackPlugin.getHooks(compilation);
+        hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
+        hooks.alterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+      }
     } else {
       // Webpack 3
       compilation.plugin('html-webpack-plugin-before-html-generation', onBeforeHtmlGeneration);
