@@ -255,11 +255,12 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
             var globOptions = {cwd: cwd};
 
-                    // assets will be an array of strings with all matching asset file names
+            // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
-                        function (globAsset) {
-                          return slash(path.join(includeAsset.path, globAsset));
-                        });
+              function (globAsset) {
+                return slash(path.join(includeAsset.path, globAsset));
+              }
+            );
           }
         } else {
           includeAssetType = null;
@@ -344,7 +345,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
       compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
     } else {
-        // Webpack 3
+      // Webpack 3
       compilation.plugin('html-webpack-plugin-before-html-generation', onBeforeHtmlGeneration);
       compilation.plugin('html-webpack-plugin-alter-asset-tags', onAlterAssetTag);
     }
