@@ -276,10 +276,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         includeAssetCount = includeAssetPaths.length;
         for (var a = 0; a < includeAssetCount; a++) {
           includeAssetPath = includeAssetPaths[a];
-
-          // var fsContent = fs.readFileSync(includeAssetPath);
-          // rawData[includeAssetPath] = fsContent;
-          // console.log(includeAssetPath);
           includeAssetString = getAssetPath(includeAssetPath);
           if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAssetString, jsExtensions)) {
             if (assets.js.indexOf(includeAssetString) === -1 && jsAssets.indexOf(includeAssetString) === -1) {
