@@ -149,7 +149,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       if (asset.attributes !== undefined) {
         assert(isObject(asset.attributes), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object');
         forOwn(asset.attributes, function (value) {
-          assert(isString(value), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object with string values');
+          assert(isString(value) || isBoolean(value), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object with string or boolean values');
         });
       }
     } else {
@@ -257,17 +257,17 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
             var globOptions = {cwd: cwd};
                     // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
-                        function (globAsset) {
-                          var icPath = slash(path.join(includeAsset.path, globAsset));
-                          var fullPath = path.join(cwd, globAsset);
-                          rawData[icPath] = {
-                            fullPath: fullPath,
-                            includeAssetPath: icPath,
-                            assetPath: globAsset,
-                            source: fs.readFileSync(fullPath, { encoding: 'utf8' })
-                          };
-                          return icPath;
-                        });
+              function (globAsset) {
+                var icPath = slash(path.join(includeAsset.path, globAsset));
+                var fullPath = path.join(cwd, globAsset);
+                rawData[icPath] = {
+                  fullPath: fullPath,
+                  includeAssetPath: icPath,
+                  assetPath: globAsset,
+                  source: fs.readFileSync(fullPath, { encoding: 'utf8' })
+                };
+                return icPath;
+              });
           }
         } else {
           includeAssetType = null;
@@ -352,7 +352,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
       compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
     } else {
-        // Webpack 3
+      // Webpack 3
       compilation.plugin('html-webpack-plugin-before-html-generation', onBeforeHtmlGeneration);
       compilation.plugin('html-webpack-plugin-alter-asset-tags', onAlterAssetTag);
     }
