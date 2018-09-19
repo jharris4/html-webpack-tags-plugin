@@ -36,6 +36,10 @@ plugins: [
 ]
 ```
 
+Note that some users have encountered issues with plugin ordering.
+
+It is advisable to always place any `HtmlWebpackPlugin` plugins before any `HtmlWebpackIncludeAssetsPlugin` plugins in your webpack config.
+
 Options
 -------
 The available options are:
