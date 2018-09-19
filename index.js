@@ -76,6 +76,9 @@ function extend (target, source) {
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
+  if (options.resolvePaths !== undefined) {
+    assert(isBoolean(options.resolvePaths), 'HtmlWebpackIncludeAssetsPlugin options should specify a resolvePaths that is a boolean');
+  }
   if (isString(options.assets) || isObject(options.assets)) {
     assets = [options.assets];
   } else {
@@ -217,7 +220,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var hash = self.options.hash;
       var includeAssetPrefix = publicPath === true ? defaultPublicPath : isString(publicPath) ? publicPath : '';
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
-      return path.resolve(includeAssetPrefix + includeAssetPath + includeAssetHash);
+      var assetPath = includeAssetPrefix + includeAssetPath + includeAssetHash;
+      return self.options.resolvePaths ? path.resolve(assetPath) : assetPath;
     };
 
     function onBeforeHtmlGeneration (htmlPluginData, callback) {
