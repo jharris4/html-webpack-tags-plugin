@@ -4,7 +4,6 @@ var minimatch = require('minimatch');
 var glob = require('glob');
 var path = require('path');
 var slash = require('slash');
-var fs = require('fs');
 
 var defaultOptions = {
   publicPath: true,
@@ -247,7 +246,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAssetPath;
       var includeAssetType;
       var includeCount = includeAssets.length;
-      var rawData = {};
       var jsAssets = [];
       var cssAssets = [];
       for (var i = 0; i < includeCount; i++) {
@@ -262,15 +260,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
                     // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
               function (globAsset) {
-                var icPath = slash(path.join(includeAsset.path, globAsset));
-                var fullPath = path.join(cwd, globAsset);
-                rawData[icPath] = {
-                  fullPath: fullPath,
-                  includeAssetPath: icPath,
-                  assetPath: globAsset,
-                  source: fs.readFileSync(fullPath, { encoding: 'utf8' })
-                };
-                return icPath;
+                return slash(path.join(includeAsset.path, globAsset));
               });
           }
         } else {
@@ -299,7 +289,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         assets.js = jsAssets.concat(assets.js);
         assets.css = cssAssets.concat(assets.css);
       }
-      assets.rawData = rawData;
       if (callback) {
         callback(null, htmlPluginData);
       } else {
