@@ -11,6 +11,59 @@ var HtmlWebpackIncludeAssetsPlugin = require('../');
 
 var OUTPUT_DIR = path.join(__dirname, '../dist');
 
+var WEBPACK = {
+  entry: {
+    app: path.join(__dirname, 'fixtures', 'entry.js'),
+    style: path.join(__dirname, 'fixtures', 'app.css')
+  },
+  output: {
+    path: OUTPUT_DIR,
+    filename: '[name].js'
+  },
+  module: {
+    rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+  }
+};
+
+const WEBPACK_KEYS = Object.keys(WEBPACK);
+
+function runWebpackCustom (plugins, config, callback) {
+  if (!config) {
+    config = {};
+  }
+  var webpackConfig = {
+    plugins: plugins
+  };
+  WEBPACK_KEYS.forEach(function (key) {
+    if (config[key]) {
+      webpackConfig[key] = Object.assign({}, WEBPACK[key], config[key]);
+    } else {
+      webpackConfig[key] = WEBPACK[key];
+    }
+  });
+  webpack(
+    webpackConfig,
+    callback
+  );
+}
+
+function runWebpack (plugins, config, callback) {
+  runWebpackCustom(
+    plugins,
+    config,
+    function (err, result) {
+      expect(err).toBeFalsy();
+      expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+      var htmlFile = path.resolve(__dirname, '../dist/index.html');
+      fs.readFile(htmlFile, 'utf8', function (er, data) {
+        expect(er).toBeFalsy();
+        var $ = cheerio.load(data);
+        callback(result, $);
+      });
+    }
+  );
+}
+
 describe('HtmlWebpackIncludeAssetsPlugin', function () {
   beforeEach(function (done) {
     rimraf(OUTPUT_DIR, done);
@@ -265,30 +318,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
 
   describe('option.append', function () {
     it('should include a single js file and append it', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: true, publicPath: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -297,35 +334,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="foobar.js"]').toString()).toBe('<script src="foobar.js"></script>');
           expect($($('script').get(2)).toString()).toBe('<script src="foobar.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include a single css file and append it', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: true, publicPath: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -334,35 +355,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="foobar.css"]').toString()).toBe('<link href="foobar.css" rel="stylesheet">');
           expect($($('link').get(1)).toString()).toBe('<link href="foobar.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include a single js file and prepend it', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -371,35 +376,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="foobar.js"]').toString()).toBe('<script src="foobar.js"></script>');
           expect($($('script').get(0)).toString()).toBe('<script src="foobar.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include a single css file and prepend it', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -408,36 +397,20 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="foobar.css"]').toString()).toBe('<link href="foobar.css" rel="stylesheet">');
           expect($($('link').get(0)).toString()).toBe('<link href="foobar.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should support appending and prepending at the same time', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'foo.js'], append: false, publicPath: false, debug: true }),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['bar.css', 'bar.js'], append: true, publicPath: false, debug: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(4);
           expect($('link').length).toBe(3);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -452,35 +425,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($($('link').get(0)).toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($($('link').get(2)).toString()).toBe('<link href="bar.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include multiple css files and append them in order', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css', { path: 'baz.css' }], append: true, publicPath: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(4);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -493,35 +450,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($($('link').get(2)).toString()).toBe('<link href="bar.css" rel="stylesheet">');
           expect($($('link').get(3)).toString()).toBe('<link href="baz.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include multiple css files and prepend them in order', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css'], append: false, publicPath: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(3);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -532,26 +473,15 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($($('link').get(0)).toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($($('link').get(1)).toString()).toBe('<link href="bar.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.files', function () {
     it('should not include if not present in defined files', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({
@@ -560,38 +490,22 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             append: true,
             publicPath: false
           })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
           expect($('script[src="app.js"]').toString()).toBe('<script src="app.js"></script>');
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include if present in defined files', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({
@@ -600,14 +514,9 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             append: true,
             publicPath: false
           })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -616,61 +525,34 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="foobar.js"]').toString()).toBe('<script src="foobar.js"></script>');
           expect($($('script').get(2)).toString()).toBe('<script src="foobar.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.assets', function () {
     it('should not include assets when none are requested', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: [path.join(__dirname, 'fixtures', 'app.css')]
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
           expect($('script[src="app.js"]').toString()).toBe('<script src="app.js"></script>');
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include a mixture of js and css files', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({
@@ -685,14 +567,9 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             append: true,
             publicPath: false
           })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(5);
           expect($('link').length).toBe(4);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -705,37 +582,21 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="bar.css"]').toString()).toBe('<link href="bar.css" rel="stylesheet">');
           expect($('link[href="baz"]').toString()).toBe('<link href="baz" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.jsExtensions', function () {
     it('should include all js type files when multiple jsExtensions are specified', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'foo.jsx'], append: true, jsExtensions: ['.js', '.jsx'] })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(4);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -744,37 +605,21 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="foo.js"]').toString()).toBe('<script src="foo.js"></script>');
           expect($('script[src="foo.jsx"]').toString()).toBe('<script src="foo.jsx"></script>');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.cssExtensions', function () {
     it('should include all css type files when multiple cssExtensions are specified', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'foo.style'], append: true, cssExtensions: ['.css', '.style'] })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(3);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -783,73 +628,41 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="foo.css"]').toString()).toBe('<link href="foo.css" rel="stylesheet">');
           expect($('link[href="foo.style"]').toString()).toBe('<link href="foo.style" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.assets.glob', function () {
     it('should not include any files for a glob that does not match any files', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.css' }], append: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(1);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
           expect($('script[src="app.js"]').toString()).toBe('<script src="app.js"></script>');
           expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should include any files for a glob that does match files', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }], append: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(2);
           expect($('script[src="style.js"]').toString()).toBe('<script src="style.js"></script>');
@@ -858,37 +671,21 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="assets/glob.css"]').toString()).toBe('<link href="assets/glob.css" rel="stylesheet">');
           expect($('script[src="assets/glob.js"]').toString()).toBe('<script src="assets/glob.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.assets.attributes', function () {
     it('should add the given attributes to the matching tag', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/abc.js', attributes: { id: 'abc' } }, { path: 'assets/def.css', attributes: { id: 'def', media: 'screen' } }, { path: 'assets/ghi.css' }], append: false })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {},
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(3);
           expect($('script[src="app.js"]').toString()).toBe('<script src="app.js"></script>');
@@ -898,8 +695,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href="assets/def.css"]').toString()).toBe('<link href="assets/def.css" rel="stylesheet" id="def" media="screen">');
           expect($('link[href="assets/ghi.css"]').toString()).toBe('<link href="assets/ghi.css" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('can match tags with an overridden publicPath and set hash', function (done) {
@@ -908,32 +705,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         return v + hash;
       };
 
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          publicPath: 'thePublicPath/',
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({ hash: true }),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/abc.js', attributes: { id: 'abc' } }, { path: 'assets/def.css', attributes: { id: 'def', media: 'screen' } }, { path: 'assets/ghi.css' }], append: false, hash: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var hash = result.compilation.hash;
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {
+          output: {
+            publicPath: 'thePublicPath/'
+          }
+        },
+        function (result, $) {
+          var hash = result.compilation.hash;
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(3);
           expect($('script[src^="thePublicPath/app.js"]').toString()).toBe('<script src="' + appendHash('thePublicPath/app.js', hash) + '"></script>');
@@ -943,38 +727,25 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href^="thePublicPath/assets/def.css"]').toString()).toBe('<link href="' + appendHash('thePublicPath/assets/def.css', hash) + '" rel="stylesheet" id="def" media="screen">');
           expect($('link[href^="thePublicPath/assets/ghi.css"]').toString()).toBe('<link href="' + appendHash('thePublicPath/assets/ghi.css', hash) + '" rel="stylesheet">');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.publicPath', function () {
     it('should prefix the publicPath if the publicPath option is set to true', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: true })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {
+          output: {
+            publicPath: 'thePublicPath'
+          }
+        },
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(1);
           expect($('script[src="thePublicPath/style.js"]').toString()).toBe('<script src="thePublicPath/style.js"></script>');
@@ -983,25 +754,13 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="thePublicPath/foobar.js"]').toString()).toBe('<script src="thePublicPath/foobar.js"></script>');
           expect($($('script').get(0)).toString()).toBe('<script src="thePublicPath/foobar.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should not prefix the publicPath if the publicPath option is set to false', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin(
@@ -1010,14 +769,13 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackIncludeAssetsPlugin(
             { assets: ['local-without-public-path.js', 'http://www.foo.com/foobar.js'], append: false, publicPath: false }
           )
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {
+          output: {
+            publicPath: 'thePublicPath'
+          }
+        },
+        function (result, $) {
           expect($('script').length).toBe(5);
           expect($('link').length).toBe(1);
           expect($('script[src="thePublicPath/style.js"]').toString()).toBe('<script src="thePublicPath/style.js"></script>');
@@ -1030,36 +788,23 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($($('script').get(0)).toString()).toBe('<script src="local-without-public-path.js"></script>');
           expect($($('script').get(1)).toString()).toBe('<script src="http://www.foo.com/foobar.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should prefix the value of the publicPath option if the publicPath option is set to a string', function (done) {
-      webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
+      runWebpack(
+        [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: 'abc/' })
-        ]
-      }, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+        ],
+        {
+          output: {
+            publicPath: 'thePublicPath'
+          }
+        },
+        function (result, $) {
           expect($('script').length).toBe(3);
           expect($('link').length).toBe(1);
           expect($('script[src="thePublicPath/style.js"]').toString()).toBe('<script src="thePublicPath/style.js"></script>');
@@ -1068,48 +813,31 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src="abc/foobar.js"]').toString()).toBe('<script src="abc/foobar.js"></script>');
           expect($($('script').get(0)).toString()).toBe('<script src="abc/foobar.js"></script>');
           done();
-        });
-      });
+        }
+      );
     });
   });
 
   describe('option.hash', function () {
-    beforeEach(function () {
-      this.hashTestWebpackConfig = {
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'myPublic'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({ hash: true })
-        ]
-      };
-    });
-
     var appendHash = function (v, hash) {
       if (hash.length > 0) hash = '?' + hash;
       return v + hash;
     };
 
     it('should not append hash if hash options are not provided', function (done) {
-      this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var hash = result.compilation.hash;
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+      runWebpack(
+        [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin({ hash: true }),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true })
+        ],
+        {
+          output: {
+            publicPath: 'myPublic'
+          }
+        },
+        function (result, $) {
+          var hash = result.compilation.hash;
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script src="' + appendHash('myPublic/style.js', hash) + '"></script>');
@@ -1117,20 +845,24 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="' + appendHash('myPublic/style.css', hash) + '" rel="stylesheet">');
           expect($($('link[href^="myPublic/foobar.css"]')).attr('href')).toBe('myPublic/foobar.css');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should not append hash if hash options are set to false', function (done) {
-      this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: false }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var hash = result.compilation.hash;
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+      runWebpack(
+        [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin({ hash: true }),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: false })
+        ],
+        {
+          output: {
+            publicPath: 'myPublic'
+          }
+        },
+        function (result, $) {
+          var hash = result.compilation.hash;
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script src="' + appendHash('myPublic/style.js', hash) + '"></script>');
@@ -1138,20 +870,24 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="' + appendHash('myPublic/style.css', hash) + '" rel="stylesheet">');
           expect($($('link[href^="myPublic/foobar.css"]')).attr('href')).toBe('myPublic/foobar.css');
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should append hash if hash options are set to true', function (done) {
-      this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: true }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var hash = result.compilation.hash;
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+      runWebpack(
+        [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin({ hash: true }),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: true })
+        ],
+        {
+          output: {
+            publicPath: 'myPublic'
+          }
+        },
+        function (result, $) {
+          var hash = result.compilation.hash;
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script src="' + appendHash('myPublic/style.js', hash) + '"></script>');
@@ -1159,21 +895,24 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="' + appendHash('myPublic/style.css', hash) + '" rel="stylesheet">');
           expect($($('link[href^="myPublic/foobar.css"]')).attr('href')).toBe(appendHash('myPublic/foobar.css', hash));
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should append hash if hash option in this plugin set to true but hash options in HtmlWebpackPlugin config are set to false', function (done) {
-      this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
-      this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: true }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var hash = result.compilation.hash;
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+      runWebpack(
+        [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin({ hash: false }),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: true })
+        ],
+        {
+          output: {
+            publicPath: 'myPublic'
+          }
+        },
+        function (result, $) {
+          var hash = result.compilation.hash;
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script src="myPublic/style.js"></script>');
@@ -1181,20 +920,23 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="myPublic/style.css" rel="stylesheet">');
           expect($($('link[href^="myPublic/foobar.css"]')).attr('href')).toBe(appendHash('myPublic/foobar.css', hash));
           done();
-        });
-      });
+        }
+      );
     });
 
     it('should not append hash if hash option in this plugin set to false and hash options in HtmlWebpackPlugin config are set to false', function (done) {
-      this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
-      this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: false }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        var htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-          expect(er).toBeFalsy();
-          var $ = cheerio.load(data);
+      runWebpack(
+        [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin({ hash: false }),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: false })
+        ],
+        {
+          output: {
+            publicPath: 'myPublic'
+          }
+        },
+        function (result, $) {
           expect($('script').length).toBe(2);
           expect($('link').length).toBe(2);
           expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script src="myPublic/style.js"></script>');
@@ -1202,8 +944,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="myPublic/style.css" rel="stylesheet">');
           expect($($('link[href^="myPublic/foobar.css"]')).attr('href')).toBe('myPublic/foobar.css');
           done();
-        });
-      });
+        }
+      );
     });
   });
 });
