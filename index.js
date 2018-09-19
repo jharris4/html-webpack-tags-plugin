@@ -75,6 +75,9 @@ function extend (target, source) {
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
+  if (options.resolvePaths !== undefined) {
+    assert(isBoolean(options.resolvePaths), 'HtmlWebpackIncludeAssetsPlugin options should specify a resolvePaths that is a boolean');
+  }
   if (isString(options.assets) || isObject(options.assets)) {
     assets = [options.assets];
   } else {
@@ -216,7 +219,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var hash = self.options.hash;
       var includeAssetPrefix = publicPath === true ? defaultPublicPath : isString(publicPath) ? publicPath : '';
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
-      return includeAssetPrefix + includeAssetPath + includeAssetHash;
+      var assetPath = includeAssetPrefix + includeAssetPath + includeAssetHash;
+      return self.options.resolvePaths ? path.resolve(assetPath) : assetPath;
     };
 
     function onBeforeHtmlGeneration (htmlPluginData, callback) {
@@ -252,15 +256,12 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
             includeAssetPaths = [includeAsset.path];
           } else {
             var cwd = includeAsset.globPath !== undefined ? includeAsset.globPath : path.join(compiler.options.output.path, includeAsset.path);
-
             var globOptions = {cwd: cwd};
-
-            // assets will be an array of strings with all matching asset file names
+                    // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
               function (globAsset) {
                 return slash(path.join(includeAsset.path, globAsset));
-              }
-            );
+              });
           }
         } else {
           includeAssetType = null;
@@ -288,7 +289,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         assets.js = jsAssets.concat(assets.js);
         assets.css = cssAssets.concat(assets.css);
       }
-
       if (callback) {
         callback(null, htmlPluginData);
       } else {
