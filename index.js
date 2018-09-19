@@ -264,8 +264,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
                             fullPath: fullPath,
                             includeAssetPath: icPath,
                             assetPath: globAsset,
-                            source: fs.readFileSync(fullPath,{encoding:'utf8'})
-                          }
+                            source: fs.readFileSync(fullPath, { encoding: 'utf8' })
+                          };
                           return icPath;
                         });
           }
