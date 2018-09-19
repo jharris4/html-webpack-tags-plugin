@@ -278,6 +278,33 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
+  describe('plugin dependencies', function () {
+    it('should throw an error if html-webpack-plugin is not in the webpack config', function (done) {
+      var theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
+      var theFunction = function () {
+        webpack({
+          entry: {
+            app: path.join(__dirname, 'fixtures', 'entry.js'),
+            style: path.join(__dirname, 'fixtures', 'app.css')
+          },
+          output: {
+            path: OUTPUT_DIR,
+            filename: '[name].js'
+          },
+          module: {
+            rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+          },
+          plugins: [
+            new MiniCssExtractPlugin({ filename: '[name].css' }),
+            new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: true, publicPath: false })
+          ]
+        }, function () {});
+      };
+      expect(theFunction).toThrowError(theError);
+      done();
+    });
+  });
+
   describe('option.append', function () {
     it('should include a single js file and append it', function (done) {
       webpack({
