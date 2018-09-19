@@ -224,6 +224,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
+    it('should not throw an error if the resolvePaths flag is a boolean', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js'], append: false, resolvePaths: true });
+      };
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
     it('should throw an error if the publicPath flag is not a boolean or string', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: 123 });
