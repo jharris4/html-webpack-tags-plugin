@@ -141,17 +141,17 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with an attributes property with non-string values', function (done) {
+    it('should throw an error if any of the asset options are objects with an attributes property with non string or boolean values', function (done) {
       var theFunction = function () {
-        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: null } }, 'bar.css'], append: false });
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: null, enabled: true } }, 'bar.css'], append: false });
       };
-      expect(theFunction).toThrowError(/(options assets key array objects attributes property should be an object with string values)/);
+      expect(theFunction).toThrowError(/(options assets key array objects attributes property should be an object with string or boolean values)/);
       done();
     });
 
-    it('should not throw an error if any of the asset options are objects with an attributes property with string values', function (done) {
+    it('should not throw an error if any of the asset options are objects with an attributes property with string or boolean values', function (done) {
       var theFunction = function () {
-        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: 'test' } }, 'bar.css'], append: false });
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: 'test', enabled: true } }, 'bar.css'], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
@@ -255,10 +255,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
         var theCheck = function () {
           return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: true, hash: val });
         };
-
         expect(theCheck).toThrowError(theError);
       });
-
       done();
     });
   });
