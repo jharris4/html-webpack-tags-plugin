@@ -257,7 +257,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
           } else {
             var cwd = includeAsset.globPath !== undefined ? includeAsset.globPath : path.join(compiler.options.output.path, includeAsset.path);
             var globOptions = {cwd: cwd};
-                    // assets will be an array of strings with all matching asset file names
+            // assets will be an array of strings with all matching asset file names
             includeAssetPaths = glob.sync(includeAsset.glob, globOptions).map(
               function (globAsset) {
                 return slash(path.join(includeAsset.path, globAsset));
