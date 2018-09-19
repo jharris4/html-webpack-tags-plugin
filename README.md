@@ -58,11 +58,15 @@ The available options are:
 
   If the asset is not static or does not have a valid extension, you can instead pass an object with properties `path` (required) and `type` or `glob` or `globPath` or `attributes` (optional). In this case `path` is the asset href/src, `type` is one of `js` or `css`, and `glob` is a wildcard to use to match all files in the path (uses the [glob](https://github.com/isaacs/node-glob) package). The `globPath` can be used to specify the directory from which the `glob` should search for filename matches (the default is to use `path` within webpack's output directory).
 
-  The `attributes` property may be used to add additional attributes to the link or script element that is injected. The keys of this object are attribute names and the values are the attribute values.
+  The `attributes` property may be used to add additional attributes to the link or script element that is injected. The keys of this object are attribute names and the values are the attribute values (string or boolean key values are allowed).
 
 - `append`: `boolean`
 
   Specifying whether the assets should be prepended (`false`) before any existing assets, or appended (`true`) after them.
+
+- `resolvePaths`: `boolean`
+
+  Specifying whether the asset paths should be resolved with `path.resolve` (i.e. made absolute).
 
 - `publicPath`: `boolean` or `string`
 
