@@ -64,6 +64,8 @@ The available options are:
 
   The `attributes` property may be used to add additional attributes to the link or script element that is injected. The keys of this object are attribute names and the values are the attribute values (string or boolean key values are allowed).
 
+  The `assetPath` property may be used to specify the full path to the included asset. This can be useful as it will trigger a recompilation after the assets have changed when using `webpack-dev-server` or `webpack-dev-middleware` in development mode.
+
 - `append`: `boolean`
 
   Specifying whether the assets should be prepended (`false`) before any existing assets, or appended (`true`) after them.
