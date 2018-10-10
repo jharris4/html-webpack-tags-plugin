@@ -366,7 +366,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       tagCount = tags.length;
       for (var i = 0; i < tagCount; i++) {
         tag = tags[i];
-        assetAttributes = findAttributesForAsset(includeAssets, tag.attributes.href || tag.attributes.src);
+        assetAttributes = findAttributesForAsset(includeAssets, tag.attributes && (tag.attributes.href || tag.attributes.src));
         if (assetAttributes) {
           extend(tag.attributes, assetAttributes);
         }
