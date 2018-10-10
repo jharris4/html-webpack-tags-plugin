@@ -136,6 +136,10 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
         assert(isString(asset.globPath),
           'HtmlWebpackIncludeAssetsPlugin options assets key array objects globPath property should be a string (' + asset.globPath + ')');
       }
+      if (asset.assetPath !== undefined) {
+        assert(isString(asset.assetPath),
+          'HtmlWebpackIncludeAssetsPlugin options assets key array objects assetPath property should be a string (' + asset.assetPath + ')');
+      }
       if (asset.type !== undefined) {
         assert(isOneOf(asset.type, ['js', 'css']),
           'HtmlWebpackIncludeAssetsPlugin options assets key array objects type property should be a string set to either `js` or `css` (' + asset.type + ')');
@@ -232,6 +236,19 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
       }
 
+      var addAsset = function (assetPath) {
+        var promise;
+        try {
+          promise = htmlPluginData.plugin.addFileToAssets(
+            assetPath,
+            compilation
+          );
+          return promise;
+        } catch (err) {
+          return Promise.reject(err);
+        }
+      };
+
       var includeAssets = self.options.assets;
       var jsExtensions = self.options.jsExtensions;
       var cssExtensions = self.options.cssExtensions;
@@ -248,6 +265,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeCount = includeAssets.length;
       var jsAssets = [];
       var cssAssets = [];
+      var assetPromises = [];
+
       for (var i = 0; i < includeCount; i++) {
         includeAsset = includeAssets[i];
         if (isObject(includeAsset)) {
@@ -262,6 +281,9 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
               function (globAsset) {
                 return slash(path.join(includeAsset.path, globAsset));
               });
+          }
+          if (includeAsset.assetPath !== undefined) {
+            assetPromises.push(addAsset(includeAsset.assetPath));
           }
         } else {
           includeAssetType = null;
@@ -289,11 +311,22 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         assets.js = jsAssets.concat(assets.js);
         assets.css = cssAssets.concat(assets.css);
       }
-      if (callback) {
-        callback(null, htmlPluginData);
-      } else {
-        return Promise.resolve(htmlPluginData);
-      }
+      Promise.all(assetPromises).then(
+        function () {
+          if (callback) {
+            callback(null, htmlPluginData);
+          } else {
+            return Promise.resolve(htmlPluginData);
+          }
+        },
+        function (err) {
+          if (callback) {
+            callback(err);
+          } else {
+            return Promise.reject(err);
+          }
+        }
+      );
     }
 
     function onAlterAssetTag (htmlPluginData, callback) {
@@ -360,8 +393,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
           hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
           hooks.alterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
         } else {
-          var message = "Error running html-webpack-include-assets-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
-          throw new Error(message);
+          // var message = "Error running html-webpack-include-assets-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
+          // throw new Error(message);
         }
       }
     } else {

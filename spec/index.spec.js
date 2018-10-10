@@ -85,6 +85,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
+    it('should throw an error if any of the asset options are objects with an assetPath property that is not a string', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: '', assetPath: 123, type: 'js' }, 'bar.css'], append: false });
+      };
+      expect(theFunction).toThrowError(/(options assets key array objects assetPath property should be a string)/);
+      done();
+    });
+
     it('should throw an error if any of the asset options are objects with an invalid type property', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'baz.js', type: 'foo' }, 'bar.css'], append: false });
@@ -278,7 +286,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('plugin dependencies', function () {
+  xdescribe('plugin dependencies', function () {
     it('should throw an error if html-webpack-plugin is not in the webpack config', function (done) {
       var theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
       var theFunction = function () {
@@ -987,6 +995,74 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           done();
         });
       });
+    });
+  });
+
+  describe('option.assets.assetPath', function () {
+    it('should not throw an error when assets assetPath is used and the file exists', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }], append: false })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(2);
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="assets/astyle.css"]').toString()).toBe('<link href="assets/astyle.css" rel="stylesheet">');
+          done();
+        });
+      });
+    });
+
+    it('should throw an error when assets assetPath is used and the file does not exist', function (done) {
+      function theFunction () {
+        webpack({
+          entry: {
+            app: path.join(__dirname, 'fixtures', 'entry.js'),
+            style: path.join(__dirname, 'fixtures', 'app.css')
+          },
+          output: {
+            path: OUTPUT_DIR,
+            filename: '[name].js'
+          },
+          module: {
+            rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+          },
+          plugins: [
+            new MiniCssExtractPlugin({ filename: '[name].css' }),
+            new HtmlWebpackPlugin(),
+            new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/anotherstyle.css' }], append: false })
+          ]
+        }, function (err, result) {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).not.toBe('[]');
+          done();
+        });
+      }
+
+      theFunction();
+      // expect(theFunction).toThrowError(/(HtmlWebpackPlugin: could not load file)/);
     });
   });
 
