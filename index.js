@@ -28,6 +28,10 @@ function isArray (v) {
   return Array.isArray(v);
 }
 
+function isFunction (v) {
+  return typeof v === 'function';
+}
+
 function hasExtension (v, ending) {
   if (v.indexOf('?') !== -1) { // Remove anything after `?`
     v = v.substr(0, v.indexOf('?'));
@@ -173,7 +177,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   var hash;
   if (options.hash !== undefined) {
-    assert(isBoolean(options.hash), 'HtmlWebpackIncludeAssetsPlugin options should specify a hash key with a boolean value');
+    assert(isBoolean(options.hash) || isFunction(options.hash), 'HtmlWebpackIncludeAssetsPlugin options should specify a hash key with a boolean or function value');
     hash = options.hash;
   } else {
     hash = defaultOptions.hash;
@@ -223,6 +227,9 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var hash = self.options.hash;
       var includeAssetPrefix = publicPath === true ? defaultPublicPath : isString(publicPath) ? publicPath : '';
       var includeAssetHash = hash === true ? ('?' + compilation.hash) : '';
+      if (isFunction(hash)) {
+        includeAssetPath = hash(includeAssetPath, compilation.hash);
+      }
       var assetPath = includeAssetPrefix + includeAssetPath + includeAssetHash;
       return self.options.resolvePaths ? path.resolve(assetPath) : assetPath;
     };

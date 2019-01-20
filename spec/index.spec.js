@@ -272,8 +272,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the hash option is not a boolean', function (done) {
-      var theError = /(options should specify a hash key with a boolean value)/;
+    it('should throw an error if the hash option is not a boolean or function', function (done) {
+      var theError = /(options should specify a hash key with a boolean or function value)/;
       var nonBooleanCheck = [123, 'not a boolean', /regex/, [], {}];
 
       nonBooleanCheck.forEach(function (val) {
@@ -1319,6 +1319,70 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect($('script[src^="myPublic/app.js"]').toString()).toBe('<script type="text/javascript" src="myPublic/app.js"></script>');
           expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="myPublic/style.css" rel="stylesheet">');
           expect($($('link[href^="myPublic/foobar.css"]')).attr('href')).toBe('myPublic/foobar.css');
+          done();
+        });
+      });
+    });
+
+    it('should replace the hash if a replacer hash function is provided in the plugin options', function (done) {
+      function hashReplacer (assetName, hash) {
+        return assetName.replace(/\[hash\]/, hash);
+      }
+      this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
+      this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.[hash].css', append: false, publicPath: true, hash: hashReplacer }));
+      webpack(this.hashTestWebpackConfig, function (err, result) {
+        var theHash = result.compilation.hash;
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(2);
+          expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script type="text/javascript" src="myPublic/style.js"></script>');
+          expect($('script[src^="myPublic/app.js"]').toString()).toBe('<script type="text/javascript" src="myPublic/app.js"></script>');
+          expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="myPublic/style.css" rel="stylesheet">');
+          expect($($('link[href^="myPublic/foobar.' + theHash + '.css"]')).attr('href')).toBe('myPublic/foobar.' + theHash + '.css');
+          done();
+        });
+      });
+    });
+
+    it('should inject the hash if an injector hash function is provided in the plugin options', function (done) {
+      function hashInjector (assetName, hash) {
+        assetName = assetName.replace(/\.js$/, '.' + hash + '.js');
+        assetName = assetName.replace(/\.css$/, '.' + hash + '.css');
+        return assetName;
+      }
+      this.hashTestWebpackConfig.plugins = [
+        new MiniCssExtractPlugin({ filename: '[name].css' }),
+        new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
+        new HtmlWebpackPlugin(),
+        new HtmlWebpackIncludeAssetsPlugin({
+          assets: [
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' },
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }
+          ],
+          hash: hashInjector,
+          append: true
+        })
+      ];
+      webpack(this.hashTestWebpackConfig, function (err, result) {
+        var theHash = result.compilation.hash;
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(3);
+          expect($('link').length).toBe(2);
+          expect($('script[src^="myPublic/style.js"]').toString()).toBe('<script type="text/javascript" src="myPublic/style.js"></script>');
+          expect($('script[src^="myPublic/app.js"]').toString()).toBe('<script type="text/javascript" src="myPublic/app.js"></script>');
+          expect($('link[href^="myPublic/style.css"]').toString()).toBe('<link href="myPublic/style.css" rel="stylesheet">');
+          expect($('link[href^="myPublic/assets/glob.' + theHash + '.css"]').toString()).toBe('<link href="myPublic/assets/glob.' + theHash + '.css" rel="stylesheet">');
+          expect($('script[src^="myPublic/assets/glob.' + theHash + '.js"]').toString()).toBe('<script type="text/javascript" src="myPublic/assets/glob.' + theHash + '.js"></script>');
           done();
         });
       });

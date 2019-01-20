@@ -80,7 +80,7 @@ The available options are:
 
   A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all assets with the given string. Default is `true`.
 
-- `hash`: `boolean`
+- `hash`: `boolean` or `function(assetName, hash)`
 
   Specifying whether the assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
 
@@ -216,7 +216,7 @@ plugins: [
 
 Using `hash` option :
 
-All asset paths will be appended with a hash query parameter (`?hash=<the_hash>`)
+When the hash option is set to `true`, asset paths will be appended with a hash query parameter (`?hash=<the_hash>`)
 
 ```javascript
 plugins: [
@@ -229,6 +229,28 @@ plugins: [
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     hash: true
+  })
+]
+```
+
+When the hash option is set to a `function`, asset paths will be replaced with the result of executing that function
+
+```javascript
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'somepath/somejsfile.js', to: 'js/somejsfile.[hash].js' },
+    { from: 'somepath/somecssfile.css', to: 'css/somecssfile.[hash].css' }
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: [{ path: 'js', glob: '*.js', globPath: 'somepath' }],
+    assets: [{ path: 'css', glob: '*.css', globPath: 'somepath' }],
+    append: false,
+    hash: function(assetName, hash) {
+      assetName = assetName.replace(/\.js$/, '.' + hash + '.js');
+      assetName = assetName.replace(/\.css$/, '.' + hash + '.css');
+      return assetName;
+    }
   })
 ]
 ```
