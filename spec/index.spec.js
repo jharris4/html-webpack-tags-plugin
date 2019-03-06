@@ -1152,6 +1152,51 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
+    it('should not prefix the publicPath if the publicPath option is set to false and the asset is a protocol-relative path', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js',
+          publicPath: 'thePublicPath'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin(
+            { assets: 'local-with-public-path.js', append: false, publicPath: true }
+          ),
+          new HtmlWebpackIncludeAssetsPlugin(
+            { assets: ['//www.foo.com/foobar.js'], append: false, publicPath: false }
+          )
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(4);
+          expect($('link').length).toBe(1);
+          expect($('script[src="thePublicPath/style.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/style.js"></script>');
+          expect($('script[src="thePublicPath/app.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/app.js"></script>');
+          expect($('link[href="thePublicPath/style.css"]').toString()).toBe('<link href="thePublicPath/style.css" rel="stylesheet">');
+          expect($('script[src="thePublicPath/local-with-public-path.js"]').toString()).toBe('<script type="text/javascript" src="thePublicPath/local-with-public-path.js"></script>');
+          expect($('script[src="//www.foo.com/foobar.js"]').toString()).toBe('<script type="text/javascript" src="//www.foo.com/foobar.js"></script>');
+          expect($($('script').get(1)).toString()).toBe('<script type="text/javascript" src="thePublicPath/local-with-public-path.js"></script>');
+          expect($($('script').get(0)).toString()).toBe('<script type="text/javascript" src="//www.foo.com/foobar.js"></script>');
+          done();
+        });
+      });
+    });
+
     it('should prefix the value of the publicPath option if the publicPath option is set to a string', function (done) {
       webpack({
         entry: {
