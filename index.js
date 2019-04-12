@@ -354,7 +354,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var tagCount;
       var tag;
       var headers;
-      var newHeaders;
       var includeAssets = self.options.assets;
       var includeLinks = self.options.links;
       var includeLinksLength = includeLinks.length;
@@ -419,14 +418,11 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         return link;
       };
 
+      var addHeader = (self.options.append ? headers.push : headers.unshift).bind(headers);
+
       for (var j = 0; j < includeLinksLength; j++) {
         includeLink = includeLinks[j];
-        newHeaders.push(createLink(includeLink));
-      }
-      if (self.options.append) {
-        headers = headers.concat(newHeaders);
-      } else {
-        headers = newHeaders.concat(headers);
+        addHeader(createLink(includeLink));
       }
 
       if (callback) {
