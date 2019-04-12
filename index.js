@@ -411,7 +411,9 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
         var link = {
           attributes: linkAttributes,
-          tagName: 'link'
+          tagName: 'link',
+          selfClosingTag: false,
+          voidTag: true
         };
         return link;
       };
