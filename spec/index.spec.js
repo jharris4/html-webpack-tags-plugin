@@ -62,21 +62,39 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contain an element that is not an object with href', function (done) {
+    it('should throw an error if the links contain an element that is not an object with string href', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '' }, { rel: '' }, { href: '', rel: '' }] });
       };
 
-      expect(theFunction).toThrowError(/(options link key should be an array of objects with href)/);
+      expect(theFunction).toThrowError(/(options link key should be an array of objects with string href)/);
       done();
     });
 
-    it('should throw an error if the links contain an element that is not an object with rel', function (done) {
+    it('should throw an error if the links contain an element that is not an object with string rel', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '' }, { href: '' }, { href: '', rel: '' }] });
       };
 
-      expect(theFunction).toThrowError(/(options link key should be an array of objects with rel)/);
+      expect(theFunction).toThrowError(/(options link key should be an array of objects with string rel)/);
+      done();
+    });
+
+    it('should not throw an error if the links contain an element that is an object with asset set to true', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '', asset: true }, { href: '', rel: '' }, { href: '', rel: '' }] });
+      };
+
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
+    it('should not throw an error if the links contain an element that is an object with asset set to false', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '', asset: false }, { href: '', rel: '' }, { href: '', rel: '' }] });
+      };
+
+      expect(theFunction).not.toThrowError();
       done();
     });
 
@@ -1184,7 +1202,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should output link attributes and inject the publicPath to relative href values', function (done) {
+    it('should output link attributes and inject the publicPath only when link.asset is not false', function (done) {
       var publicPath = '/pub-path/';
 
       webpack({
@@ -1207,8 +1225,10 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             assets: [],
             append: false,
             links: [
-              { rel: 'the-rel-a', href: '/the-href', a: 'abc', x: 'xyz' },
-              { rel: 'the-rel-b', href: 'the-href', a: '123', x: '789' }
+              { rel: 'the-rel-a', href: '/the-href', asset: false, a: 'abc', x: 'xyz' },
+              { rel: 'the-rel-b', href: 'the-href-1', asset: 'asset', a: '123', x: '789' },
+              { rel: 'the-rel-c', href: 'the-href-2', asset: true, a: '___', x: '---' },
+              { rel: 'the-rel-d', href: 'the-href-3', a: '@@@', x: '###' }
             ]
           })
         ]
@@ -1220,12 +1240,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           expect(er).toBeFalsy();
           var $ = cheerio.load(data);
           expect($('script').length).toBe(2);
-          expect($('link').length).toBe(3);
+          expect($('link').length).toBe(5);
           expect($('script[src="' + publicPath + 'app.js"]').toString()).toBe('<script type="text/javascript" src="' + publicPath + 'app.js"></script>');
           expect($('script[src="' + publicPath + 'style.js"]').toString()).toBe('<script type="text/javascript" src="' + publicPath + 'style.js"></script>');
           expect($('link[href="' + publicPath + 'style.css"]').toString()).toBe('<link href="' + publicPath + 'style.css" rel="stylesheet">');
           expect($('link[href="/the-href"]').toString()).toBe('<link rel="the-rel-a" href="/the-href" a="abc" x="xyz">');
-          expect($('link[href="' + publicPath + 'the-href"]').toString()).toBe('<link rel="the-rel-b" href="' + publicPath + 'the-href" a="123" x="789">');
+          expect($('link[href="' + publicPath + 'the-href-1"]').toString()).toBe('<link rel="the-rel-b" href="' + publicPath + 'the-href-1" asset="asset" a="123" x="789">');
+          expect($('link[href="' + publicPath + 'the-href-2"]').toString()).toBe('<link rel="the-rel-c" href="' + publicPath + 'the-href-2" asset a="___" x="---">');
+          expect($('link[href="' + publicPath + 'the-href-3"]').toString()).toBe('<link rel="the-rel-d" href="' + publicPath + 'the-href-3" a="@@@" x="###">');
           done();
         });
       });

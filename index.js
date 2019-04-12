@@ -94,8 +94,8 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     assert(isArray(links), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array');
     links.forEach(function (link) {
       assert(isObject(link), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects');
-      assert(isString(link.href), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with href');
-      assert(isString(link.rel), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with rel');
+      assert(isString(link.href), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with string href');
+      assert(isString(link.rel), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with string rel');
     });
   } else {
     links = [];
@@ -402,10 +402,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var createLink = function (linkAttributes) {
         if (linkAttributes.href !== undefined) {
           var href = linkAttributes.href;
-          const absolutes = ['http://', 'https://', '/'];
-          const isAbsolute = absolutes.filter(prefix => href.length >= prefix.length && href.substring(0, prefix.length) === prefix).length > 0;
 
-          if (!isAbsolute) {
+          if (linkAttributes.asset !== false) {
             linkAttributes = Object.assign({}, linkAttributes, {
               href: defaultPublicPath + href
             });

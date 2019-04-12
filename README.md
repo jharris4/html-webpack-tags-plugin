@@ -300,7 +300,7 @@ plugins: [
 ]
 ```
 
-Sepcifying links
+Sepcifying `links`
 
 ```javascript
 output: {
@@ -322,14 +322,15 @@ plugins: [
       },
       {
         rel: 'manifest',
-        href: '/absolute/asset/path'
+        href: '/absolute/asset/path',
+        asset: false
       }
     ]
   })
 ]
 ```
 
-will append the following into the index template html
+Will append the following link elements into the index template html
 
 ```html
 <head>
@@ -338,3 +339,5 @@ will append the following into the index template html
   <link rel="manifest" href="/absolute/asset/path"/>
 </head>
 ```
+
+Note that the second link's href was not prefixed with the webpack `publicPath` because `link.asset` was set to `false`.
