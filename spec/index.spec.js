@@ -44,6 +44,51 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
+    it('should throw an error if the links are not an array', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: 'a string' });
+      };
+
+      expect(theFunction).toThrowError(/(options link key should be an array)/);
+      done();
+    });
+
+    it('should throw an error if the links contain an element that is not an object', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '' }, '', { href: '', rel: '' }] });
+      };
+
+      expect(theFunction).toThrowError(/(options link key should be an array of objects)/);
+      done();
+    });
+
+    it('should throw an error if the links contain an element that is not an object with href', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '' }, { rel: '' }, { href: '', rel: '' }] });
+      };
+
+      expect(theFunction).toThrowError(/(options link key should be an array of objects with href)/);
+      done();
+    });
+
+    it('should throw an error if the links contain an element that is not an object with rel', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '' }, { href: '' }, { href: '', rel: '' }] });
+      };
+
+      expect(theFunction).toThrowError(/(options link key should be an array of objects with rel)/);
+      done();
+    });
+
+    it('should not throw an error if the links contain an elements that are objects that all have href and rel', function (done) {
+      var theFunction = function () {
+        return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ href: '', rel: '' }, { href: '', rel: '' }, { href: '', rel: '' }] });
+      };
+
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+
     it('should throw an error if the assets are not an array or string or object', function (done) {
       var theFunction = function () {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: 123, append: false });
@@ -1063,6 +1108,127 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
 
       theFunction();
       // expect(theFunction).toThrowError(/(HtmlWebpackPlugin: could not load file)/);
+    });
+  });
+
+  describe('options.links', function () {
+    it('should not throw an error when the links are all valid', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, links: [{ rel: 'the-rel', href: 'the-href' }] })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(2);
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="the-href"]').toString()).toBe('<link rel="the-rel" href="the-href">');
+          done();
+        });
+      });
+    });
+
+    it('should output link attributes other than href and rel', function (done) {
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, links: [{ rel: 'the-rel', href: '/the-href', a: 'abc', x: 'xyz' }] })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(2);
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('link[href="/the-href"]').toString()).toBe('<link rel="the-rel" href="/the-href" a="abc" x="xyz">');
+          done();
+        });
+      });
+    });
+
+    it('should output link attributes and inject the publicPath to relative href values', function (done) {
+      var publicPath = '/pub-path/';
+
+      webpack({
+        entry: {
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          publicPath: publicPath,
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({
+            assets: [],
+            append: false,
+            links: [
+              { rel: 'the-rel-a', href: '/the-href', a: 'abc', x: 'xyz' },
+              { rel: 'the-rel-b', href: 'the-href', a: '123', x: '789' }
+            ]
+          })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        var htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', function (er, data) {
+          expect(er).toBeFalsy();
+          var $ = cheerio.load(data);
+          expect($('script').length).toBe(2);
+          expect($('link').length).toBe(3);
+          expect($('script[src="' + publicPath + 'app.js"]').toString()).toBe('<script type="text/javascript" src="' + publicPath + 'app.js"></script>');
+          expect($('script[src="' + publicPath + 'style.js"]').toString()).toBe('<script type="text/javascript" src="' + publicPath + 'style.js"></script>');
+          expect($('link[href="' + publicPath + 'style.css"]').toString()).toBe('<link href="' + publicPath + 'style.css" rel="stylesheet">');
+          expect($('link[href="/the-href"]').toString()).toBe('<link rel="the-rel-a" href="/the-href" a="abc" x="xyz">');
+          expect($('link[href="' + publicPath + 'the-href"]').toString()).toBe('<link rel="the-rel-b" href="' + publicPath + 'the-href" a="123" x="789">');
+          done();
+        });
+      });
     });
   });
 

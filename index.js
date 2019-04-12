@@ -79,6 +79,7 @@ function extend (target, source) {
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
+  var links;
   if (options.resolvePaths !== undefined) {
     assert(isBoolean(options.resolvePaths), 'HtmlWebpackIncludeAssetsPlugin options should specify a resolvePaths that is a boolean');
   }
@@ -88,6 +89,17 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     assets = options.assets;
   }
   assert(isArray(assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array or string value');
+  if (options.links !== undefined) {
+    links = options.links;
+    assert(isArray(links), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array');
+    links.forEach(function (link) {
+      assert(isObject(link), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects');
+      assert(isString(link.href), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with href');
+      assert(isString(link.rel), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with rel');
+    });
+  } else {
+    links = [];
+  }
   var jsExtensions;
   if (options.jsExtensions !== undefined) {
     if (isString(options.jsExtensions)) {
@@ -200,6 +212,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   this.options = {
     assets: assets,
+    links: links,
     jsExtensions: jsExtensions,
     cssExtensions: cssExtensions,
     append: options.append,
@@ -269,12 +282,12 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var includeAssetCount;
       var includeAssetPath;
       var includeAssetType;
-      var includeCount = includeAssets.length;
+      var includeAssetsLength = includeAssets.length;
       var jsAssets = [];
       var cssAssets = [];
       var assetPromises = [];
 
-      for (var i = 0; i < includeCount; i++) {
+      for (var i = 0; i < includeAssetsLength; i++) {
         includeAsset = includeAssets[i];
         if (isObject(includeAsset)) {
           includeAssetType = includeAsset.type;
@@ -340,8 +353,22 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       var tags;
       var tagCount;
       var tag;
+      var headers;
+      var newHeaders;
       var includeAssets = self.options.assets;
+      var includeLinks = self.options.links;
+      var includeLinksLength = includeLinks.length;
+      var includeLink;
       var assetAttributes;
+
+      if (shouldSkip(htmlPluginData)) {
+        if (callback) {
+          return callback(null, htmlPluginData);
+        } else {
+          return Promise.resolve(htmlPluginData);
+        }
+      }
+
       var findAttributesForAsset = function (assets, href) {
         var assetCount = assets.length;
         var asset;
@@ -355,19 +382,13 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         return null;
       };
 
-      if (shouldSkip(htmlPluginData)) {
-        if (callback) {
-          return callback(null, htmlPluginData);
-        } else {
-          return Promise.resolve(htmlPluginData);
-        }
-      }
-
       // HtmlWebpackPlugin 3.x
       if (htmlPluginData.head) {
+        headers = htmlPluginData.head;
         tags = htmlPluginData.head.concat(htmlPluginData.body);
       } else {
         // HtmlWebpackPlugin 4.x
+        headers = htmlPluginData.headTags;
         tags = htmlPluginData.headTags.concat(htmlPluginData.bodyTags);
       }
       tagCount = tags.length;
@@ -377,6 +398,35 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         if (assetAttributes) {
           extend(tag.attributes, assetAttributes);
         }
+      }
+
+      var createLink = function (linkAttributes) {
+        if (linkAttributes.href !== undefined) {
+          var href = linkAttributes.href;
+          const absolutes = ['http://', 'https://', '/'];
+          const isAbsolute = absolutes.filter(prefix => href.length >= prefix.length && href.substring(0, prefix.length) === prefix).length > 0;
+
+          if (!isAbsolute) {
+            linkAttributes = Object.assign({}, linkAttributes, {
+              href: defaultPublicPath + href
+            });
+          }
+        }
+        var link = {
+          attributes: linkAttributes,
+          tagName: 'link'
+        };
+        return link;
+      };
+
+      for (var j = 0; j < includeLinksLength; j++) {
+        includeLink = includeLinks[j];
+        newHeaders.push(createLink(includeLink));
+      }
+      if (self.options.append) {
+        headers = headers.concat(newHeaders);
+      } else {
+        headers = newHeaders.concat(headers);
       }
 
       if (callback) {
@@ -392,6 +442,10 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       if (compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration) {
         compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
         compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+        // compilation.hooks.htmlWebpackPluginAlterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTagGroup);
+
+        // alterAssetTags
+        // alterAssetTagGroups
       } else {
         var HtmlWebpackPlugin = require('html-webpack-plugin');
         // HtmlWebPackPlugin 4.x

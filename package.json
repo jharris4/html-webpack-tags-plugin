@@ -30,16 +30,16 @@
   },
   "homepage": "https://github.com/jharris4/html-webpack-include-assets-plugin",
   "devDependencies": {
-    "cheerio": "^1.0.0-rc.2",
-    "copy-webpack-plugin": "^4.5.2",
-    "css-loader": "^1.0.0",
+    "cheerio": "^1.0.0-rc.3",
+    "copy-webpack-plugin": "^5.0.2",
+    "css-loader": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",
-    "jasmine": "^3.2.0",
-    "mini-css-extract-plugin": "^0.4.3",
-    "rimraf": "^2.6.2",
+    "jasmine": "^3.4.0",
+    "mini-css-extract-plugin": "^0.6.0",
+    "rimraf": "^2.6.3",
     "semistandard": "^12.0.1",
-    "style-loader": "^0.23.0",
-    "webpack": "^4.19.1"
+    "style-loader": "^0.23.1",
+    "webpack": "^4.29.6"
   },
   "dependencies": {
     "glob": "^7.1.3",

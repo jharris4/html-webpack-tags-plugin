@@ -299,3 +299,42 @@ plugins: [
   })
 ]
 ```
+
+Sepcifying links
+
+```javascript
+output: {
+  publicPath: '/my-public-path/'
+},
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/css', to: 'css/'},
+    { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: [],
+    append: true,
+    links: [
+      {
+        rel: 'icon',
+        href: 'asset/path'
+      },
+      {
+        rel: 'manifest',
+        href: '/absolute/asset/path'
+      }
+    ]
+  })
+]
+```
+
+will append the following into the index template html
+
+```html
+<head>
+  <!-- previous header content -->
+  <link rel="icon" href="/my-public-path/asset/path"/>
+  <link rel="manifest" href="/absolute/asset/path"/>
+</head>
+```
