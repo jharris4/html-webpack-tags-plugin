@@ -381,12 +381,12 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         return null;
       };
 
-      // HtmlWebpackPlugin 3.x
+      // HtmlWebpackPlugin - new
       if (htmlPluginData.head) {
         headers = htmlPluginData.head;
         tags = htmlPluginData.head.concat(htmlPluginData.body);
       } else {
-        // HtmlWebpackPlugin 4.x
+        // HtmlWebpackPlugin - old
         headers = htmlPluginData.headTags;
         tags = htmlPluginData.headTags.concat(htmlPluginData.bodyTags);
       }
@@ -432,17 +432,13 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
 
     // Webpack 4+
     if (compilation.hooks) {
-      // HtmlWebPackPlugin 3.x
+      // HtmlWebPackPlugin - new
       if (compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration) {
         compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
         compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
-        // compilation.hooks.htmlWebpackPluginAlterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTagGroup);
-
-        // alterAssetTags
-        // alterAssetTagGroups
       } else {
         var HtmlWebpackPlugin = require('html-webpack-plugin');
-        // HtmlWebPackPlugin 4.x
+        // HtmlWebPackPlugin - old
         if (HtmlWebpackPlugin.getHooks) {
           var hooks = HtmlWebpackPlugin.getHooks(compilation);
           hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
