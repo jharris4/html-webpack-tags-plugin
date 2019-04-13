@@ -79,7 +79,7 @@ function extend (target, source) {
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options are required');
   var assets;
-  var links;
+  var cssAssets;
   if (options.resolvePaths !== undefined) {
     assert(isBoolean(options.resolvePaths), 'HtmlWebpackIncludeAssetsPlugin options should specify a resolvePaths that is a boolean');
   }
@@ -89,16 +89,27 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     assets = options.assets;
   }
   assert(isArray(assets), 'HtmlWebpackIncludeAssetsPlugin options must have an assets key with an array or string value');
-  if (options.links !== undefined) {
-    links = options.links;
-    assert(isArray(links), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array');
-    links.forEach(function (link) {
-      assert(isObject(link), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects');
-      assert(isString(link.href), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with string href');
-      assert(isString(link.rel), 'HtmlWebpackIncludeAssetsPlugin options link key should be an array of objects with string rel');
-    });
+  if (options.cssAssets !== undefined) {
+    cssAssets = options.cssAssets;
+    assert(isArray(cssAssets), 'HtmlWebpackIncludeAssetsPlugin options cssAsset key should be an array');
+    if (isArray(cssAssets)) {
+      cssAssets.forEach(function (cssAsset) {
+        assert(isObject(cssAsset), 'HtmlWebpackIncludeAssetsPlugin options cssAsset key should be an array of objects');
+        assert(isString(cssAsset.href), 'HtmlWebpackIncludeAssetsPlugin options cssAsset key should be an array of objects with string href');
+        if (cssAsset.attributes !== undefined) {
+          assert(isObject(cssAsset.attributes), 'HtmlWebpackIncludeAssetsPlugin options cssAsset key should be an array of objects with undefined or object attributes');
+        } else {
+          cssAsset.attributes = {};
+        }
+        if (cssAsset.asset !== undefined) {
+          assert(isBoolean(cssAsset.asset), 'HtmlWebpackIncludeAssetsPlugin options cssAsset key should be an array of objects with undefined or boolean asset');
+        } else {
+          cssAsset.asset = true;
+        }
+      });
+    }
   } else {
-    links = [];
+    cssAssets = [];
   }
   var jsExtensions;
   if (options.jsExtensions !== undefined) {
@@ -170,9 +181,11 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       }
       if (asset.attributes !== undefined) {
         assert(isObject(asset.attributes), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object');
-        forOwn(asset.attributes, function (value) {
-          assert(isString(value) || isBoolean(value), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object with string or boolean values');
-        });
+        if (isObject(asset.attributes)) {
+          forOwn(asset.attributes, function (value) {
+            assert(isString(value) || isBoolean(value), 'HtmlWebpackIncludeAssetsPlugin options assets key array objects attributes property should be an object with string or boolean values');
+          });
+        }
       }
     } else {
       assert(false, 'HtmlWebpackIncludeAssetsPlugin options assets key array must contain only strings and objects (' + asset + ')');
@@ -212,7 +225,7 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
   }
   this.options = {
     assets: assets,
-    links: links,
+    cssAssets: cssAssets,
     jsExtensions: jsExtensions,
     cssExtensions: cssExtensions,
     append: options.append,
@@ -247,6 +260,11 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       return self.options.resolvePaths ? path.resolve(assetPath) : assetPath;
     };
 
+    var jsAssetAttributes = [];
+    var jsAssetStrings = [];
+    var cssAssetAttributes = [];
+    var cssAssetStrings = [];
+
     function onBeforeHtmlGeneration (htmlPluginData, callback) {
       if (shouldSkip(htmlPluginData)) {
         if (callback) {
@@ -270,25 +288,27 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       };
 
       var includeAssets = self.options.assets;
+      var includeCssAssets = self.options.cssAssets;
       var jsExtensions = self.options.jsExtensions;
       var cssExtensions = self.options.cssExtensions;
       var appendAssets = self.options.append;
       var assets = htmlPluginData.assets;
+
       defaultPublicPath = assets.publicPath;
 
       var includeAsset;
       var includeAssetString;
       var includeAssetPaths;
+      var includeAssetAttributes;
       var includeAssetCount;
       var includeAssetPath;
       var includeAssetType;
       var includeAssetsLength = includeAssets.length;
-      var jsAssets = [];
-      var cssAssets = [];
       var assetPromises = [];
 
       for (var i = 0; i < includeAssetsLength; i++) {
         includeAsset = includeAssets[i];
+        includeAssetAttributes = {};
         if (isObject(includeAsset)) {
           includeAssetType = includeAsset.type;
           if (includeAsset.glob === undefined) {
@@ -305,31 +325,44 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
           if (includeAsset.assetPath !== undefined) {
             assetPromises.push(addAsset(includeAsset.assetPath));
           }
+          if (includeAsset.attributes !== undefined) {
+            includeAssetAttributes = includeAsset.attributes;
+          }
         } else {
           includeAssetType = null;
           includeAssetPaths = [includeAsset];
         }
+
         includeAssetCount = includeAssetPaths.length;
         for (var a = 0; a < includeAssetCount; a++) {
           includeAssetPath = includeAssetPaths[a];
           includeAssetString = getAssetPath(includeAssetPath);
           if ((includeAssetType && includeAssetType === 'js') || hasExtensions(includeAssetString, jsExtensions)) {
-            if (assets.js.indexOf(includeAssetString) === -1 && jsAssets.indexOf(includeAssetString) === -1) {
-              jsAssets.push(includeAssetString);
-            }
+            jsAssetStrings.push(includeAssetString);
+            jsAssetAttributes.push(includeAssetAttributes);
           } else if ((includeAssetType && includeAssetType === 'css') || hasExtensions(includeAssetString, cssExtensions)) {
-            if (assets.css.indexOf(includeAssetString) === -1 && cssAssets.indexOf(includeAssetString) === -1) {
-              cssAssets.push(includeAssetString);
-            }
+            cssAssetStrings.push(includeAssetString);
+            cssAssetAttributes.push(includeAssetAttributes);
           }
         }
       }
+      if (includeCssAssets) {
+        var includeCount = includeCssAssets.length;
+        for (var j = 0; j < includeCount; j++) {
+          if (includeCssAssets[j].asset !== false) {
+            cssAssetStrings.push(defaultPublicPath + includeCssAssets[j].href);
+          } else {
+            cssAssetStrings.push(includeCssAssets[j].href);
+          }
+          cssAssetAttributes.push(includeCssAssets[j].attributes || {});
+        }
+      }
       if (appendAssets) {
-        assets.js = assets.js.concat(jsAssets);
-        assets.css = assets.css.concat(cssAssets);
+        assets.js = assets.js.concat(jsAssetStrings);
+        assets.css = assets.css.concat(cssAssetStrings);
       } else {
-        assets.js = jsAssets.concat(assets.js);
-        assets.css = cssAssets.concat(assets.css);
+        assets.js = jsAssetStrings.concat(assets.js);
+        assets.css = cssAssetStrings.concat(assets.css);
       }
       Promise.all(assetPromises).then(
         function () {
@@ -350,16 +383,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
     }
 
     function onAlterAssetTag (htmlPluginData, callback) {
-      var tags;
-      var tagCount;
-      var tag;
-      var headers;
-      var includeAssets = self.options.assets;
-      var includeLinks = self.options.links;
-      var includeLinksLength = includeLinks.length;
-      var includeLink;
-      var assetAttributes;
-
       if (shouldSkip(htmlPluginData)) {
         if (callback) {
           return callback(null, htmlPluginData);
@@ -368,62 +391,27 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
       }
 
-      var findAttributesForAsset = function (assets, href) {
-        var assetCount = assets.length;
-        var asset;
+      var append = self.options.append;
+      var pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
+      var pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
 
-        for (var i = 0; i < assetCount; i++) {
-          asset = assets[i];
-          if (!isString(asset) && asset.attributes && href === getAssetPath(asset.path)) {
-            return asset.attributes;
-          }
-        }
-        return null;
-      };
+      pluginHead = pluginHead.slice(
+        append ? pluginHead.length - cssAssetAttributes.length : 0,
+        append ? pluginHead.length : cssAssetAttributes.length
+      );
 
-      // HtmlWebpackPlugin - new
-      if (htmlPluginData.head) {
-        headers = htmlPluginData.head;
-        tags = htmlPluginData.head.concat(htmlPluginData.body);
-      } else {
-        // HtmlWebpackPlugin - old
-        headers = htmlPluginData.headTags;
-        tags = htmlPluginData.headTags.concat(htmlPluginData.bodyTags);
-      }
-      tagCount = tags.length;
-      for (var i = 0; i < tagCount; i++) {
-        tag = tags[i];
-        assetAttributes = findAttributesForAsset(includeAssets, tag.attributes && (tag.attributes.href || tag.attributes.src));
-        if (assetAttributes) {
-          extend(tag.attributes, assetAttributes);
-        }
-      }
+      pluginBody = pluginBody.slice(
+        append ? pluginHead.length - jsAssetAttributes.length : 0,
+        append ? pluginHead.length : jsAssetAttributes.length
+      );
 
-      var createLink = function (linkAttributes) {
-        if (linkAttributes.href !== undefined) {
-          var href = linkAttributes.href;
+      pluginBody.forEach(function (tag, i) {
+        extend(tag.attributes, jsAssetAttributes[i]);
+      });
 
-          if (linkAttributes.asset !== false) {
-            linkAttributes = Object.assign({}, linkAttributes, {
-              href: defaultPublicPath + href
-            });
-          }
-        }
-        var link = {
-          attributes: linkAttributes,
-          tagName: 'link',
-          selfClosingTag: false,
-          voidTag: true
-        };
-        return link;
-      };
-
-      var addHeader = (self.options.append ? headers.push : headers.unshift).bind(headers);
-
-      for (var j = 0; j < includeLinksLength; j++) {
-        includeLink = includeLinks[j];
-        addHeader(createLink(includeLink));
-      }
+      pluginHead.forEach(function (tag, i) {
+        extend(tag.attributes, cssAssetAttributes[i]);
+      });
 
       if (callback) {
         callback(null, htmlPluginData);
@@ -432,7 +420,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       }
     }
 
-    // Webpack 4+
+    // Webpack >= 4
     if (compilation.hooks) {
       // HtmlWebPackPlugin - new
       if (compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration) {
@@ -451,7 +439,7 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
       }
     } else {
-      // Webpack 3
+      // Webpack < 4
       compilation.plugin('html-webpack-plugin-before-html-generation', onBeforeHtmlGeneration);
       compilation.plugin('html-webpack-plugin-alter-asset-tags', onAlterAssetTag);
     }

@@ -90,6 +90,12 @@ The available options are:
 
   By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs (uses the [minimatch](https://github.com/isaacs/minimatch) package).
 
+  - `cssAssets`: `array`
+
+  Optional shortcut for adding css assets. An array of css asset objects.
+
+  See the cssAssets example below for the syntax of css asset object.
+
 Example
 -------
 Using `HtmlWebpackIncludeAssetsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template :
@@ -300,7 +306,7 @@ plugins: [
 ]
 ```
 
-Sepcifying `links`
+Specifying `cssAssets` (a shortcut for specifying assets of type css)
 
 ```javascript
 output: {
@@ -315,15 +321,19 @@ plugins: [
   new HtmlWebpackIncludeAssetsPlugin({
     assets: [],
     append: true,
-    links: [
+    cssAssets: [
       {
-        rel: 'icon',
-        href: 'asset/path'
+        href: 'asset/path',
+        attributes: {
+          rel: 'icon'
+        }
       },
       {
-        rel: 'manifest',
         href: '/absolute/asset/path',
-        asset: false
+        asset: false,
+        attributes: {
+          rel: 'manifest'
+        }
       }
     ]
   })
@@ -340,4 +350,4 @@ Will append the following link elements into the index template html
 </head>
 ```
 
-Note that the second link's href was not prefixed with the webpack `publicPath` because `link.asset` was set to `false`.
+Note that the second cssAsset's href was not prefixed with the webpack `publicPath` because `csAsset.asset` was set to `false`.

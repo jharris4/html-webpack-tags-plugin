@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>html-webpack-include-assets-plugin</title>
+  <!-- CSS Tags -->
+  <% for (var cssIndex = 0; cssIndex < htmlWebpackPlugin.files.css.length; cssIndex++) { %>
+  <link href="<%= htmlWebpackPlugin.files.css[cssIndex] %>">
+  <% } %>
+</head>
+
+<body>
+  <noscript>This page requires Javascript to be enabled.</noscript>
+  <!-- Application Root -->
+  <div id="root">
+    <!-- Loading -->
+    <div id="loading" class="container d-none">
+      Loading...
+    </div>
+    <script id="loading-script" type="text/javascript">
+      setTimeout(function () {
+        var loadingElement = document.getElementById("loading");
+        if (loadingElement !== undefined && loadingElement !== null) {
+          loadingElement.className = "container";
+        }
+      }, 750);
+    </script>
+  </div>
+  <!-- Script Tags -->
+  <% for (var jsIndex = 0; jsIndex < htmlWebpackPlugin.files.js.length; jsIndex++) { %>
+  <script src="<%= htmlWebpackPlugin.files.js[jsIndex] %>"></script>
+  <% } %>
+</body>
+
+</html>
