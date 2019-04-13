@@ -27,18 +27,31 @@ Require the plugin in your webpack config:
 var HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 ```
 
-Add the plugin to your webpack config as follows:
+Add the plugin to your webpack config:
 
 ```javascript
+output: {
+  publicPath: '/abc/'
+},
 plugins: [
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true })
+  new HtmlWebpackIncludeAssetsPlugin({ assets: ['a.js', 'b.css'], append: true })
 ]
 ```
 
-Note that some users have encountered issues with plugin ordering.
+Which will generate html like this:
 
-It is advisable to always place any `HtmlWebpackPlugin` plugins before any `HtmlWebpackIncludeAssetsPlugin` plugins in your webpack config.
+```html
+<head>
+  <!-- other head content -->
+  <link rel="stylesheet" href="/abc/b.css"/>
+</head>
+<body>
+  <!-- other body content -->
+  <script type="text/javascript" src="/abc/a.js"></script>
+</body>
+```
+
 
 Options
 -------
@@ -96,8 +109,12 @@ The available options are:
 
   See the cssAssets example below for the syntax of css asset object.
 
+
 Example
 -------
+
+_____
+
 Using `HtmlWebpackIncludeAssetsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template :
 
 ```javascript
@@ -113,6 +130,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 Appending and prepending at the same time :
 
@@ -134,6 +153,8 @@ plugins: [
 ]
 ```
 
+_____
+
 Using custom `jsExtensions` :
 
 ```javascript
@@ -146,6 +167,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 Using custom `publicPath` :
 
@@ -164,6 +187,8 @@ plugins: [
 ]
 ```
 
+_____
+
 Or to include assets without prepending the `publicPath`:
 
 ```javascript
@@ -176,6 +201,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 Manually specifying asset types :
 
@@ -197,6 +224,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 Adding custom attributes to asset tags :
 
@@ -220,6 +249,8 @@ plugins: [
 ]
 ```
 
+_____
+
 Using `hash` option :
 
 When the hash option is set to `true`, asset paths will be appended with a hash query parameter (`?hash=<the_hash>`)
@@ -238,6 +269,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 When the hash option is set to a `function`, asset paths will be replaced with the result of executing that function
 
@@ -260,6 +293,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 Specifying specific `files`
 
@@ -288,6 +323,8 @@ plugins: [
 ]
 ```
 
+_____
+
 Specifying assets usings a `glob`
 
 Note that since `copy-webpack-plugin` does not actually copy the files to webpack's output directory until *after* `html-webpack-plugin` has completed, it is necessary to use the `globPath` to retrieve filename matches relative to the original location of any such files.
@@ -305,6 +342,8 @@ plugins: [
   })
 ]
 ```
+
+_____
 
 Specifying `cssAssets` (a shortcut for specifying assets of type css)
 
@@ -351,3 +390,72 @@ Will append the following link elements into the index template html
 ```
 
 Note that the second cssAsset's href was not prefixed with the webpack `publicPath` because `csAsset.asset` was set to `false`.
+
+_____
+
+
+Caveats
+-------
+
+Some users have encountered issues with plugin ordering.
+
+- It is advisable to always place any `HtmlWebpackPlugin` plugins **before** any `HtmlWebpackIncludeAssetsPlugin` plugins in your webpack config.
+
+This plugin has only been tested with **two instances** in one webpack config, where one had `option.append: false` and the other had `option.append: true`.
+
+- It is **not recommended to use more than one instance of this plugin** in one webpack config unless using the above configuration.
+
+Changing `HtmlWebpackPlugin.options.inject` from its **default value** may cause **issues**.
+
+- This plugin **requires** `HtmlWebpackPlugin.options.inject` to be `true` (it defaults to true if undefined) for attribute injection to work.
+
+
+If you setup your webpack config to have `HtmlWebpackPlugin.options.inject: false` like this:
+
+```javascript
+output: {
+  publicPath: '/the-public-path/`
+},
+plugins: [
+  new HtmlWebpackPlugin({ inject: false }),
+  new HtmlWebpackIncludeAssetsPlugin({
+    assets: [{ path: 'css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }],
+    links: [{ href: 'the-ref', attributes: { rel: 'icon' } }],
+    append: true
+  })
+]
+```
+
+You will need to add the following to your *template* `index.html` to get assets to be **generated**:
+
+```html
+<head>
+  <!-- other head content -->
+  <% for (var cssIndex = 0; cssIndex < htmlWebpackPlugin.files.css.length; cssIndex++) { %>
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[cssIndex] %>">
+  <% } %>
+</head>
+<body>
+  <!-- other body content -->
+  <% for (var jsIndex = 0; jsIndex < htmlWebpackPlugin.files.js.length; jsIndex++) { %>
+    <script src="<%= htmlWebpackPlugin.files.js[jsIndex] %>"></script>
+  <% } %>
+</body>
+```
+
+Using the (lodash) `template syntax` like this for css and js files is necessary when you turn injection off.
+
+But, the `template syntax` does not allow injection of more than `one attribute value`.
+
+This means it will **generate** an `index.html` that looks like this:
+
+```html
+<head>
+  <link rel="stylesheet" href="/the-public-path/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="/the-public-path/the-ref">
+</head>
+```
+
+None of the `link` elements have any of the `attributes` we specified for the `assets` or `links`.
+
+This is because `HtmlWebpackPlugin.options.inject` needs to be set to `true` for `attributes` injection to work.
