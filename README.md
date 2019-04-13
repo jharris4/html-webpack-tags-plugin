@@ -414,7 +414,7 @@ If you setup your webpack config to have `HtmlWebpackPlugin.options.inject: fals
 
 ```javascript
 output: {
-  publicPath: '/the-public-path/`
+  publicPath: '/the-public-path/'
 },
 plugins: [
   new HtmlWebpackPlugin({ inject: false }),
