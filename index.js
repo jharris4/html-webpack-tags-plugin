@@ -7,15 +7,13 @@ const slash = require('slash');
 
 const DEFAULT_OPTIONS = {
   append: true,
-  hash: false,
-  publicPath: true,
+  useHash: false,
+  addHash: (assetPath, hash) => assetPath + '?' + hash,
+  usePublicPath: true,
+  addPublicPath: (assetPath, publicPath) => path.join(publicPath, assetPath),
   jsExtensions: ['.js'],
   cssExtensions: ['.css']
 };
-
-const ADD_HASH = (assetPath, hash) => assetPath + '?' + hash;
-const ADD_PUBLIC_PATH = (assetPath, publicPath) => publicPath + assetPath; // TODO maybe path.join
-const ADD_NONE = assetPath => assetPath;
 
 const ASSET_TYPE_CSS = 'css';
 const ASSET_TYPE_JS = 'js';
@@ -198,58 +196,69 @@ function getAllAssetObjects (options, key) {
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options should be an object');
   if (isObject(options)) {
-    let addPublicPath = ADD_NONE;
-    if (isDefined(options.publicPath)) {
-      const { publicPath } = options;
-      assert(isBoolean(publicPath) || isString(publicPath) || isFunction(publicPath),
-        'HtmlWebpackIncludeAssetsPlugin options should specify a publicPath that is either a boolean or a string or a function');
-      if (isBoolean(publicPath)) {
-        addPublicPath = publicPath ? ADD_PUBLIC_PATH : ADD_NONE;
-      } else if (isString(publicPath)) {
-        // create function that injects the string
-        addPublicPath = path => ADD_PUBLIC_PATH(path, publicPath);
-      } else {
-        assert(isString(publicPath('', '')), `HtmlWebpackIncludeAssetsPlugin options.publicPath should be a function that returns a string`);
-        addPublicPath = publicPath;
-      }
-    } else if (DEFAULT_OPTIONS.publicPath) {
-      addPublicPath = ADD_PUBLIC_PATH;
-    }
-
     let append = DEFAULT_OPTIONS.append;
     if (isDefined(options.append)) {
       assert(isBoolean(options.append), 'HtmlWebpackIncludeAssetsPlugin options.append should be a boolean');
       append = options.append;
     }
 
-    let addHash = ADD_NONE;
-    if (isDefined(options.hash)) {
+    // TODO - this is wrong, need to return both addPublicPath and usePublicPath to enable asset object override
+    // if (isDefined(options.usePublicPath)) {
+
+    // }
+
+    let usePublicPath = DEFAULT_OPTIONS.usePublicPath;
+    let addPublicPath = DEFAULT_OPTIONS.addPublicPath;
+    if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
+      if (isDefined(options.usePublicPath)) {
+        assert(isBoolean(options.usePublicPath), 'HtmlWebpackIncludeAssetsPlugin options.usePublicPath should be a boolean');
+        usePublicPath = options.usePublicPath;
+      }
+      if (isDefined(options.addPublicPath)) {
+        assert(isFunction(options.addPublicPath), 'HtmlWebpackIncludeAssetsPlugin options.addPublicPath should be a function');
+        assert(isString(options.addPublicPath('', '')), 'HtmlWebpackIncludeAssetsPlugin options.addPublicPath should be a function that returns a string');
+        addPublicPath = options.addPublicPath;
+      }
+    } else if (isDefined(options.publicPath)) {
+      const { publicPath } = options;
+      assert(isBoolean(publicPath) || isString(publicPath) || isFunction(publicPath),
+        'HtmlWebpackIncludeAssetsPlugin options should specify a publicPath that is either a boolean or a string or a function');
+      if (isBoolean(publicPath)) {
+        usePublicPath = publicPath;
+      } else if (isString(publicPath)) {
+        // create function that injects the string
+        usePublicPath = true;
+        const oldAddPublicPath = addPublicPath;
+        addPublicPath = path => oldAddPublicPath(path, publicPath);
+      } else {
+        assert(isString(publicPath('', '')), `HtmlWebpackIncludeAssetsPlugin options.publicPath should be a function that returns a string`);
+        usePublicPath = true;
+        addPublicPath = publicPath;
+      }
+    }
+
+    let useHash = DEFAULT_OPTIONS.useHash;
+    let addHash = DEFAULT_OPTIONS.addHash;
+    if (isDefined(options.useHash) || isDefined(options.addHash)) {
+      if (isDefined(options.useHash)) {
+        assert(isBoolean(options.useHash), 'HtmlWebpackIncludeAssetsPlugin options.useHash should be a boolean');
+        useHash = options.useHash;
+      }
+      if (isDefined(options.addHash)) {
+        assert(isFunction(options.addHash), 'HtmlWebpackIncludeAssetsPlugin options.addHash should be a function');
+        assert(isString(options.addHash('', '')), 'HtmlWebpackIncludeAssetsPlugin options.addHash should be a function that returns a string');
+        addHash = options.addHash;
+      }
+    } else if (isDefined(options.hash)) {
       const { hash } = options;
       assert(isBoolean(hash) || isFunction(hash), 'HtmlWebpackIncludeAssetsPlugin options.hash should be a boolean or a function');
       if (isBoolean(hash)) {
-        addHash = hash ? ADD_HASH : ADD_NONE;
+        useHash = hash;
       } else {
         assert(isString(hash('', '')), `HtmlWebpackIncludeAssetsPlugin options.hash should be a function that returns a string`);
+        useHash = true;
         addHash = hash;
       }
-    } else if (DEFAULT_OPTIONS.hash) {
-      addHash = ADD_HASH;
-    }
-
-    let shouldSkip = () => false;
-    if (isDefined(options.files)) {
-      let { files } = options;
-      assert((isString(files) || isArray(files)), 'HtmlWebpackIncludeAssetsPlugin options.files should be a string or array');
-      if (isString(files)) {
-        files = [files];
-      } else if (isArray(files)) {
-        files.forEach(file => {
-          assert(isString(file), 'HtmlWebpackIncludeAssetsPlugin options.files should be an array of strings');
-        });
-      }
-      shouldSkip = htmlPluginData => !files.some(function (file) {
-        return minimatch(htmlPluginData.outputName, file);
-      });
     }
 
     let links = [];
@@ -268,18 +277,37 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       const scriptObjects = getAllAssetObjects(options, 'scripts');
       scripts = scripts.concat(scriptObjects);
     }
+
+    let shouldSkip = () => false;
+    if (isDefined(options.files)) {
+      let { files } = options;
+      assert((isString(files) || isArray(files)), 'HtmlWebpackIncludeAssetsPlugin options.files should be a string or array');
+      if (isString(files)) {
+        files = [files];
+      } else if (isArray(files)) {
+        files.forEach(file => {
+          assert(isString(file), 'HtmlWebpackIncludeAssetsPlugin options.files should be an array of strings');
+        });
+      }
+      shouldSkip = htmlPluginData => !files.some(function (file) {
+        return minimatch(htmlPluginData.outputName, file);
+      });
+    }
+
     this.options = {
       links,
       scripts,
       append: append,
-      addPublicPath: addPublicPath,
-      addHash: addHash,
-      shouldSkip: shouldSkip
+      usePublicPath,
+      addPublicPath,
+      useHash,
+      addHash,
+      shouldSkip
     };
   }
 }
 
-function getAssetPath (assetObject, addPublicPath, addHash, webpackPublicPath, compilationHash) {
+function getAssetPath (assetObject, usePublicPath, addPublicPath, useHash, addHash, webpackPublicPath, compilationHash) {
   const { publicPath, hash } = assetObject;
   let { path } = assetObject;
 
@@ -289,7 +317,7 @@ function getAssetPath (assetObject, addPublicPath, addHash, webpackPublicPath, c
     } else if (isFunction(publicPath)) {
       path = publicPath(path, webpackPublicPath);
     }
-  } else {
+  } else if (usePublicPath) {
     path = addPublicPath(path, webpackPublicPath);
   }
   if (isDefined(hash)) {
@@ -298,7 +326,7 @@ function getAssetPath (assetObject, addPublicPath, addHash, webpackPublicPath, c
     } else if (isFunction(hash)) {
       path = hash(path, compilationHash);
     }
-  } else {
+  } else if (useHash) {
     path = addHash(path, compilationHash);
   }
   return path;
@@ -306,7 +334,7 @@ function getAssetPath (assetObject, addPublicPath, addHash, webpackPublicPath, c
 
 HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
-  const { addPublicPath, addHash, shouldSkip } = options;
+  const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip } = options;
 
   // Hook into the html-webpack-plugin processing
   const onCompilation = compilation => {
@@ -340,13 +368,13 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         if (isString(script.assetPath)) {
           assetPromises.push(addAsset(script.assetPath));
         }
-        jsPaths.push(getAssetPath(script, addPublicPath, addHash, pluginPublicPath, compilationHash));
+        jsPaths.push(getAssetPath(script, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash));
       });
       links.forEach(link => {
         if (isString(link.assetPath)) {
           assetPromises.push(addAsset(link.assetPath));
         }
-        cssPaths.push(getAssetPath(link, addPublicPath, addHash, pluginPublicPath, compilationHash));
+        cssPaths.push(getAssetPath(link, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash));
       });
 
       if (append) {
