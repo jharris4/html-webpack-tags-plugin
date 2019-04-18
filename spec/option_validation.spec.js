@@ -146,40 +146,42 @@ describe('option validation', () => {
 });
 
 function runTestsForOption (optionName, runExtraTests) {
-  it(`should throw an error if the ${optionName} are not an array or string or object`, done => {
-    const theFunction = () => {
-      return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: 123 });
-    };
+  describe(`options.${optionName}`, () => {
+    it(`should throw an error if the ${optionName} are not an array or string or object`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: 123 });
+      };
 
-    expect(theFunction).toThrowError(new RegExp(`(options.${optionName} should be a string, object, or array)`));
-    done();
-  });
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} should be a string, object, or array)`));
+      done();
+    });
 
-  it(`should throw an error if the ${optionName} contains objects and a boolean`, done => {
-    const theFunction = () => {
-      return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: [{ path: 'a.js' }, false, { path: 'b.css' }] });
-    };
+    it(`should throw an error if the ${optionName} contains objects and a boolean`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: [{ path: 'a.js' }, false, { path: 'b.css' }] });
+      };
 
-    expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
-    done();
-  });
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
+      done();
+    });
 
-  it(`should throw an error if the ${optionName} contains string and a boolean`, done => {
-    const theFunction = () => {
-      return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: ['foo.js', true, 'bar.css'] });
-    };
+    it(`should throw an error if the ${optionName} contains string and a boolean`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: ['foo.js', true, 'bar.css'] });
+      };
 
-    expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
-    done();
-  });
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
+      done();
+    });
 
-  it(`should not throw an error if the ${optionName} contains strings and objects`, done => {
-    const theFunction = () => {
-      return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: ['foo.js', { path: 'file.js' }, 'bar.css'] });
-    };
+    it(`should not throw an error if the ${optionName} contains strings and objects`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: ['foo.js', { path: 'file.js' }, 'bar.css'] });
+      };
 
-    expect(theFunction).not.toThrowError();
-    done();
+      expect(theFunction).not.toThrowError();
+      done();
+    });
   });
 
   describe(`options.${optionName} path`, () => {
