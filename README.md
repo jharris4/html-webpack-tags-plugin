@@ -11,7 +11,7 @@ This plugin allows you to force some of these assets to be included in the outpu
 
 Installation
 ------------
-You must be running webpack on node 4.x or higher
+You must be running webpack on node 8.x or higher
 
 Install the plugin with npm:
 ```shell
