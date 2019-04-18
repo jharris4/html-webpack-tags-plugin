@@ -13,14 +13,14 @@ const OUTPUT_DIR = path.join(__dirname, '../dist');
 
 const FIXTURES_PATH = path.join(__dirname, './fixtures');
 
-describe('HtmlWebpackIncludeAssetsPlugin', function () {
-  beforeEach(function (done) {
+describe('HtmlWebpackIncludeAssetsPlugin', () => {
+  beforeEach(done => {
     rimraf(OUTPUT_DIR, done);
   });
 
-  describe('option validation', function () {
-    it('should throw an error if no options are provided', function (done) {
-      const theFunction = function () {
+  describe('option validation', () => {
+    it('should throw an error if no options are provided', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin();
       };
 
@@ -28,8 +28,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the options are not an object', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the options are not an object', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin('hello');
       };
 
@@ -37,8 +37,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should not throw an error if the assets are not provided', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if the assets are not provided', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false });
       };
 
@@ -46,8 +46,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links are not an array or string or object', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links are not an array or string or object', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: 123 });
       };
 
@@ -55,8 +55,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is not an object or string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is not an object or string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, false, { path: '' }] });
       };
 
@@ -64,8 +64,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is not an object with string path', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is not an object with string path', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { }, { path: '' }] });
       };
 
@@ -73,8 +73,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with publicPath set to string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with publicPath set to string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', publicPath: 'string' }, { path: '' }] });
       };
 
@@ -82,8 +82,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with publicPath set to object', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with publicPath set to object', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', publicPath: {} }, { path: '' }] });
       };
 
@@ -91,8 +91,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with publicPath set to number', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with publicPath set to number', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', publicPath: 0 }, { path: '' }] });
       };
 
@@ -100,8 +100,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with publicPath set to array', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with publicPath set to array', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', publicPath: [] }, { path: '' }] });
       };
 
@@ -109,8 +109,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should not throw an error if the links contains an element that is an object with publicPath set to true', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if the links contains an element that is an object with publicPath set to true', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '', publicPath: true }, { path: '' }, { path: '' }] });
       };
 
@@ -118,8 +118,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should not throw an error if the links contains an element that is an object with asset set to false', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if the links contains an element that is an object with asset set to false', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '', asset: false }, { path: '' }, { path: '' }] });
       };
 
@@ -127,8 +127,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should not throw an error if the links contains elements that are all objects that have a path', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if the links contains elements that are all objects that have a path', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '' }, { path: '' }] });
       };
 
@@ -136,8 +136,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with non object string attributes', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with non object string attributes', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', attributes: '' }, { path: '' }] });
       };
 
@@ -145,8 +145,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with array attributes', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with array attributes', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', attributes: [] }, { path: '' }] });
       };
 
@@ -154,8 +154,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with number attributes', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with number attributes', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', attributes: 0 }, { path: '' }] });
       };
 
@@ -163,8 +163,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the links contains an element that is an object with boolean attributes', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the links contains an element that is an object with boolean attributes', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', attributes: true }, { path: '' }] });
       };
 
@@ -172,8 +172,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should not throw an error if the links contains an element that is an object with empty object attributes', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if the links contains an element that is an object with empty object attributes', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ append: false, assets: [], links: [{ path: '' }, { path: '', attributes: {} }, { path: '' }] });
       };
 
@@ -181,8 +181,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the assets are not an array or string or object', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the assets are not an array or string or object', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: 123, append: false });
       };
 
@@ -190,168 +190,168 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if any of the asset options are not strings or objects', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are not strings or objects', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', true, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets items must be an object or string)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects missing the path property', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects missing the path property', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { type: 'js' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object must have a string path property)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with a path property that is not a string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects with a path property that is not a string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 123, type: 'js' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object must have a string path property)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with a glob property that is not a string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects with a glob property that is not a string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: '', glob: 123, type: 'js' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object should have a string glob property)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with an assetPath property that is not a string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects with an assetPath property that is not a string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: '', assetPath: 123, type: 'js' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object should have a string assetPath property)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with an invalid type property', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects with an invalid type property', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'baz.js', type: 'foo' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets type must be css or js \(foo\))/);
       done();
     });
 
-    it('should throw an error if any of the assets options do not end with .css or .js', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the assets options do not end with .css or .js', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bad.txt', 'bar.js'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets could not determine asset type for \(bad\.txt\))/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects without a type property that cannot be inferred from the path', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects without a type property that cannot be inferred from the path', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithoutExtension' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets could not determine asset type for \(pathWithoutExtension\))/);
       done();
     });
 
-    it('should not throw an error if any of the asset options are objects without a type property that can be inferred from the path', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if any of the asset options are objects without a type property that can be inferred from the path', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
     });
 
-    it('should throw an error if glob is specified but the globPath is missing', function (done) {
-      const theFunction = function () {
+    it('should throw an error if glob is specified but the globPath is missing', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', glob: 'withoutExtensions*' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object should have a string globPath property)/);
       done();
     });
 
-    it('should throw an error if globPath is specified but the glob is missing', function (done) {
-      const theFunction = function () {
+    it('should throw an error if globPath is specified but the glob is missing', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', globPath: 'withoutExtensions*' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object should have a string glob property)/);
       done();
     });
 
-    it('should not throw an error if any of the asset options are objects without a type property that can be inferred from the glob', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if any of the asset options are objects without a type property that can be inferred from the glob', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithoutExtension', globPath: FIXTURES_PATH, glob: 'glo*.js' }, 'bar.css'], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with an attributes property that is not an object', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects with an attributes property that is not an object', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: 'foobar' }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object should have an object attributes property)/);
       done();
     });
 
-    it('should throw an error if any of the asset options are objects with an attributes property with non string or boolean values', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the asset options are objects with an attributes property with non string or boolean values', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: null, enabled: true } }, 'bar.css'], append: false });
       };
       expect(theFunction).toThrowError(/(options\.assets object attribute values should strings, booleans or numbers)/);
       done();
     });
 
-    it('should not throw an error if any of the asset options are objects with an attributes property with string or boolean values', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if any of the asset options are objects with an attributes property with string or boolean values', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: 'test', enabled: true } }, 'bar.css'], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
     });
 
-    it('should not throw an error if any of the asset options are objects without an attributes property', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if any of the asset options are objects without an attributes property', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
     });
 
-    it('should throw an error if the jsExtensions is not an array or string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the jsExtensions is not an array or string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, jsExtensions: 123 });
       };
       expect(theFunction).toThrowError(/(options\.jsExtensions should be a string or array of strings)/);
       done();
     });
 
-    it('should throw an error if any of the jsExtensions are not a string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the jsExtensions are not a string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, jsExtensions: ['a', 123, 'b'] });
       };
       expect(theFunction).toThrowError(/(options\.jsExtensions array should only contain strings)/);
       done();
     });
 
-    it('should throw an error if the csssExtensions is not an array or string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the csssExtensions is not an array or string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, cssExtensions: 123 });
       };
       expect(theFunction).toThrowError(/(options\.cssExtensions should be a string or array of strings)/);
       done();
     });
 
-    it('should throw an error if any of the cssExtensions are not a string', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the cssExtensions are not a string', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, cssExtensions: ['a', 123, 'b'] });
       };
       expect(theFunction).toThrowError(/(options\.cssExtensions array should only contain strings)/);
       done();
     });
 
-    it('should not throw an error if the append flag is not provided', function (done) {
-      const theFunction = function () {
+    it('should not throw an error if the append flag is not provided', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [] });
       };
 
@@ -359,8 +359,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the append flag is not a boolean', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the append flag is not a boolean', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: 'hello' });
       };
 
@@ -368,8 +368,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the publicPath flag is not a boolean or string or a function', function (done) {
-      const theFunction = function () {
+    it('should throw an error if the publicPath flag is not a boolean or string or a function', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: 123 });
       };
 
@@ -377,11 +377,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if the files option is not a string', function (done) {
+    it('should throw an error if the files option is not a string', done => {
       const nonStringCheck = [123, true, /regex/, {}];
 
-      nonStringCheck.forEach(function (val) {
-        const theCheck = function () {
+      nonStringCheck.forEach(val => {
+        const theCheck = () => {
           return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: true, files: val });
         };
 
@@ -391,19 +391,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error if any of the files options are not strings', function (done) {
-      const theFunction = function () {
+    it('should throw an error if any of the files options are not strings', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'bar.css'], append: false, files: ['abc', true, 'def'] });
       };
       expect(theFunction).toThrowError(/(options\.files should be an array of strings)/);
       done();
     });
 
-    it('should throw an error if the hash option is not a boolean or function', function (done) {
+    it('should throw an error if the hash option is not a boolean or function', done => {
       const nonBooleanCheck = [123, 'not a boolean', /regex/, [], {}];
 
-      nonBooleanCheck.forEach(function (val) {
-        const theCheck = function () {
+      nonBooleanCheck.forEach(val => {
+        const theCheck = () => {
           return new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, publicPath: true, hash: val });
         };
         expect(theCheck).toThrowError(/(options.hash should be a boolean or a function)/);
@@ -411,8 +411,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       done();
     });
 
-    it('should throw an error for a glob that does not match any files', function (done) {
-      const theFunction = function () {
+    it('should throw an error for a glob that does not match any files', done => {
+      const theFunction = () => {
         return new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'nonexistant*.css' }], append: true });
       };
       expect(theFunction).toThrowError(/(options.assets object glob found no files \(assets\/ nonexistant\*.js spec\/fixtures\/\))/);
@@ -420,10 +420,10 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  xdescribe('plugin dependencies', function () {
-    it('should throw an error if html-webpack-plugin is not in the webpack config', function (done) {
+  xdescribe('plugin dependencies', () => {
+    it('should throw an error if html-webpack-plugin is not in the webpack config', done => {
       const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
-      const theFunction = function () {
+      const theFunction = () => {
         webpack({
           entry: {
             app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -440,15 +440,15 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: true, publicPath: false })
           ]
-        }, function () {});
+        }, () => {});
       };
       expect(theFunction).toThrowError(theError);
       done();
     });
   });
 
-  describe('option.append', function () {
-    it('should include a single js file and append it', function (done) {
+  describe('option.append', () => {
+    it('should include a single js file and append it', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -466,11 +466,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: true, publicPath: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -485,7 +485,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include a single css file and append it', function (done) {
+    it('should include a single css file and append it', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -503,11 +503,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: true, publicPath: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -522,7 +522,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include a single js file and prepend it', function (done) {
+    it('should include a single js file and prepend it', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -540,11 +540,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -559,7 +559,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include a single css file and prepend it', function (done) {
+    it('should include a single css file and prepend it', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -577,11 +577,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -596,7 +596,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should support appending and prepending at the same time', function (done) {
+    it('should support appending and prepending at the same time', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -615,11 +615,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'foo.js'], append: false, publicPath: false, debug: true }),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['bar.css', 'bar.js'], append: true, publicPath: false, debug: true })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(4);
@@ -640,7 +640,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include multiple css files and append them in order', function (done) {
+    it('should include multiple css files and append them in order', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -658,11 +658,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css', { path: 'baz.css' }], append: true, publicPath: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -681,7 +681,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include multiple css files and prepend them in order', function (done) {
+    it('should include multiple css files and prepend them in order', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -699,11 +699,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'bar.css'], append: false, publicPath: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -721,8 +721,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.files', function () {
-    it('should not include if not present in defined files', function (done) {
+  describe('option.files', () => {
+    it('should not include if not present in defined files', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -745,11 +745,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             publicPath: false
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -762,7 +762,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include if present in defined files', function (done) {
+    it('should include if present in defined files', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -785,11 +785,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             publicPath: false
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -805,8 +805,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.assets', function () {
-    it('should not include assets when none are requested', function (done) {
+  describe('option.assets', () => {
+    it('should not include assets when none are requested', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -824,11 +824,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -841,7 +841,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should include a mixture of js and css files', function (done) {
+    it('should include a mixture of js and css files', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -870,11 +870,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             publicPath: false
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(5);
@@ -894,8 +894,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.jsExtensions', function () {
-    it('should include all js type files when multiple jsExtensions are specified', function (done) {
+  describe('option.jsExtensions', () => {
+    it('should include all js type files when multiple jsExtensions are specified', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -913,11 +913,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.js', 'foo.jsx'], append: true, jsExtensions: ['.js', '.jsx'] })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(4);
@@ -933,8 +933,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.cssExtensions', function () {
-    it('should include all css type files when multiple cssExtensions are specified', function (done) {
+  describe('option.cssExtensions', () => {
+    it('should include all css type files when multiple cssExtensions are specified', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -952,11 +952,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: ['foo.css', 'foo.style'], append: true, cssExtensions: ['.css', '.style'] })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -972,8 +972,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.assets.glob', function () {
-    it('should include any files for a glob that does match files', function (done) {
+  describe('option.assets.glob', () => {
+    it('should include any files for a glob that does match files', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -992,11 +992,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' }, { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }], append: true })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1012,8 +1012,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.assets.attributes', function () {
-    it('should add the given attributes to the matching tag', function (done) {
+  describe('option.assets.attributes', () => {
+    it('should add the given attributes to the matching tag', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1031,11 +1031,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/abc.js', attributes: { id: 'abc' } }, { path: 'assets/def.css', attributes: { id: 'def', media: 'screen' } }, { path: 'assets/ghi.css' }], append: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1051,8 +1051,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('can match tags with an overridden publicPath and set hash', function (done) {
-      const appendHash = function (v, hash) {
+    it('can match tags with an overridden publicPath and set hash', done => {
+      const appendHash = (v, hash) => {
         if (hash.length > 0) hash = '?' + hash;
         return v + hash;
       };
@@ -1075,12 +1075,12 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin({ hash: true }),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/abc.js', attributes: { id: 'abc' } }, { path: 'assets/def.css', attributes: { id: 'def', media: 'screen' } }, { path: 'assets/ghi.css' }], append: false, hash: true })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const hash = result.compilation.hash;
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1097,8 +1097,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.assets.assetPath', function () {
-    it('should not throw an error when assets assetPath is used and the file exists', function (done) {
+  describe('option.assets.assetPath', () => {
+    it('should not throw an error when assets assetPath is used and the file exists', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1116,11 +1116,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }], append: false })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1134,8 +1134,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should throw an error when assets assetPath is used and the file does not exist', function (done) {
-      function theFunction () {
+    it('should throw an error when assets assetPath is used and the file does not exist', done => {
+      const theFunction = () => {
         webpack({
           entry: {
             app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1153,20 +1153,20 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             new HtmlWebpackPlugin(),
             new HtmlWebpackIncludeAssetsPlugin({ assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/anotherstyle.css' }], append: false })
           ]
-        }, function (err, result) {
+        }, (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).not.toBe('[]');
           done();
         });
-      }
+      };
 
       theFunction();
       // expect(theFunction).toThrowError(/(HtmlWebpackPlugin: could not load file)/);
     });
   });
 
-  describe('options.links', function () {
-    it('should prepend when the links are all valid and append is set to false', function (done) {
+  describe('options.links', () => {
+    it('should prepend when the links are all valid and append is set to false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1184,11 +1184,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, links: [{ path: 'the-href', attributes: { rel: 'the-rel' } }] })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1202,7 +1202,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append when the links are all valid and append is set to true', function (done) {
+    it('should append when the links are all valid and append is set to true', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1220,11 +1220,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: true, links: [{ path: 'the-href', attributes: { rel: 'the-rel' } }] })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1238,7 +1238,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is false and append is set to false', function (done) {
+    it('should append links and assets together with a custom index.html template when inject is false and append is set to false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1263,11 +1263,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1283,7 +1283,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is false and append is set to true', function (done) {
+    it('should append links and assets together with a custom index.html template when inject is false and append is set to true', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1308,11 +1308,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1328,7 +1328,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is false and append is set to true and false', function (done) {
+    it('should append links and assets together with a custom index.html template when inject is false and append is set to true and false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1358,11 +1358,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1380,7 +1380,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is true and append is set to true and false', function (done) {
+    it('should append links and assets together with a custom index.html template when inject is true and append is set to true and false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1410,11 +1410,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1432,7 +1432,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when append is set to false', function (done) {
+    it('should append links and assets together with a custom index.html template when append is set to false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1456,11 +1456,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1476,7 +1476,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when append is set to true', function (done) {
+    it('should append links and assets together with a custom index.html template when append is set to true', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1500,11 +1500,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1520,7 +1520,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together when append is set to false', function (done) {
+    it('should append links and assets together when append is set to false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1542,11 +1542,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1561,7 +1561,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append links and assets together when append is set to true', function (done) {
+    it('should append links and assets together when append is set to true', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1583,11 +1583,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1602,7 +1602,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should output links attributes other than href', function (done) {
+    it('should output links attributes other than href', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1620,11 +1620,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: [], append: false, links: [{ path: '/the-href', attributes: { rel: 'the-rel', a: 'abc', x: 'xyz' } }] })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1638,7 +1638,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should output link attributes and inject the publicPath only when link.asset is not false', function (done) {
+    it('should output link attributes and inject the publicPath only when link.asset is not false', done => {
       const publicPath = '/pub-path/';
 
       webpack({
@@ -1667,11 +1667,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             ]
           })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1688,8 +1688,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.publicPath', function () {
-    it('should prefix the publicPath if the publicPath option is set to true', function (done) {
+  describe('option.publicPath', () => {
+    it('should prefix the publicPath if the publicPath option is set to true', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1708,11 +1708,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: true })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1727,7 +1727,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should not prefix the publicPath if the publicPath option is set to false', function (done) {
+    it('should not prefix the publicPath if the publicPath option is set to false', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1751,11 +1751,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             { assets: ['local-without-public-path.js', 'http://www.foo.com/foobar.js'], append: false, publicPath: false }
           )
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(5);
@@ -1774,7 +1774,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should not prefix the publicPath if the publicPath option is set to false and the asset is a protocol-relative path', function (done) {
+    it('should not prefix the publicPath if the publicPath option is set to false and the asset is a protocol-relative path', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1798,11 +1798,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
             { assets: ['//www.foo.com/foobar.js'], append: false, publicPath: false }
           )
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(4);
@@ -1819,7 +1819,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should prefix the value of the publicPath option if the publicPath option is set to a string', function (done) {
+    it('should prefix the value of the publicPath option if the publicPath option is set to a string', done => {
       webpack({
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1838,11 +1838,11 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: false, publicPath: 'abc/' })
         ]
-      }, function (err, result) {
+      }, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1858,8 +1858,8 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
     });
   });
 
-  describe('option.hash', function () {
-    beforeEach(function () {
+  describe('option.hash', () => {
+    beforeEach(() => {
       this.hashTestWebpackConfig = {
         entry: {
           app: path.join(__dirname, 'fixtures', 'entry.js'),
@@ -1880,19 +1880,19 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       };
     });
 
-    const appendHash = function (v, hash) {
+    const appendHash = (v, hash) => {
       if (hash.length > 0) hash = '?' + hash;
       return v + hash;
     };
 
-    it('should not append hash if hash options are not provided', function (done) {
+    it('should not append hash if hash options are not provided', done => {
       this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const hash = result.compilation.hash;
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1906,14 +1906,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should not append hash if hash options are set to false', function (done) {
+    it('should not append hash if hash options are set to false', done => {
       this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: false }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const hash = result.compilation.hash;
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1927,14 +1927,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append hash if hash options are set to true', function (done) {
+    it('should append hash if hash options are set to true', done => {
       this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: true }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const hash = result.compilation.hash;
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1948,15 +1948,15 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should append hash if hash option in this plugin set to true but hash options in HtmlWebpackPlugin config are set to false', function (done) {
+    it('should append hash if hash option in this plugin set to true but hash options in HtmlWebpackPlugin config are set to false', done => {
       this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
       this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: true }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const hash = result.compilation.hash;
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1970,14 +1970,14 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should not append hash if hash option in this plugin set to false and hash options in HtmlWebpackPlugin config are set to false', function (done) {
+    it('should not append hash if hash option in this plugin set to false and hash options in HtmlWebpackPlugin config are set to false', done => {
       this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
       this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.css', append: false, publicPath: true, hash: false }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1991,18 +1991,18 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should replace the hash if a replacer hash function is provided in the plugin options', function (done) {
-      function hashReplacer (assetName, hash) {
+    it('should replace the hash if a replacer hash function is provided in the plugin options', done => {
+      const hashReplacer = (assetName, hash) => {
         return assetName.replace(/\[hash\]/, hash);
-      }
+      };
       this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
       this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.[hash].css', append: false, publicPath: true, hash: hashReplacer }));
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         const theHash = result.compilation.hash;
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -2016,12 +2016,12 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
       });
     });
 
-    it('should inject the hash if an injector hash function is provided in the plugin options', function (done) {
-      function hashInjector (assetName, hash) {
+    it('should inject the hash if an injector hash function is provided in the plugin options', done => {
+      const hashInjector = (assetName, hash) => {
         assetName = assetName.replace(/\.js$/, '.' + hash + '.js');
         assetName = assetName.replace(/\.css$/, '.' + hash + '.css');
         return assetName;
-      }
+      };
       this.hashTestWebpackConfig.plugins = [
         new MiniCssExtractPlugin({ filename: '[name].css' }),
         new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
@@ -2035,12 +2035,12 @@ describe('HtmlWebpackIncludeAssetsPlugin', function () {
           append: true
         })
       ];
-      webpack(this.hashTestWebpackConfig, function (err, result) {
+      webpack(this.hashTestWebpackConfig, (err, result) => {
         const theHash = result.compilation.hash;
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
