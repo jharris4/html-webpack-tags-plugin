@@ -475,6 +475,75 @@ describe('HtmlWebpackIncludeAssetsPlugin', () => {
     });
   });
 
+  describe('option.assetPath', () => {
+    it('should not throw an error when the assetPath points to a valid file', done => {
+      webpack({
+        entry: {
+          // TODO - replace all these with FIXTURES_PATH
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: { path: 'foobar.js', assetPath: path.join(FIXTURES_PATH, 'other.js') } })
+        ]
+      }, (err, result) => {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        const htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
+          expect(er).toBeFalsy();
+          const $ = cheerio.load(data);
+          expect($('script').length).toBe(3);
+          expect($('link').length).toBe(1);
+          expect($('script[src="style.js"]').toString()).toBe('<script type="text/javascript" src="style.js"></script>');
+          expect($('script[src="app.js"]').toString()).toBe('<script type="text/javascript" src="app.js"></script>');
+          expect($('link[href="style.css"]').toString()).toBe('<link href="style.css" rel="stylesheet">');
+          expect($('script[src="foobar.js"]').toString()).toBe('<script type="text/javascript" src="foobar.js"></script>');
+          expect($($('script').get(2)).toString()).toBe('<script type="text/javascript" src="foobar.js"></script>');
+          done();
+        });
+      });
+    });
+
+    fit('should throw an error when the assetPath does not point to a valid file', done => {
+      const assetPath = path.join(FIXTURES_PATH, 'does-not-exist.js')
+      webpack({
+        entry: {
+          // TODO - replace all these with FIXTURES_PATH
+          app: path.join(__dirname, 'fixtures', 'entry.js'),
+          style: path.join(__dirname, 'fixtures', 'app.css')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: '[name].js'
+        },
+        module: {
+          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+        },
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackIncludeAssetsPlugin({ assets: { path: 'foobar.js', assetPath } })
+        ]
+      }, (err, result) => {
+        expect(err).toBeFalsy();
+        const errorText = JSON.stringify(result.compilation.errors);
+        expect(errorText).toContain('could not load file');
+        expect(errorText).toContain(assetPath);
+        done();
+      });
+    });
+  });
+
   describe('option.append', () => {
     it('should include a single js file and append it', done => {
       webpack({
