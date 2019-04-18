@@ -10,10 +10,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackIncludeAssetsPlugin = require('../');
 
 const OUTPUT_DIR = path.join(__dirname, '../dist');
+const OUTPUT_FILENAME = '[name].js';
 
 const FIXTURES_PATH = path.join(__dirname, './fixtures');
 const FIXTURES_ENTRY = path.join(FIXTURES_PATH, 'entry.js');
 const FIXTURES_STYLE = path.join(FIXTURES_PATH, 'app.css');
+
+const WEBPACK_CSS_RULE = { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] };
 
 const WEBPACK_ENTRY = {
   app: FIXTURES_ENTRY,
@@ -22,11 +25,11 @@ const WEBPACK_ENTRY = {
 
 const WEBPACK_OUTPUT = {
   path: OUTPUT_DIR,
-  filename: '[name].js'
+  filename: OUTPUT_FILENAME
 };
 
 const WEBPACK_MODULE = {
-  rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+  rules: [WEBPACK_CSS_RULE]
 };
 
 describe('end to end', () => {
