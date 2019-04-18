@@ -12,6 +12,22 @@ const HtmlWebpackIncludeAssetsPlugin = require('../');
 const OUTPUT_DIR = path.join(__dirname, '../dist');
 
 const FIXTURES_PATH = path.join(__dirname, './fixtures');
+const FIXTURES_ENTRY = path.join(FIXTURES_PATH, 'entry.js');
+const FIXTURES_STYLE = path.join(FIXTURES_PATH, 'app.css');
+
+const WEBPACK_ENTRY = {
+  app: FIXTURES_ENTRY,
+  style: FIXTURES_STYLE
+};
+
+const WEBPACK_OUTPUT = {
+  path: OUTPUT_DIR,
+  filename: '[name].js'
+};
+
+const WEBPACK_MODULE = {
+  rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
+};
 
 describe('end to end', () => {
   beforeEach(done => {
@@ -23,17 +39,12 @@ describe('end to end', () => {
       const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
       const theFunction = () => {
         webpack({
-          entry: {
-            app: path.join(__dirname, 'fixtures', 'entry.js'),
-            style: path.join(__dirname, 'fixtures', 'app.css')
-          },
+          entry: WEBPACK_ENTRY,
           output: {
             path: OUTPUT_DIR,
             filename: '[name].js'
           },
-          module: {
-            rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-          },
+          module: WEBPACK_MODULE,
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackIncludeAssetsPlugin({ assets: 'foobar.js', append: true, publicPath: false })
@@ -48,18 +59,9 @@ describe('end to end', () => {
   describe('options.assetPath', () => {
     it('should not throw an error when the assetPath points to a valid file', done => {
       webpack({
-        entry: {
-          // TODO - replace all these with FIXTURES_PATH
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -87,18 +89,9 @@ describe('end to end', () => {
     fit('should throw an error when the assetPath does not point to a valid file', done => {
       const badAssetPath = path.join(FIXTURES_PATH, 'does-not-exist.js');
       webpack({
-        entry: {
-          // TODO - replace all these with FIXTURES_PATH
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -117,17 +110,9 @@ describe('end to end', () => {
   describe('option.append', () => {
     it('should include a single js file and append it', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -154,17 +139,9 @@ describe('end to end', () => {
 
     it('should include a single css file and append it', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -191,17 +168,9 @@ describe('end to end', () => {
 
     it('should include a single js file and prepend it', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -228,17 +197,9 @@ describe('end to end', () => {
 
     it('should include a single css file and prepend it', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -265,17 +226,9 @@ describe('end to end', () => {
 
     it('should support appending and prepending at the same time', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -309,17 +262,9 @@ describe('end to end', () => {
 
     it('should include multiple css files and append them in order', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -350,17 +295,9 @@ describe('end to end', () => {
 
     it('should include multiple css files and prepend them in order', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -391,17 +328,9 @@ describe('end to end', () => {
   describe('option.files', () => {
     it('should not include if not present in defined files', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -431,17 +360,9 @@ describe('end to end', () => {
 
     it('should include if present in defined files', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -475,17 +396,9 @@ describe('end to end', () => {
   describe('option.assets', () => {
     it('should not include assets when none are requested', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: [path.join(__dirname, 'fixtures', 'app.css')]
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -510,17 +423,9 @@ describe('end to end', () => {
 
     it('should include a mixture of js and css files', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -564,17 +469,9 @@ describe('end to end', () => {
   describe('option.jsExtensions', () => {
     it('should include all js type files when multiple jsExtensions are specified', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -603,17 +500,9 @@ describe('end to end', () => {
   describe('option.cssExtensions', () => {
     it('should include all css type files when multiple cssExtensions are specified', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -642,17 +531,9 @@ describe('end to end', () => {
   describe('option.assets.glob', () => {
     it('should include any files for a glob that does match files', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
@@ -682,17 +563,9 @@ describe('end to end', () => {
   describe('option.assets.attributes', () => {
     it('should add the given attributes to the matching tag', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -725,18 +598,12 @@ describe('end to end', () => {
       };
 
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
+        entry: WEBPACK_ENTRY,
         output: {
-          path: OUTPUT_DIR,
-          publicPath: 'thePublicPath/',
-          filename: '[name].js'
+          ...WEBPACK_OUTPUT,
+          publicPath: 'thePublicPath/'
         },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({ hash: true }),
@@ -767,17 +634,9 @@ describe('end to end', () => {
   describe('option.assets.assetPath', () => {
     it('should not throw an error when assets assetPath is used and the file exists', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -804,17 +663,9 @@ describe('end to end', () => {
     it('should throw an error when assets assetPath is used and the file does not exist', done => {
       const theFunction = () => {
         webpack({
-          entry: {
-            app: path.join(__dirname, 'fixtures', 'entry.js'),
-            style: path.join(__dirname, 'fixtures', 'app.css')
-          },
-          output: {
-            path: OUTPUT_DIR,
-            filename: '[name].js'
-          },
-          module: {
-            rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-          },
+          entry: WEBPACK_ENTRY,
+          output: WEBPACK_OUTPUT,
+          module: WEBPACK_MODULE,
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
@@ -835,17 +686,9 @@ describe('end to end', () => {
   describe('options.links', () => {
     it('should prepend when the links are all valid and append is set to false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -871,17 +714,9 @@ describe('end to end', () => {
 
     it('should append when the links are all valid and append is set to true', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -907,17 +742,9 @@ describe('end to end', () => {
 
     it('should append links and assets together with a custom index.html template when inject is false and append is set to false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({
@@ -952,17 +779,9 @@ describe('end to end', () => {
 
     it('should append links and assets together with a custom index.html template when inject is false and append is set to true', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({
@@ -997,17 +816,9 @@ describe('end to end', () => {
 
     it('should append links and assets together with a custom index.html template when inject is false and append is set to true and false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({
@@ -1049,17 +860,9 @@ describe('end to end', () => {
 
     it('should append links and assets together with a custom index.html template when inject is true and append is set to true and false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({
@@ -1101,17 +904,9 @@ describe('end to end', () => {
 
     it('should append links and assets together with a custom index.html template when append is set to false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({
@@ -1145,17 +940,9 @@ describe('end to end', () => {
 
     it('should append links and assets together with a custom index.html template when append is set to true', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({
@@ -1189,17 +976,9 @@ describe('end to end', () => {
 
     it('should append links and assets together when append is set to false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1230,17 +1009,9 @@ describe('end to end', () => {
 
     it('should append links and assets together when append is set to true', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1271,17 +1042,9 @@ describe('end to end', () => {
 
     it('should output links attributes other than href', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1309,18 +1072,9 @@ describe('end to end', () => {
       const publicPath = '/pub-path/';
 
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          publicPath: publicPath,
-          path: OUTPUT_DIR,
-          filename: '[name].js'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1358,18 +1112,9 @@ describe('end to end', () => {
   describe('option.publicPath', () => {
     it('should prefix the publicPath if the publicPath option is set to true', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1396,18 +1141,9 @@ describe('end to end', () => {
 
     it('should not prefix the publicPath if the publicPath option is set to false', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1443,18 +1179,9 @@ describe('end to end', () => {
 
     it('should not prefix the publicPath if the publicPath option is set to false and the asset is a protocol-relative path', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1488,18 +1215,9 @@ describe('end to end', () => {
 
     it('should prefix the value of the publicPath option if the publicPath option is set to a string', done => {
       webpack({
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'thePublicPath'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
@@ -1528,18 +1246,9 @@ describe('end to end', () => {
   describe('option.hash', () => {
     beforeEach(() => {
       this.hashTestWebpackConfig = {
-        entry: {
-          app: path.join(__dirname, 'fixtures', 'entry.js'),
-          style: path.join(__dirname, 'fixtures', 'app.css')
-        },
-        output: {
-          path: OUTPUT_DIR,
-          filename: '[name].js',
-          publicPath: 'myPublic'
-        },
-        module: {
-          rules: [{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }]
-        },
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin({ hash: true })
