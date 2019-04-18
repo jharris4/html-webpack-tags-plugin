@@ -448,7 +448,7 @@ describe('HtmlWebpackIncludeAssetsPlugin', () => {
     });
   });
 
-  xdescribe('plugin dependencies', () => {
+  describe('plugin dependencies', () => {
     it('should throw an error if html-webpack-plugin is not in the webpack config', done => {
       const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
       const theFunction = () => {

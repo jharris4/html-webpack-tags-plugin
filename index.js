@@ -432,16 +432,8 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
         compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
       } else {
-        const HtmlWebpackPlugin = require('html-webpack-plugin');
-        // HtmlWebPackPlugin - old
-        if (HtmlWebpackPlugin.getHooks) {
-          const hooks = HtmlWebpackPlugin.getHooks(compilation);
-          hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
-          hooks.alterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
-        } else {
-          // const message = "Error running html-webpack-include-assets-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
-          // throw new Error(message);
-        }
+        const message = "Error running html-webpack-include-assets-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
+        throw new Error(message);
       }
     } else {
       // Webpack < 4
