@@ -1,7 +1,7 @@
 {
-  "name": "html-webpack-include-assets-plugin",
+  "name": "html-webpack-tags-plugin",
   "version": "2.0.0",
-  "description": "Add the ability to include assets based on a list of paths",
+  "description": "lets you define html tags to inject with html-webpack-plugin",
   "main": "index.js",
   "engines": {
 		"node": ">=8"
@@ -20,21 +20,24 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jharris4/html-webpack-include-assets-plugin.git"
+    "url": "https://github.com/jharris4/html-webpack-tags-plugin.git"
   },
   "keywords": [
     "webpack",
     "plugin",
     "html-webpack-plugin",
+    "html",
+    "tags",
+    "inject",
     "include",
     "assets"
   ],
   "author": "Jon Harris <harris.jb@gmail.com> (https://github.com/jharris4)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jharris4/html-webpack-include-assets-plugin/issues"
+    "url": "https://github.com/jharris4/html-webpack-tags-plugin/issues"
   },
-  "homepage": "https://github.com/jharris4/html-webpack-include-assets-plugin",
+  "homepage": "https://github.com/jharris4/html-webpack-tags-plugin",
   "devDependencies": {
     "cheerio": "^1.0.0-rc.3",
     "copy-webpack-plugin": "^5.0.2",
@@ -46,7 +49,7 @@
     "rimraf": "^2.6.3",
     "semistandard": "^13.0.1",
     "style-loader": "^0.23.1",
-    "webpack": "^4.29.6"
+    "webpack": "^4.30.0"
   },
   "dependencies": {
     "glob": "^7.1.3",
