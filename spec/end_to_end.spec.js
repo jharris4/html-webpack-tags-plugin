@@ -875,10 +875,10 @@ describe('end to end', () => {
     });
   });
 
-  runTestsForOption({ optionName: 'assets', optionTag: 'link', pathSuffix: '.css' });
-  // runTestsForOption({ optionName: 'assets', optionTag: 'script', optionPathSuffix: '.js' });
-  // runTestsForOption({ optionName: 'links', optionTag: 'link' });
-  // runTestsForOption({ optionName: 'scripts', optionTag: 'script' });
+  runTestsForOption({ optionName: 'assets', optionTag: 'link' });
+  runTestsForOption({ optionName: 'assets', optionTag: 'script' });
+  runTestsForOption({ optionName: 'links', optionTag: 'link' });
+  runTestsForOption({ optionName: 'scripts', optionTag: 'script' });
 
   describe('option.assets', () => {
     it('should include a mixture of js and css files', done => {
@@ -1241,7 +1241,8 @@ function runTestsForOption (options, runExtraTests) {
     optionTag //   = 'script' || 'link'
   } = options;
 
-  const tagAttr = optionTag === 'script' ? 'src' : 'href';
+  const optionAttr = optionTag === 'script' ? 'src' : 'href';
+  const optionType = optionTag === 'script' ? 'js' : 'css';
 
   const createWebpackConfig = ({
     webpackPublicPath = void 0,
@@ -1349,8 +1350,8 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${tagAttr}="the-href"]`)).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'the-href', rel: 'the-rel' } });
-          expect($($(optionTag).get(0))).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'the-href', rel: 'the-rel' } });
+          expect($(`${optionTag}[${optionAttr}="the-href"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'the-href', rel: 'the-rel' } });
+          expect($($(optionTag).get(0))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'the-href', rel: 'the-rel' } });
           done();
         });
       });
@@ -1362,7 +1363,7 @@ function runTestsForOption (options, runExtraTests) {
           append: true,
           [optionName]: [{
             path: 'the-href',
-            attributes: { rel: 'the-rel' }
+            type: optionType
           }]
         }
       }), (err, result) => {
@@ -1372,13 +1373,13 @@ function runTestsForOption (options, runExtraTests) {
         fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
-          expect($('script').length).toBe(2);
-          expect($('link').length).toBe(2);
+          expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
+          expect($('link').length).toBe(1 + (optionTag === 'link' ? 1 : 0));
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${tagAttr}="the-href"]`)).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'the-href', rel: 'the-rel' } });
-          expect($($(optionTag).get(1))).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'the-href', rel: 'the-rel' } });
+          expect($(`${optionTag}[${optionAttr}="the-href"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'the-href' } });
+          expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'the-href' } });
           done();
         });
       });
@@ -1408,25 +1409,25 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${tagAttr}="assets/abc"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}="assets/abc"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [tagAttr]: 'assets/abc',
+              [optionAttr]: 'assets/abc',
               id: 'abc'
             }
           });
-          expect($(`${optionTag}[${tagAttr}="assets/def"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}="assets/def"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [tagAttr]: 'assets/def',
+              [optionAttr]: 'assets/def',
               id: 'def',
               media: 'screen'
             }
           });
-          expect($(`${optionTag}[${tagAttr}="assets/ghi"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}="assets/ghi"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [tagAttr]: 'assets/ghi'
+              [optionAttr]: 'assets/ghi'
             }
           });
           done();
@@ -1465,25 +1466,25 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src^="thePublicPath/app.js"]')).toBeTag({ tagName: 'script', attributes: { type: 'text/javascript', src: appendHash('thePublicPath/app.js', hash) } });
           expect($('script[src^="thePublicPath/style.js"]')).toBeTag({ tagName: 'script', attributes: { type: 'text/javascript', src: appendHash('thePublicPath/style.js', hash) } });
           expect($('link[href^="thePublicPath/style.css"]')).toBeTag({ tagName: 'link', attributes: { rel: 'stylesheet', href: appendHash('thePublicPath/style.css', hash) } });
-          expect($(`${optionTag}[${tagAttr}^="thePublicPath/assets/abc"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/abc"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [tagAttr]: appendHash('thePublicPath/assets/abc', hash),
+              [optionAttr]: appendHash('thePublicPath/assets/abc', hash),
               id: 'abc'
             }
           });
-          expect($(`${optionTag}[${tagAttr}^="thePublicPath/assets/def"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/def"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [tagAttr]: appendHash('thePublicPath/assets/def', hash),
+              [optionAttr]: appendHash('thePublicPath/assets/def', hash),
               id: 'def',
               media: 'screen'
             }
           });
-          expect($(`${optionTag}[${tagAttr}^="thePublicPath/assets/ghi"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/ghi"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [tagAttr]: appendHash('thePublicPath/assets/ghi', hash)
+              [optionAttr]: appendHash('thePublicPath/assets/ghi', hash)
             }
           });
           done();
@@ -1491,63 +1492,65 @@ function runTestsForOption (options, runExtraTests) {
       });
     });
 
-    it(`should output ${optionName} attributes other than path`, done => {
-      webpack(createWebpackConfig({
-        options: {
-          append: false,
-          [optionName]: [
-            { path: '/the-href.css', attributes: { rel: 'the-rel', a: 'abc', x: 'xyz' } }
-          ]
-        }
-      }), (err, result) => {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
-          expect(er).toBeFalsy();
-          const $ = cheerio.load(data);
-          expect($('script').length).toBe(2);
-          expect($('link').length).toBe(2);
-          expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
-          expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
-          expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($('link[href="/the-href.css"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href.css', rel: 'the-rel', a: 'abc', x: 'xyz' } });
-          done();
+    if (optionTag === 'link') {
+      it(`should output ${optionName} attributes other than path`, done => {
+        webpack(createWebpackConfig({
+          options: {
+            append: false,
+            [optionName]: [
+              { path: '/the-href.css', attributes: { rel: 'the-rel', a: 'abc', x: 'xyz' } }
+            ]
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          const htmlFile = path.resolve(__dirname, '../dist/index.html');
+          fs.readFile(htmlFile, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(2);
+            expect($('link').length).toBe(2);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('link[href="/the-href.css"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href.css', rel: 'the-rel', a: 'abc', x: 'xyz' } });
+            done();
+          });
         });
       });
-    });
 
-    it(`should output ${optionName} attributes and inject the publicPath only when ${optionName} object publicPath is not false`, done => {
-      const publicPath = '/pub-path/';
-      webpack(createWebpackConfig({
-        webpackPublicPath: publicPath,
-        options: {
-          append: false,
-          [optionName]: [
-            { path: '/the-href', publicPath: false, attributes: { rel: 'the-rel-a', a: 'abc', x: 'xyz' } },
-            { path: 'the-href-1', publicPath: true, attributes: { rel: 'the-rel-b', a: '123', x: '789' } },
-            { path: 'the-href-2', attributes: { rel: 'the-rel-c', a: '___', x: '---' } }
-          ]
-        }
-      }), (err, result) => {
-        expect(err).toBeFalsy();
-        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
-          expect(er).toBeFalsy();
-          const $ = cheerio.load(data);
-          expect($('script').length).toBe(2);
-          expect($('link').length).toBe(4);
-          expect($('script[src="' + publicPath + 'app.js"]')).toBeTag({ tagName: 'script', attributes: { src: publicPath + 'app.js', type: 'text/javascript' } });
-          expect($('script[src="' + publicPath + 'style.js"]')).toBeTag({ tagName: 'script', attributes: { src: publicPath + 'style.js', type: 'text/javascript' } });
-          expect($('link[href="' + publicPath + 'style.css"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'style.css', rel: 'stylesheet' } });
-          expect($('link[href="/the-href"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href', rel: 'the-rel-a', a: 'abc', x: 'xyz' } });
-          expect($('link[href="' + publicPath + 'the-href-1"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'the-href-1', rel: 'the-rel-b', a: '123', x: '789' } });
-          expect($('link[href="' + publicPath + 'the-href-2"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'the-href-2', rel: 'the-rel-c', a: '___', x: '---' } });
-          done();
+      it(`should output ${optionName} attributes and inject the publicPath only when ${optionName} object publicPath is not false`, done => {
+        const publicPath = '/pub-path/';
+        webpack(createWebpackConfig({
+          webpackPublicPath: publicPath,
+          options: {
+            append: false,
+            [optionName]: [
+              { path: '/the-href', publicPath: false, attributes: { rel: 'the-rel-a', a: 'abc', x: 'xyz' } },
+              { path: 'the-href-1', publicPath: true, attributes: { rel: 'the-rel-b', a: '123', x: '789' } },
+              { path: 'the-href-2', attributes: { rel: 'the-rel-c', a: '___', x: '---' } }
+            ]
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          const htmlFile = path.resolve(__dirname, '../dist/index.html');
+          fs.readFile(htmlFile, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(2 + (optionTag === 'script' ? 3 : 0));
+            expect($('link').length).toBe(1 + (optionTag === 'link' ? 3 : 0));
+            expect($('script[src="' + publicPath + 'app.js"]')).toBeTag({ tagName: 'script', attributes: { src: publicPath + 'app.js', type: 'text/javascript' } });
+            expect($('script[src="' + publicPath + 'style.js"]')).toBeTag({ tagName: 'script', attributes: { src: publicPath + 'style.js', type: 'text/javascript' } });
+            expect($('link[href="' + publicPath + 'style.css"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'style.css', rel: 'stylesheet' } });
+            expect($('link[href="/the-href"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href', rel: 'the-rel-a', a: 'abc', x: 'xyz' } });
+            expect($('link[href="' + publicPath + 'the-href-1"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'the-href-1', rel: 'the-rel-b', a: '123', x: '789' } });
+            expect($('link[href="' + publicPath + 'the-href-2"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'the-href-2', rel: 'the-rel-c', a: '___', x: '---' } });
+            done();
+          });
         });
       });
-    });
+    }
   });
 
   describe(`option.${optionName} glob`, () => {
@@ -1573,8 +1576,8 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${tagAttr}="assets/glob-a"]`)).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'assets/glob-a' } });
-          expect($(`${optionTag}[${tagAttr}="assets/glob-b"]`)).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'assets/glob-b' } });
+          expect($(`${optionTag}[${optionAttr}="assets/glob-a"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'assets/glob-a' } });
+          expect($(`${optionTag}[${optionAttr}="assets/glob-b"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'assets/glob-b' } });
           done();
         });
       });
@@ -1602,8 +1605,8 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${tagAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'foobar' } });
-          expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [tagAttr]: 'foobar' } });
+          expect($(`${optionTag}[${optionAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+          expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
           done();
         });
       });
@@ -1631,8 +1634,8 @@ function runTestsForOption (options, runExtraTests) {
       webpack(createWebpackConfig({
         options: {
           [optionName]: [{
-            path: 'assets/astyle.css',
-            assetPath: 'spec/fixtures/astyle.css'
+            path: 'assets/afile',
+            assetPath: 'spec/fixtures/other'
           }],
           append: false
         }
@@ -1643,12 +1646,12 @@ function runTestsForOption (options, runExtraTests) {
         fs.readFile(htmlFile, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
-          expect($('script').length).toBe(2);
-          expect($('link').length).toBe(2);
+          expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
+          expect($('link').length).toBe(1 + (optionTag === 'link' ? 1 : 0));
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($('link[href="assets/astyle.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'assets/astyle.css', rel: 'stylesheet' } });
+          expect($(`${optionTag}[${optionAttr}="assets/afile"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'assets/afile' } });
           done();
         });
       });
