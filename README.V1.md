@@ -2,17 +2,12 @@ Include Assets extension for the HTML Webpack Plugin
 ========================================
 [![npm version](https://badge.fury.io/js/html-webpack-include-assets-plugin.svg)](https://badge.fury.io/js/html-webpack-include-assets-plugin) [![Build Status](https://travis-ci.org/jharris4/html-webpack-include-assets-plugin.svg?branch=master)](https://travis-ci.org/jharris4/html-webpack-include-assets-plugin) [![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard)
 
+This is the `README.md` from **version 1.x** which provides support for ** Node < 8.6 **.
+
+This **version is deprecated** in favour of [https://github.com/jharris4/html-webpack-include-assets-plugin](html-webpack-include-assets-plugin version 2).
+
 Enhances [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin)
 functionality by allowing you to specify js or css assets to be included.
-
-Prior Version
-------------
-
-- `html-webpack-include-assets-plugin` version `2.x` and above require ** Node >= 8.6 **
-- For older version of Node, please install version `1.x` and consult the [old readme](https://github.com/jharris4/html-webpack-include-assets-plugin/blob/master/README.V1.md)
-
-Motivation
-------------
 
 When using a plugin such as [copy-webpack-plugin](https://github.com/kevlened/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
@@ -26,6 +21,7 @@ Install the plugin with npm:
 ```shell
 $ npm install --save-dev html-webpack-include-assets-plugin
 ```
+
 
 Basic Usage
 -----------
@@ -65,66 +61,60 @@ Options
 -------
 The available options are:
 
-- `jsExtensions:string|array` - The file extensions to use when attempting to determine if an `assets` object is a `script`.
+- `jsExtensions`: `string` or `array`
 
-- `cssExtensions:string|array` - The file extensions to use when attempting to determine if an `assets` object is a `link`.
+  Specifies the file extensions to use to determine if assets are script assets. Default is `['.js']`.
 
-- `append:boolean` - Use `true` to `append` assets or `false` to `prepend` assets.
+- `cssExtensions`: `string` or `array`
 
+  Specifies the file extensions to use to determine if assets are style assets. Default is `['.css']`.
 
-- `publicPath`: `boolean` or `string`, or `function(path:string, publicPath:string) => any:string` - (**default** `true`)
-
-  * Determines hether the assets should be prepended with webpack's public path or a custom publicPath (string or function).
-
-  * A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all assets with the given string. Default is `true`.
-
-- `hash`: `boolean` or `function(path: string, hash: string) => any: string` - (**default** `false`)
-
-  Specifying whether the assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
-
-- `files`: `string` or `array` - (**default** `[]`)
-
-  Files that the assets will be added to. Using this option can be necessary if you are using multiple instances of the this plugin or `html-webpack-plugin` plugin instances.
-
-  By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs (uses the [minimatch](https://github.com/isaacs/minimatch) package).
-
-- `links:string|array|object` - (**default** `[]`) - Shortcut to add assets that are all `type` `css`. Will be added **after** any `assets` values.
-
-- `scripts:string|array|object` - (**default** `[]`) - Shortcut to add assets that are all `type` `js`. Will be added **after** any `assets` values.
-
-- `assets:string|array|object` - (**default** `[]`)
+- `assets`: `string` or `array` or `object`
 
   Assets that will be output into your html-webpack-plugin template.
 
-  - To specify just one asset, simply pass a string or object.
-  - To specify multiple, pass an array of strings or objects.
+  To specify just one asset, simply pass a string or object. To specify multiple, pass an array of strings or objects.
 
-  Assets that do not have a `type` attempt to infer it from the asset `path` using the `jsExtensions` and `cssExtensions` options values.
+  If the asset path is static and ends in one of the `jsExtensions` or `cssExtensions` values, simply use a string value.
 
-  This plugin will throw an error if it cannot determine the type of any asset, we can specify asset as `objects` to fix that.
+  If the asset is not static or does not have a valid extension, you can instead pass an object with properties `path` (required) and `type` or `glob` or `globPath` or `attributes` (optional). In this case `path` is the asset href/src, `type` is one of `js` or `css`, and `glob` is a wildcard to use to match all files in the path (uses the [glob](https://github.com/isaacs/node-glob) package). The `globPath` can be used to specify the directory from which the `glob` should search for filename matches (the default is to use `path` within webpack's output directory).
 
-  ```javascript
-  const oldAsset = 'abc'; // change this
+  The `attributes` property may be used to add additional attributes to the link or script element that is injected. The keys of this object are attribute names and the values are the attribute values (string or boolean key values are allowed).
 
-  const newAsset = { // to this
-    path: 'abc',
-    type: 'css'
-  }
-  ```
+  The `assetPath` property may be used to specify the full path to the included asset. This can be useful as it will trigger a recompilation after the assets have changed when using `webpack-dev-server` or `webpack-dev-middleware` in development mode.
 
-  Each `asset object` may have the following properties:
------
-  - `path:string` (**required**) - The asset path.
-  - `type:string` (optional) - For assets where the type is unknown, this can be set to either of: `['css', 'js']`.
-  - `glob:string` and `globPath:string` (**must be together**) - Lets you use a [glob](https://github.com/isaacs/node-glob) to insert multiple assets from the `globPath`.
-  - `attributes:object` (optional) - The attributes to be injected into the html tags. Some attributes are filtered by `html-webpack-plugin` (especially for script tags). To work **requires** that you set the `html-webpack-plugin` options to: `{ inject: true }`.
-  - `assetPath:string` (optional) - property may be used to specify a source path to be added as an entry to `html-webpack-plugin`. This can be useful as it will trigger a recompilation after the assets have changed when using `webpack-dev-server` or `webpack-dev-middleware` in development mode.
-  - `publicPath:boolean|function(path:string, publicPath:string) => any:string` (optional) - Controls whether the webpack `publicPath` will be injected into the asset path. `true` mean always. `false` means never. `function` means manual, `undefined` means use global settings.
-  - `hash:boolean|function(path:string, hash:string) => any:string` (optional) - Controls whether the webpack `compilation hash` will be injected into the asset path. `true` mean always. `false` means never. `function` means manual, `undefined` means use global settings.
+- `append`: `boolean`
 
------
+  Specifying whether the assets should be prepended (`false`) before any existing assets, or appended (`true`) after them.
 
-Examples
+- `resolvePaths`: `boolean`
+
+  Specifying whether the asset paths should be resolved with `path.resolve` (i.e. made absolute).
+
+- `publicPath`: `boolean` or `string`
+
+  Specifying whether the assets should be prepended with webpack's public path or a custom publicPath (`string`).
+
+  A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all assets with the given string. Default is `true`.
+
+- `hash`: `boolean` or `function(assetName, hash)`
+
+  Specifying whether the assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
+
+- `files`: `string` or `array`
+
+  Files that the assets will be added to.
+
+  By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs (uses the [minimatch](https://github.com/isaacs/minimatch) package).
+
+  - `cssAssets`: `array`
+
+  Optional shortcut for adding css assets. An array of css asset objects.
+
+  See the cssAssets example below for the syntax of css asset object.
+
+
+Example
 -------
 
 _____
@@ -359,7 +349,7 @@ plugins: [
 
 _____
 
-Specifying `links` (a shortcut for specifying assets of `type` `css`)
+Specifying `cssAssets` (a shortcut for specifying assets of type css)
 
 ```javascript
 output: {
@@ -374,7 +364,7 @@ plugins: [
   new HtmlWebpackIncludeAssetsPlugin({
     assets: [],
     append: true,
-    links: [
+    cssAssets: [
       {
         href: 'asset/path',
         attributes: {
@@ -403,7 +393,7 @@ Will append the following link elements into the index template html
 </head>
 ```
 
-Note that the second link's href was not prefixed with the webpack `publicPath` because `csAsset.asset` was set to `false`.
+Note that the second cssAsset's href was not prefixed with the webpack `publicPath` because `csAsset.asset` was set to `false`.
 
 _____
 
