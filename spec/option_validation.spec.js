@@ -386,13 +386,13 @@ function runTestsForOption (optionName, runExtraTests) {
     });
   });
 
-  describe(`options.${optionName} assetPath`, () => {
-    it(`should throw an error if any of the ${optionName} options are objects with an assetPath property that is not a string`, done => {
+  describe(`options.${optionName} sourcePath`, () => {
+    it(`should throw an error if any of the ${optionName} options are objects with an sourcePath property that is not a string`, done => {
       const theFunction = () => {
-        return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: ['foo.js', { path: 'a.js', assetPath: 123, type: 'js' }, 'bar.css'] });
+        return new HtmlWebpackIncludeAssetsPlugin({ [optionName]: ['foo.js', { path: 'a.js', sourcePath: 123, type: 'js' }, 'bar.css'] });
       };
 
-      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string assetPath property)`));
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string sourcePath property)`));
       done();
     });
   });

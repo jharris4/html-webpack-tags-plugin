@@ -144,8 +144,8 @@ function getAssetObjects (asset, key) {
         assert(isString(hash('', '')), `HtmlWebpackIncludeAssetsPlugin options.${key} object hash should be a function that returns a string`);
       }
     }
-    if (isDefined(asset.assetPath)) {
-      assert(isString(asset.assetPath), `HtmlWebpackIncludeAssetsPlugin options.${key} object should have a string assetPath property`);
+    if (isDefined(asset.sourcePath)) {
+      assert(isString(asset.sourcePath), `HtmlWebpackIncludeAssetsPlugin options.${key} object should have a string sourcePath property`);
     }
     if (isDefined(asset.attributes)) {
       const { attributes } = asset;
@@ -365,14 +365,14 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       const jsPaths = [];
       const cssPaths = [];
       scripts.forEach(script => {
-        if (isString(script.assetPath)) {
-          assetPromises.push(addAsset(script.assetPath));
+        if (isString(script.sourcePath)) {
+          assetPromises.push(addAsset(script.sourcePath));
         }
         jsPaths.push(getAssetPath(script, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash));
       });
       links.forEach(link => {
-        if (isString(link.assetPath)) {
-          assetPromises.push(addAsset(link.assetPath));
+        if (isString(link.sourcePath)) {
+          assetPromises.push(addAsset(link.sourcePath));
         }
         cssPaths.push(getAssetPath(link, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash));
       });

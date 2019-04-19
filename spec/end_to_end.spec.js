@@ -941,7 +941,7 @@ describe('end to end', () => {
           new HtmlWebpackIncludeAssetsPlugin({
             assets: [{
               path: 'assets/astyle.css',
-              assetPath: 'spec/fixtures/astyle.css'
+              sourcePath: 'spec/fixtures/astyle.css'
             }],
             append: false,
             links: [{
@@ -982,7 +982,7 @@ describe('end to end', () => {
             inject: false
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
@@ -1019,12 +1019,12 @@ describe('end to end', () => {
             inject: false
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle-1.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle-1.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href-1', attributes: { rel: 'the-rel-1', sizes: '16x16' } }]
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle-2.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle-2.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
           })
@@ -1063,12 +1063,12 @@ describe('end to end', () => {
             inject: true
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle-1.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle-1.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href-1', attributes: { rel: 'the-rel-1', sizes: '16x16' } }]
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle-2.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle-2.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
           })
@@ -1106,7 +1106,7 @@ describe('end to end', () => {
             template: path.join(__dirname, 'fixtures', 'index.html')
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
@@ -1142,7 +1142,7 @@ describe('end to end', () => {
             template: path.join(__dirname, 'fixtures', 'index.html')
           }),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
@@ -1176,7 +1176,7 @@ describe('end to end', () => {
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
@@ -1209,7 +1209,7 @@ describe('end to end', () => {
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
           new HtmlWebpackIncludeAssetsPlugin({
-            assets: [{ path: 'assets/astyle.css', assetPath: 'spec/fixtures/astyle.css' }],
+            assets: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
           })
@@ -1584,13 +1584,13 @@ function runTestsForOption (options, runExtraTests) {
     });
   });
 
-  describe(`options.${optionName} assetPath`, () => {
-    it(`should not throw an error when the ${optionName} assetPath points to a valid js file`, done => {
+  describe(`options.${optionName} sourcePath`, () => {
+    it(`should not throw an error when the ${optionName} sourcePath points to a valid js file`, done => {
       webpack(createWebpackConfig({
         options: {
           [optionName]: {
             path: 'foobar',
-            assetPath: path.join(FIXTURES_PATH, 'other')
+            sourcePath: path.join(FIXTURES_PATH, 'other')
           }
         }
       }), (err, result) => {
@@ -1612,14 +1612,13 @@ function runTestsForOption (options, runExtraTests) {
       });
     });
 
-    it(`should throw an error when the ${optionName} assetPath does not point to a valid js file`, done => {
+    it(`should throw an error when the ${optionName} sourcePath does not point to a valid js file`, done => {
       const badFilename = 'does-not-exist.js';
-      const badAssetPath = path.join(FIXTURES_PATH, badFilename);
       webpack(createWebpackConfig({
         options: {
           [optionName]: {
             path: 'foobar.js',
-            assetPath: badAssetPath
+            sourcePath: path.join(FIXTURES_PATH, badFilename)
           }
         }
       }), (err, result) => {
@@ -1631,12 +1630,12 @@ function runTestsForOption (options, runExtraTests) {
       });
     });
 
-    it(`should not throw an error when ${optionName} assetPath is used and the css file exists`, done => {
+    it(`should not throw an error when ${optionName} sourcePath is used and the css file exists`, done => {
       webpack(createWebpackConfig({
         options: {
           [optionName]: [{
             path: 'assets/afile',
-            assetPath: 'spec/fixtures/other'
+            sourcePath: 'spec/fixtures/other'
           }],
           append: false
         }
@@ -1658,13 +1657,13 @@ function runTestsForOption (options, runExtraTests) {
       });
     });
 
-    it(`should throw an error when ${optionName} assetPath is used and the css file does not exist`, done => {
+    it(`should throw an error when ${optionName} sourcePath is used and the css file does not exist`, done => {
       const theFunction = () => {
         webpack(createWebpackConfig({
           options: {
             [optionName]: [{
               path: 'assets/astyle.css',
-              assetPath: 'spec/fixtures/anotherstyle.css'
+              sourcePath: 'spec/fixtures/anotherstyle.css'
             }],
             append: false
           }

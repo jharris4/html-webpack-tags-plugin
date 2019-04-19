@@ -1,22 +1,23 @@
-Include Assets extension for the HTML Webpack Plugin
+Tags Plugin for the HTML Webpack Plugin
 ========================================
-[![npm version](https://badge.fury.io/js/html-webpack-include-assets-plugin.svg)](https://badge.fury.io/js/html-webpack-include-assets-plugin) [![Build Status](https://travis-ci.org/jharris4/html-webpack-include-assets-plugin.svg?branch=master)](https://travis-ci.org/jharris4/html-webpack-include-assets-plugin) [![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard)
+[![npm version](https://badge.fury.io/js/html-webpack-tags-plugin.svg)](https://badge.fury.io/js/html-webpack-tags-plugin) [![Build Status](https://travis-ci.org/jharris4/html-webpack-tags-plugin.svg?branch=master)](https://travis-ci.org/jharris4/html-webpack-tags-plugin) [![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard)
 
 Enhances [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin)
-functionality by allowing you to specify js or css assets to be included.
+by letting you specify script or link tags to inject.
 
 Prior Version
 ------------
 
-- `html-webpack-include-assets-plugin` version `2.x` and above require ** Node >= 8.6 **
-- For older version of Node, please install version `1.x` and consult the [old readme](https://github.com/jharris4/html-webpack-include-assets-plugin/blob/master/README.V1.md)
+- `html-webpack-tags-plugin` requires ** Node >= 8.6 **
+- This plugin used to be called `html-webpack-include-assets-plugin`.
+- For older version of Node, please install [html-webpack-include-assets-plugin version 1.x](https://github.com/jharris4/html-webpack-tags-plugin/releases/tag/1.0.10) and consult the [old readme](https://github.com/jharris4/html-webpack-tags-plugin/blob/master/README.V1.md)
 
 Motivation
 ------------
 
 When using a plugin such as [copy-webpack-plugin](https://github.com/webpack-contrib/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
-This plugin plugins gives you the tools to fix that and also lets you inject the webpack `publicPath` or compilation `hash` into your assets paths if you so choose.
+This plugin lets you manually resolve such issues, and also lets you inject the webpack `publicPath` or compilation `hash` into your assets paths if you so choose.
 
 Installation
 ------------
@@ -24,7 +25,7 @@ You must be running webpack on node 8.x or higher
 
 Install the plugin with npm:
 ```shell
-$ npm install --save-dev html-webpack-include-assets-plugin
+$ npm install --save-dev html-webpack-tags-plugin
 ```
 
 Basic Usage
@@ -32,7 +33,7 @@ Basic Usage
 Require the plugin in your webpack config:
 
 ```javascript
-var HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
+var HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
 ```
 
 Add the plugin to your webpack config:
@@ -43,7 +44,7 @@ output: {
 },
 plugins: [
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({ assets: ['a.js', 'b.css'], append: true })
+  new HtmlWebpackTagsPlugin({ assets: ['a.js', 'b.css'], append: true })
 ]
 ```
 
@@ -92,33 +93,33 @@ The available options are:
 
 - `scripts:string|array|object` - (**default** `[]`) - Shortcut to add assets that are all `type` `js`. Will be added **after** any `assets` values.
 
-- `assets:string|array|object` - (**default** `[]`)
+- `tags:string|array|object` - (**default** `[]`)
 
-  Assets that will be output into your html-webpack-plugin template.
+  Tags that will be output into your html-webpack-plugin template.
 
-  - To specify just one asset, simply pass a string or object.
-  - To specify multiple, pass an array of strings or objects.
+  - To specify just one tag asset, simply pass a string or object.
+  - To specify multiple tag assets, pass an array of strings or objects.
 
-  Assets that do not have a `type` attempt to infer it from the asset `path` using the `jsExtensions` and `cssExtensions` options values.
+  Tags that do not have a `type` attempt to infer it from the asset `path` using the `jsExtensions` and `cssExtensions` options values.
 
-  This plugin will throw an error if it cannot determine the type of any asset, we can specify asset as `objects` to fix that.
+  This plugin will throw an error if it cannot determine the type of any tag, we can specify tags as `objects` to fix that.
 
   ```javascript
-  const oldAsset = 'abc'; // change this
+  const oldTag = 'abc'; // change this
 
-  const newAsset = { // to this
+  const newTag = { // to this
     path: 'abc',
     type: 'css'
   }
   ```
 
-  Each `asset object` may have the following properties:
+  Each `tag object` may have the following properties:
 -----
-  - `path:string` (**required**) - The asset path.
-  - `type:string` (optional) - For assets where the type is unknown, this can be set to either of: `['css', 'js']`.
-  - `glob:string` and `globPath:string` (**must be together**) - Lets you use a [glob](https://github.com/isaacs/node-glob) to insert multiple assets from the `globPath`.
+  - `path:string` (**required**) - The tag path.
+  - `type:string` (optional) - For tags where the type is unknown, this can be set to either of: `['css', 'js']`.
+  - `glob:string` and `globPath:string` (**must be together**) - Lets you use a [glob](https://github.com/isaacs/node-glob) to insert multiple tags from the `globPath`.
   - `attributes:object` (optional) - The attributes to be injected into the html tags. Some attributes are filtered by `html-webpack-plugin` (especially for script tags). To work **requires** that you set the `html-webpack-plugin` options to: `{ inject: true }`.
-  - `assetPath:string` (optional) - property may be used to specify a source path to be added as an entry to `html-webpack-plugin`. This can be useful as it will trigger a recompilation after the assets have changed when using `webpack-dev-server` or `webpack-dev-middleware` in development mode.
+  - `sourcePath:string` (optional) - property may be used to specify a source path to be added as an entry to `html-webpack-plugin`. This can be useful as it will trigger a recompilation after the assets have changed when using `webpack-dev-server` or `webpack-dev-middleware` in development mode.
   - `publicPath:boolean|function(path:string, publicPath:string) => any:string` (optional) - Controls whether the webpack `publicPath` will be injected into the asset path. `true` mean always. `false` means never. `function` means manual, `undefined` means use global settings.
   - `hash:boolean|function(path:string, hash:string) => any:string` (optional) - Controls whether the webpack `compilation hash` will be injected into the asset path. `true` mean always. `false` means never. `function` means manual, `undefined` means use global settings.
 
@@ -129,7 +130,7 @@ Examples
 
 _____
 
-Using `HtmlWebpackIncludeAssetsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template :
+Using `HtmlWebpackTagsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template :
 
 ```javascript
 plugins: [
@@ -138,7 +139,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false
   })
@@ -156,11 +157,11 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false
   }),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['css/custom.css'],
     append: true
   })
@@ -174,7 +175,7 @@ Using custom `jsExtensions` :
 ```javascript
 plugins: [
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['dist/output.js', 'lib/content.jsx'],
     append: false,
     jsExtensions: ['.js', '.jsx']
@@ -193,7 +194,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     publicPath: 'myPublicPath/'
@@ -208,7 +209,7 @@ Or to include assets without prepending the `publicPath`:
 ```javascript
 plugins: [
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['css/no-public-path.min.css', 'http://some.domain.com.js'],
     append: false,
     publicPath: false
@@ -227,7 +228,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: [
       '/css/bootstrap.min.css',
       '/css/bootstrap-theme.min.css',
@@ -252,7 +253,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: [
       '/css/bootstrap.min.css',
       { path: '/css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }
@@ -276,7 +277,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     hash: true
@@ -295,7 +296,7 @@ plugins: [
     { from: 'somepath/somecssfile.css', to: 'css/somecssfile.[hash].css' }
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: [{ path: 'js', glob: '*.js', globPath: 'somepath' }],
     assets: [{ path: 'css', glob: '*.css', globPath: 'somepath' }],
     append: false,
@@ -324,12 +325,12 @@ plugins: [
   new HtmlWebpackPlugin({
     filename: 'b/index.html'
   }),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     files: ['a/**/*.html'],
     assets: ['css/a.css'],
     append: true
   }),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     files: ['b/**/*.html'],
     assets: ['css/b.css'],
     append: true
@@ -350,7 +351,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: [{ path: 'css', glob: '*.css', globPath: 'node_modules/bootstrap/dist/css/' }],
     append: true
   })
@@ -371,7 +372,7 @@ plugins: [
     { from: 'node_modules/bootstrap/dist/fonts', to: 'fonts/'}
   ]),
   new HtmlWebpackPlugin(),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: [],
     append: true,
     links: [
@@ -413,7 +414,7 @@ Caveats
 
 Some users have encountered issues with plugin ordering.
 
-- It is advisable to always place any `HtmlWebpackPlugin` plugins **before** any `HtmlWebpackIncludeAssetsPlugin` plugins in your webpack config.
+- It is advisable to always place any `HtmlWebpackPlugin` plugins **before** any `HtmlWebpackTagsPlugin` plugins in your webpack config.
 
 This plugin has only been tested with **two instances** in one webpack config, where one had `option.append: false` and the other had `option.append: true`.
 
@@ -432,7 +433,7 @@ output: {
 },
 plugins: [
   new HtmlWebpackPlugin({ inject: false }),
-  new HtmlWebpackIncludeAssetsPlugin({
+  new HtmlWebpackTagsPlugin({
     assets: [{ path: 'css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }],
     links: [{ href: 'the-ref', attributes: { rel: 'icon' } }],
     append: true
