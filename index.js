@@ -193,7 +193,7 @@ function getAllAssetObjects (options, optionName) {
   return assetObjects;
 }
 
-function getVarAssetObjects (assetObjects, optionName) {
+function filterVarAssetObjects (assetObjects, optionName) {
   const allowed = optionName === 'scripts';
   if (isArray(assetObjects)) {
     assetObjects.forEach(assetObject => {
@@ -277,19 +277,19 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     if (isDefined(options.tags)) {
       const assetObjects = getAllAssetObjects(options, 'tags');
       let [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', assetObjects);
-      linkObjects = getVarAssetObjects(linkObjects, 'links');
-      scriptObjects = getVarAssetObjects(scriptObjects, 'scripts');
+      linkObjects = filterVarAssetObjects(linkObjects, 'links');
+      scriptObjects = filterVarAssetObjects(scriptObjects, 'scripts');
       links = links.concat(linkObjects);
       scripts = scripts.concat(scriptObjects);
     }
     if (isDefined(options.links)) {
       let linkObjects = getAllAssetObjects(options, 'links');
-      linkObjects = getVarAssetObjects(linkObjects, 'links');
+      linkObjects = filterVarAssetObjects(linkObjects, 'links');
       links = links.concat(linkObjects);
     }
     if (isDefined(options.scripts)) {
       let scriptObjects = getAllAssetObjects(options, 'scripts');
-      scriptObjects = getVarAssetObjects(scriptObjects, 'scripts');
+      scriptObjects = filterVarAssetObjects(scriptObjects, 'scripts');
       scripts = scripts.concat(scriptObjects);
     }
 
