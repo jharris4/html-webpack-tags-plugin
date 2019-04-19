@@ -193,6 +193,22 @@ function getAllAssetObjects (options, optionName) {
   return assetObjects;
 }
 
+function getVarAssetObjects (assetObjects, optionName) {
+  const allowed = optionName === 'scripts';
+  if (isArray(assetObjects)) {
+    assetObjects.forEach(assetObject => {
+      if (isObject(assetObject) && (isDefined(assetObject.var) || isDefined(assetObject.varName))) {
+        if (allowed) {
+          assert(isString(assetObject.var) && isString(assetObject.varName), `HtmlWebpackIncludeAssetsPlugin options.${optionName} var and varName should both be strings`);
+        } else {
+          assert(false, `HtmlWebpackIncludeAssetsPlugin options.${optionName} var or varName should not be used`);
+        }
+      }
+    });
+  }
+  return assetObjects;
+}
+
 function HtmlWebpackIncludeAssetsPlugin (options) {
   assert(isObject(options), 'HtmlWebpackIncludeAssetsPlugin options should be an object');
   if (isObject(options)) {
@@ -260,16 +276,20 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
     let scripts = [];
     if (isDefined(options.tags)) {
       const assetObjects = getAllAssetObjects(options, 'tags');
-      const [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', assetObjects);
+      let [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', assetObjects);
+      linkObjects = getVarAssetObjects(linkObjects, 'links');
+      scriptObjects = getVarAssetObjects(scriptObjects, 'scripts');
       links = links.concat(linkObjects);
       scripts = scripts.concat(scriptObjects);
     }
     if (isDefined(options.links)) {
-      const linkObjects = getAllAssetObjects(options, 'links');
+      let linkObjects = getAllAssetObjects(options, 'links');
+      linkObjects = getVarAssetObjects(linkObjects, 'links');
       links = links.concat(linkObjects);
     }
     if (isDefined(options.scripts)) {
-      const scriptObjects = getAllAssetObjects(options, 'scripts');
+      let scriptObjects = getAllAssetObjects(options, 'scripts');
+      scriptObjects = getVarAssetObjects(scriptObjects, 'scripts');
       scripts = scripts.concat(scriptObjects);
     }
 
@@ -331,6 +351,14 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
   const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip } = options;
   const { append, scripts, links } = options;
+
+  const externals = compiler.options.externals || {};
+  scripts.forEach(script => {
+    if (isString(script.var) && isString(script.varName)) {
+      externals[script.varName] = script.var;
+    }
+  });
+  compiler.options.externals = externals;
 
   // Hook into the html-webpack-plugin processing
   const onCompilation = compilation => {
