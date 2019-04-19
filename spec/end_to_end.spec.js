@@ -624,8 +624,6 @@ describe('end to end', () => {
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
             expect($('link').length).toBe(2);
-            // )).toBeTag({ tagName: 'script', attributes: { src: 'appendHash('myPublic/style.js', hash), type: 'text/javascript' } });
-            // )).toBeTag({ tagName: 'link', attributes: { href: 'thePublicPath/style.css', rel: 'stylesheet' } });
             expect($('script[src^="myPublic/style.js"]')).toBeTag({
               tagName: 'script',
               attributes: {
@@ -741,7 +739,6 @@ describe('end to end', () => {
       });
 
       it('should append hash if hash option in this plugin set to true but hash options in HtmlWebpackPlugin config are set to false', done => {
-        // this.hashTestWebpackConfig
         webpack(createWebpackHashConfig({
           webpackPublicPath: 'myPublic/',
           htmlOptions: { hash: false },
