@@ -14,7 +14,7 @@ Prior Version
 Motivation
 ------------
 
-When using a plugin such as [copy-webpack-plugin](https://github.com/kevlened/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
+When using a plugin such as [copy-webpack-plugin](https://github.com/webpack-contrib/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
 This plugin plugins gives you the tools to fix that and also lets you inject the webpack `publicPath` or compilation `hash` into your assets paths if you so choose.
 

@@ -9,7 +9,7 @@ This **version is deprecated** in favour of [https://github.com/jharris4/html-we
 Enhances [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin)
 functionality by allowing you to specify js or css assets to be included.
 
-When using a plugin such as [copy-webpack-plugin](https://github.com/kevlened/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
+When using a plugin such as [copy-webpack-plugin](https://github.com/webpack-contrib/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
 This plugin allows you to force some of these assets to be included in the output from html-webpack-plugin.
 
