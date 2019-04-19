@@ -44,7 +44,7 @@ output: {
 },
 plugins: [
   new HtmlWebpackPlugin(),
-  new HtmlWebpackTagsPlugin({ assets: ['a.js', 'b.css'], append: true })
+  new HtmlWebpackTagsPlugin({ tags: ['a.js', 'b.css'], append: true })
 ]
 ```
 
@@ -66,32 +66,32 @@ Options
 -------
 The available options are:
 
-- `jsExtensions:string|array` - The file extensions to use when attempting to determine if an `assets` object is a `script`.
+- `jsExtensions:string|array` - The file extensions to use when attempting to determine if a `tag` object is a `script`.
 
-- `cssExtensions:string|array` - The file extensions to use when attempting to determine if an `assets` object is a `link`.
+- `cssExtensions:string|array` - The file extensions to use when attempting to determine if a `tag` object is a `link`.
 
-- `append:boolean` - Use `true` to `append` assets or `false` to `prepend` assets.
+- `append:boolean` - Use `true` to `append` tags or `false` to `prepend` tags.
 
 
 - `publicPath`: `boolean` or `string`, or `function(path:string, publicPath:string) => any:string` - (**default** `true`)
 
-  * Determines hether the assets should be prepended with webpack's public path or a custom publicPath (string or function).
+  * Determines whether the tag assets should be prepended with webpack's public path or a custom publicPath (string or function).
 
-  * A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all assets with the given string. Default is `true`.
+  * A value of `false` may be used to disable prefixing with webpack's publicPath, or a value like `myPublicPath/` may be used to prefix all tag assets with the given string. Default is `true`.
 
 - `hash`: `boolean` or `function(path: string, hash: string) => any: string` - (**default** `false`)
 
-  Specifying whether the assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
+  Specifying whether the tag assets should be appended with webpack's compilation hash. This is useful for cache busting. Default is `false`.
 
 - `files`: `string` or `array` - (**default** `[]`)
 
-  Files that the assets will be added to. Using this option can be necessary if you are using multiple instances of the this plugin or `html-webpack-plugin` plugin instances.
+  Files that the tags will be added to. Using this option can be necessary if you are using multiple instances of the this plugin or `html-webpack-plugin` plugin instances.
 
-  By default the assets will be included in all files. If files are defined, the assets will only be included in specified file globs (uses the [minimatch](https://github.com/isaacs/minimatch) package).
+  By default the tags will be injected in all files. If files are defined, the tags will only be injected in specified file globs (uses the [minimatch](https://github.com/isaacs/minimatch) package).
 
-- `links:string|array|object` - (**default** `[]`) - Shortcut to add assets that are all `type` `css`. Will be added **after** any `assets` values.
+- `links:string|array|object` - (**default** `[]`) - Shortcut to add tags that are all `type` `css`. Will be added **after** any `tags` values.
 
-- `scripts:string|array|object` - (**default** `[]`) - Shortcut to add assets that are all `type` `js`. Will be added **after** any `assets` values.
+- `scripts:string|array|object` - (**default** `[]`) - Shortcut to add tags that are all `type` `js`. Will be added **after** any `tags` values.
 
 - `tags:string|array|object` - (**default** `[]`)
 
@@ -130,7 +130,7 @@ Examples
 
 _____
 
-Using `HtmlWebpackTagsPlugin` and `CopyWebpackPlugin` to include assets to `html-webpack-plugin` template :
+Using `HtmlWebpackTagsPlugin` and `CopyWebpackPlugin` to inject asset tags into `html-webpack-plugin` template :
 
 ```javascript
 plugins: [
@@ -140,7 +140,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    tags: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false
   })
 ]
@@ -158,11 +158,11 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    tags: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false
   }),
   new HtmlWebpackTagsPlugin({
-    assets: ['css/custom.css'],
+    tags: ['css/custom.css'],
     append: true
   })
 ]
@@ -176,7 +176,7 @@ Using custom `jsExtensions` :
 plugins: [
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: ['dist/output.js', 'lib/content.jsx'],
+    tags: ['dist/output.js', 'lib/content.jsx'],
     append: false,
     jsExtensions: ['.js', '.jsx']
   })
@@ -195,7 +195,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    tags: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     publicPath: 'myPublicPath/'
   })
@@ -204,13 +204,13 @@ plugins: [
 
 _____
 
-Or to include assets without prepending the `publicPath`:
+Or to include tag assets without prepending the `publicPath`:
 
 ```javascript
 plugins: [
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: ['css/no-public-path.min.css', 'http://some.domain.com.js'],
+    tags: ['css/no-public-path.min.css', 'http://some.domain.com.js'],
     append: false,
     publicPath: false
   })
@@ -229,7 +229,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: [
+    tags: [
       '/css/bootstrap.min.css',
       '/css/bootstrap-theme.min.css',
       { path: 'https://fonts.googleapis.com/css?family=Material+Icons', type: 'css' }
@@ -254,7 +254,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: [
+    tags: [
       '/css/bootstrap.min.css',
       { path: '/css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }
     ],
@@ -278,7 +278,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
+    tags: ['css/bootstrap.min.css', 'css/bootstrap-theme.min.css'],
     append: false,
     hash: true
   })
@@ -297,8 +297,8 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: [{ path: 'js', glob: '*.js', globPath: 'somepath' }],
-    assets: [{ path: 'css', glob: '*.css', globPath: 'somepath' }],
+    tags: [{ path: 'js', glob: '*.js', globPath: 'somepath' }],
+    tags: [{ path: 'css', glob: '*.css', globPath: 'somepath' }],
     append: false,
     hash: function(assetName, hash) {
       assetName = assetName.replace(/\.js$/, '.' + hash + '.js');
@@ -327,12 +327,12 @@ plugins: [
   }),
   new HtmlWebpackTagsPlugin({
     files: ['a/**/*.html'],
-    assets: ['css/a.css'],
+    tags: ['css/a.css'],
     append: true
   }),
   new HtmlWebpackTagsPlugin({
     files: ['b/**/*.html'],
-    assets: ['css/b.css'],
+    tags: ['css/b.css'],
     append: true
   })
 ]
@@ -340,7 +340,7 @@ plugins: [
 
 _____
 
-Specifying assets usings a `glob`
+Specifying tag assets usings a `glob`
 
 Note that since `copy-webpack-plugin` does not actually copy the files to webpack's output directory until *after* `html-webpack-plugin` has completed, it is necessary to use the `globPath` to retrieve filename matches relative to the original location of any such files.
 
@@ -352,7 +352,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: [{ path: 'css', glob: '*.css', globPath: 'node_modules/bootstrap/dist/css/' }],
+    tags: [{ path: 'css', glob: '*.css', globPath: 'node_modules/bootstrap/dist/css/' }],
     append: true
   })
 ]
@@ -360,7 +360,7 @@ plugins: [
 
 _____
 
-Specifying `links` (a shortcut for specifying assets of `type` `css`)
+Specifying `links` (a shortcut for specifying link vs script tags)
 
 ```javascript
 output: {
@@ -373,7 +373,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    assets: [],
+    tags: [],
     append: true,
     links: [
       {
@@ -434,14 +434,14 @@ output: {
 plugins: [
   new HtmlWebpackPlugin({ inject: false }),
   new HtmlWebpackTagsPlugin({
-    assets: [{ path: 'css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }],
+    tags: [{ path: 'css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }],
     links: [{ href: 'the-ref', attributes: { rel: 'icon' } }],
     append: true
   })
 ]
 ```
 
-You will need to add the following to your *template* `index.html` to get assets to be **generated**:
+You will need to add the following to your *template* `index.html` to get tags to be **generated**:
 
 ```html
 <head>
