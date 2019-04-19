@@ -1253,8 +1253,9 @@ function runTestsForOption (options, runExtraTests) {
     optionTag //   = 'script' || 'link'
   } = options;
 
-  const optionAttr = optionTag === 'script' ? 'src' : 'href';
-  const optionType = optionTag === 'script' ? 'js' : 'css';
+  const isScript = optionTag === 'script';
+  const optionAttr = isScript ? 'src' : 'href';
+  const optionType = isScript ? 'js' : 'css';
 
   const createWebpackConfig = ({
     webpackPublicPath = void 0,
@@ -1691,6 +1692,68 @@ function runTestsForOption (options, runExtraTests) {
       // expect(theFunction).toThrowError(/(HtmlWebpackPlugin: could not load file)/);
     });
   });
+
+  if (isScript) {
+    describe(`options.${optionName} var`, () => {
+      it(`should add the webpack external when var and varName are used`, done => {
+        webpack(createWebpackConfig({
+          options: {
+            [optionName]: {
+              path: 'foobar',
+              var: 'myVar',
+              varName: 'myVarName',
+              sourcePath: path.join(FIXTURES_PATH, 'other')
+            }
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          expect(JSON.stringify(result.compilation.options.externals)).toBe('{"myVarName":"myVar"}');
+          const htmlFile = path.resolve(__dirname, '../dist/index.html');
+          fs.readFile(htmlFile, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
+            expect($('link').length).toBe(1 + (optionTag === 'link' ? 1 : 0));
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($(`${optionTag}[${optionAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+            done();
+          });
+        });
+      });
+
+      it(`should not add the webpack external when var and varName are not used`, done => {
+        webpack(createWebpackConfig({
+          options: {
+            [optionName]: {
+              path: 'foobar',
+              sourcePath: path.join(FIXTURES_PATH, 'other')
+            }
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          expect(JSON.stringify(result.compilation.options.externals)).toBe('{}');
+          const htmlFile = path.resolve(__dirname, '../dist/index.html');
+          fs.readFile(htmlFile, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
+            expect($('link').length).toBe(1 + (optionTag === 'link' ? 1 : 0));
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($(`${optionTag}[${optionAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+            done();
+          });
+        });
+      });
+    });
+  }
 
   if (runExtraTests) {
     runExtraTests();
