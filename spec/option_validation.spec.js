@@ -402,6 +402,32 @@ function runTestsForOption (optionName, type, runExtraTests) {
       }
       done();
     });
+
+    if (isScript) {
+      it(`should not throw an error if any of the ${optionName} options are objects with var and varName properties that are strings`, done => {
+        const theFunction = () => {
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, var: 'a', varName: 'A' }, `bar${ext}`] });
+        };
+        expect(theFunction).not.toThrowError();
+        done();
+      });
+
+      it(`should throw an error if any of the ${optionName} options are objects with var but not varName string properties`, done => {
+        const theFunction = () => {
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, var: 'a' }, `bar${ext}`] });
+        };
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var and varName should both be strings)`));
+        done();
+      });
+
+      it(`should throw an error if any of the ${optionName} options are objects with varName but not var string properties`, done => {
+        const theFunction = () => {
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, varName: 'A' }, `bar${ext}`] });
+        };
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var and varName should both be strings)`));
+        done();
+      });
+    }
   });
 
   if (runExtraTests) {
