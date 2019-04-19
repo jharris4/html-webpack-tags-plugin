@@ -140,13 +140,16 @@ describe('option validation', () => {
   });
 
   describe('options[tags|links|scripts]', () => {
-    runTestsForOption('tags', runTestsForAssetType);
-    runTestsForOption('links');
-    runTestsForOption('scripts');
+    runTestsForOption('tags', 'link', runTestsForAssetType);
+    runTestsForOption('tags', 'script', runTestsForAssetType);
+    runTestsForOption('links', 'link');
+    runTestsForOption('scripts', 'script');
   });
 });
 
-function runTestsForOption (optionName, runExtraTests) {
+function runTestsForOption (optionName, type, runExtraTests) {
+  const isScript = type === 'script';
+  const ext = isScript ? '.js' : '.css';
   describe(`options.${optionName}`, () => {
     it(`should throw an error if the ${optionName} are not an array or string or object`, done => {
       const theFunction = () => {
@@ -159,7 +162,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains objects and a boolean`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, false, { path: 'b.css' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, false, { path: `b${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
@@ -168,7 +171,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains string and a boolean`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: ['foo.js', true, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo.js`, true, `bar.css`] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
@@ -177,7 +180,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should not throw an error if the ${optionName} contains strings and objects`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: ['foo.js', { path: 'file.js' }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo.js`, { path: `file.js` }, `bar.css`] });
       };
 
       expect(theFunction).not.toThrowError();
@@ -188,7 +191,7 @@ function runTestsForOption (optionName, runExtraTests) {
   describe(`options.${optionName} path`, () => {
     it(`should throw an error if the ${optionName} contains an element that is an empty object`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, {}, { path: 'b.css' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, {}, { path: `b${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object must have a string path property)`));
@@ -197,7 +200,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with a non string path`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 123, type: 'js' }, { path: 'c.css' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: 123, type: 'js' }, { path: 'c.css' }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object must have a string path property)`));
@@ -206,7 +209,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should not throw an error if the ${optionName} contains elements that are all objects that have a path`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css' }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}` }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).not.toThrowError();
@@ -217,7 +220,7 @@ function runTestsForOption (optionName, runExtraTests) {
   describe(`options.${optionName} publicPath`, () => {
     it(`should throw an error if the ${optionName} contains an element that is an object with publicPath set to string`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', publicPath: 'string' }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: 'string' }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
@@ -226,7 +229,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with publicPath set to object`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', publicPath: {} }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: {} }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
@@ -235,7 +238,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with publicPath set to number`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', publicPath: 0 }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: 0 }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
@@ -244,7 +247,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with publicPath set to array`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', publicPath: [] }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: [] }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
@@ -253,7 +256,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should not throw an error if the ${optionName} contains an element that is an object with publicPath set to true`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js', publicPath: true }, { path: 'b.css' }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}`, publicPath: true }, { path: `b${ext}` }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).not.toThrowError();
@@ -264,7 +267,7 @@ function runTestsForOption (optionName, runExtraTests) {
   describe(`options.${optionName} attributes`, () => {
     it(`should throw an error if the ${optionName} contains an element that is an object with non object string attributes`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', attributes: '' }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, attributes: '' }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have an object attributes property)`));
@@ -273,7 +276,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with array attributes`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', attributes: [] }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, attributes: [] }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have an object attributes property)`));
@@ -282,7 +285,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with number attributes`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', attributes: 0 }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, attributes: 0 }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have an object attributes property)`));
@@ -291,7 +294,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with boolean attributes`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', attributes: true }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, attributes: true }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have an object attributes property)`));
@@ -300,17 +303,16 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should not throw an error if the ${optionName} contains an element that is an object with empty object attributes`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'a.js' }, { path: 'b.css', attributes: {} }, { path: 'c.js' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, attributes: {} }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).not.toThrowError();
       done();
     });
 
-    // TODO
     it('should throw an error if any of the tags options are objects with an attributes property that is not an object', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithExtension.js', attributes: 'foobar' }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `pathWithExtension${ext}`, attributes: 'foobar' }, `bar${ext}`] });
       };
       expect(theFunction).toThrowError(/(options\.tags object should have an object attributes property)/);
       done();
@@ -318,7 +320,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it('should throw an error if any of the tags options are objects with an attributes property with non string or boolean values', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: null, enabled: true } }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `pathWithExtension${ext}`, attributes: { crossorigin: 'crossorigin', id: null, enabled: true } }, `bar${ext}`] });
       };
       expect(theFunction).toThrowError(/(options\.tags object attribute values should strings, booleans or numbers)/);
       done();
@@ -326,7 +328,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it('should not throw an error if any of the tags options are objects with an attributes property with string or boolean values', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithExtension.js', attributes: { crossorigin: 'crossorigin', id: 'test', enabled: true } }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `pathWithExtension${ext}`, attributes: { crossorigin: 'crossorigin', id: 'test', enabled: true } }, `bar${ext}`] });
       };
       expect(theFunction).not.toThrowError();
       done();
@@ -334,7 +336,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it('should not throw an error if any of the tags options are objects without an attributes property', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `pathWithExtension${ext}` }, `bar${ext}`] });
       };
       expect(theFunction).not.toThrowError();
       done();
@@ -344,7 +346,7 @@ function runTestsForOption (optionName, runExtraTests) {
   describe(`options.${optionName} glob`, () => {
     it(`should throw an error if any of the ${optionName} options are objects with a glob property that is not a string`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: ['foo.js', { path: 'a.js', glob: 123, type: 'js' }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, glob: 123, type: 'js' }, `bar${ext}`] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string glob property)`));
@@ -353,7 +355,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if any of the ${optionName} options are objects with glob specified but globPath missing`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: ['foo.js', { path: 'pathWithExtension.js', glob: 'withoutExtensions*' }, 'bar.css'], append: false });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, glob: 'withoutExtensions*' }, `bar${ext}`], append: false });
       };
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string globPath property)`));
       done();
@@ -361,7 +363,7 @@ function runTestsForOption (optionName, runExtraTests) {
 
     it(`should throw an error if any of the ${optionName} options are objects with globPath specified but glob missing`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: ['foo.js', { path: 'pathWithExtension.js', globPath: 'withoutExtensions*' }, 'bar.css'], append: false });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, globPath: 'withoutExtensions*' }, `bar${ext}`], append: false });
       };
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string glob property)`));
       done();
@@ -380,7 +382,7 @@ function runTestsForOption (optionName, runExtraTests) {
   describe(`options.${optionName} sourcePath`, () => {
     it(`should throw an error if any of the ${optionName} options are objects with an sourcePath property that is not a string`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: ['foo.js', { path: 'a.js', sourcePath: 123, type: 'js' }, 'bar.css'] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, sourcePath: 123, type: 'js' }, `bar${ext}`] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string sourcePath property)`));
@@ -388,16 +390,30 @@ function runTestsForOption (optionName, runExtraTests) {
     });
   });
 
+  describe(`options.${optionName} var`, () => {
+    it(`should throw an error if any of the ${optionName} options are objects with var property that is not a string`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, var: 123 }, `bar${ext}`] });
+      };
+      if (isScript) {
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var and varName should both be strings)`));
+      } else {
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var or varName should not be used)`));
+      }
+      done();
+    });
+  });
+
   if (runExtraTests) {
-    runExtraTests();
+    runExtraTests(ext);
   }
 }
 
-function runTestsForAssetType () {
+function runTestsForAssetType (ext) {
   describe(`options.tags type`, () => {
     it('should throw an error if any of the tags options are objects with an invalid type property', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'baz.js', type: 'foo' }, 'bar.css'], append: false });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `baz${ext}`, type: 'foo' }, `bar${ext}`], append: false });
       };
       expect(theFunction).toThrowError(/(options\.tags type must be css or js \(foo\))/);
       done();
@@ -413,7 +429,7 @@ function runTestsForAssetType () {
 
     it('should throw an error if any of the tags options are objects without a type property that cannot be inferred from the path', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithoutExtension' }, 'bar.css'], append: false });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: 'pathWithoutExtension' }, `bar${ext}`], append: false });
       };
       expect(theFunction).toThrowError(/(options\.tags could not determine asset type for \(pathWithoutExtension\))/);
       done();
@@ -421,7 +437,7 @@ function runTestsForAssetType () {
 
     it('should not throw an error if any of the tags options are objects without a type property that can be inferred from the path', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithExtension.js' }, 'bar.css'], append: false });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `pathWithExtension${ext}` }, `bar${ext}`], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
@@ -429,7 +445,7 @@ function runTestsForAssetType () {
 
     it('should not throw an error if any of the tags options are objects without a type property that can be inferred from the glob', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ tags: ['foo.js', { path: 'pathWithoutExtension', globPath: FIXTURES_PATH, glob: 'glo*.js' }, 'bar.css'], append: false });
+        return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: '', globPath: FIXTURES_PATH, glob: `glo*${ext}` }, `bar${ext}`], append: false });
       };
       expect(theFunction).not.toThrowError();
       done();
