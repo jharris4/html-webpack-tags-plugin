@@ -1613,7 +1613,8 @@ function runTestsForOption (options, runExtraTests) {
     });
 
     it(`should throw an error when the ${optionName} assetPath does not point to a valid js file`, done => {
-      const badAssetPath = path.join(FIXTURES_PATH, 'does-not-exist.js');
+      const badFilename = 'does-not-exist.js';
+      const badAssetPath = path.join(FIXTURES_PATH, badFilename);
       webpack(createWebpackConfig({
         options: {
           [optionName]: {
@@ -1625,7 +1626,7 @@ function runTestsForOption (options, runExtraTests) {
         expect(err).toBeFalsy();
         const errorText = JSON.stringify(result.compilation.errors);
         expect(errorText).toContain('could not load file');
-        expect(errorText).toContain(badAssetPath);
+        expect(errorText).toContain(badFilename);
         done();
       });
     });
