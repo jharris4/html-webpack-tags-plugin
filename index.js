@@ -158,19 +158,19 @@ function getAssetObjects (asset, optionName) {
       });
     }
     if (isDefined(asset.glob) || isDefined(asset.globPath)) {
-        const { glob: assetGlob, globPath, ...otherAssetProperties } = asset;
-        assert(isString(assetGlob), `${PLUGIN_NAME} options.${optionName} object should have a string glob property`);
-        assert(isString(globPath), `${PLUGIN_NAME} options.${optionName} object should have a string globPath property`);
-        const globAssets = glob.sync(assetGlob, { cwd: globPath });
-        const globAssetPaths = globAssets.map(globAsset => slash(path.join(asset.path, globAsset)));
-        assert(globAssetPaths.length > 0, `${PLUGIN_NAME} options.${optionName} object glob found no files (${asset.path} ${assetGlob} ${globPath})`);
-        assetObjects = [];
-        globAssetPaths.forEach(globAssetPath => {
-          assetObjects.push({
-            ...otherAssetProperties,
-            path: globAssetPath
-          });
+      const { glob: assetGlob, globPath, ...otherAssetProperties } = asset;
+      assert(isString(assetGlob), `${PLUGIN_NAME} options.${optionName} object should have a string glob property`);
+      assert(isString(globPath), `${PLUGIN_NAME} options.${optionName} object should have a string globPath property`);
+      const globAssets = glob.sync(assetGlob, { cwd: globPath });
+      const globAssetPaths = globAssets.map(globAsset => slash(path.join(asset.path, globAsset)));
+      assert(globAssetPaths.length > 0, `${PLUGIN_NAME} options.${optionName} object glob found no files (${asset.path} ${assetGlob} ${globPath})`);
+      assetObjects = [];
+      globAssetPaths.forEach(globAssetPath => {
+        assetObjects.push({
+          ...otherAssetProperties,
+          path: globAssetPath
         });
+      });
     } else {
       assetObjects = [asset];
     }
