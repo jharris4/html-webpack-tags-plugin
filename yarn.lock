@@ -183,6 +183,11 @@ acorn@^6.0.2, acorn@^6.0.5:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.1.tgz#7d25ae05bb8ad1f9b699108e1094ecd7884adc1f"
   integrity sha512-jPTiwtOxaHNaAPg/dmrJ/beuzLRnXtB0kQPQ8JpotKJgTB6rX6c8mlf315941pyjBSaPg8NHXS9fhP4u17DpGA==
 
+add-matchers@0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/add-matchers/-/add-matchers-0.6.2.tgz#faeb2fa9380228c1b0da5f21a655c69304dd2011"
+  integrity sha512-hVO2wodMei9RF00qe+506MoeJ/NEOdCMEkSJ12+fC3hx/5Z4zmhNiP92nJEF6XhmXokeB0hOtuQrjHCx2vmXrQ==
+
 ajv-errors@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ajv-errors/-/ajv-errors-1.0.1.tgz#f35986aceb91afadec4102fbd85014950cefa64d"
@@ -2083,6 +2088,13 @@ jasmine-core@~3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-3.4.0.tgz#2a74618e966026530c3518f03e9f845d26473ce3"
   integrity sha512-HU/YxV4i6GcmiH4duATwAbJQMlE0MsDIR5XmSVxURxKHn3aGAdbY1/ZJFmVRbKtnLwIxxMJD7gYaPsypcbYimg==
+
+jasmine-expect@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/jasmine-expect/-/jasmine-expect-4.0.1.tgz#48934ec5a3ba6b13dc0396eab8d4ddc336a0f7b3"
+  integrity sha512-tn+sdVx04MRHpW6ltIkEKANRO29C7AUdmkeupFrwbAawd8ICA/IZT9YsdIljGuxU+wLYoOJsaics6swnw2lO2g==
+  dependencies:
+    add-matchers "0.6.2"
 
 jasmine@^3.4.0:
   version "3.4.0"

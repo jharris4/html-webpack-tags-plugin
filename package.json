@@ -12,6 +12,9 @@
     "test": "jasmine",
     "debug": "node-debug jasmine"
   },
+  "unmockedModulePathPatterns": [
+    "jasmine-expect"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jharris4/html-webpack-include-assets-plugin.git"
@@ -35,6 +38,7 @@
     "css-loader": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",
     "jasmine": "^3.4.0",
+    "jasmine-expect": "^4.0.1",
     "mini-css-extract-plugin": "^0.6.0",
     "rimraf": "^2.6.3",
     "semistandard": "^13.0.1",

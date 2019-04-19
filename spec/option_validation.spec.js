@@ -1,5 +1,6 @@
 /* eslint-env jasmine */
 const path = require('path');
+require('jasmine-expect');
 
 const HtmlWebpackIncludeAssetsPlugin = require('../');
 
