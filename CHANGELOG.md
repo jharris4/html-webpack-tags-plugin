@@ -1,9 +1,19 @@
 # Change Log
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-https://github.com/jharris4/html-webpack-include-assets-plugin
+https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.1"></a>
+# [2.0.1](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.0...2.0.1) (2019-04-19)
+
+Version `2.0.1` renamed this package from `html-webpack-include-assets-plugin` to `html-webpack-tags-plugin`.
+
+### BREAKING CHANGES
+
+* The **assets** option was renamed to the **tags** option
+* The **asset.assetPath** option was renamed to **asset.sourcePath**
+
 <a name="2.0.0"></a>
-# [2.0.0](https://github.com/jharris4/html-webpack-include-assets-plugin/compare/1.0.10...2.0.0) (2019-04-18)
+# [2.0.0](https://github.com/jharris4/html-webpack-tags-plugin/compare/1.0.10...2.0.0) (2019-04-18)
 
 Version `2.0.0` is a full rewrite of this plugin using ES6 instead of ES5 source code.
 
@@ -25,15 +35,15 @@ Version `2.0.0` is a full rewrite of this plugin using ES6 instead of ES5 source
 
 
 <a name="1.0.10"></a>
-# [1.0.10](https://github.com/jharris4/html-webpack-include-assets-plugin/compare/1.0.9...1.0.10) (2018-04-12)
+# [1.0.10](https://github.com/jharris4/html-webpack-tags-plugin/compare/1.0.9...1.0.10) (2018-04-12)
 
 This is the last `1.0.x` version which supports **Node < 8.6**.
 
-* Rename links to cssAssets and improve test coverage ([7e78bec](https://github.com/jharris4/html-webpack-include-assets-plugin/commit/7e78bec))
-* Add selfClosingTag and voidTag to links ([97ac502](https://github.com/jharris4/html-webpack-include-assets-plugin/commit/97ac502))
-* misc cleanup ([6ca39ac](https://github.com/jharris4/html-webpack-include-assets-plugin/commit/6ca39ac))
+* Rename links to cssAssets and improve test coverage ([7e78bec](https://github.com/jharris4/html-webpack-tags-plugin/commit/7e78bec))
+* Add selfClosingTag and voidTag to links ([97ac502](https://github.com/jharris4/html-webpack-tags-plugin/commit/97ac502))
+* misc cleanup ([6ca39ac](https://github.com/jharris4/html-webpack-tags-plugin/commit/6ca39ac))
 
 <a name="1.0.9"></a>
-# [1.0.9](https://github.com/jharris4/html-webpack-include-assets-plugin/compare/1.0.8...1.0.9) (2018-04-12)
+# [1.0.9](https://github.com/jharris4/html-webpack-tags-plugin/compare/1.0.8...1.0.9) (2018-04-12)
 
 This version adds support for the `links` option, similar to the option in version `2.x` except `href` is used instead of `path`.
