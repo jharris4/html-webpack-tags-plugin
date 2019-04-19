@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.2"></a>
+# [2.0.2](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.1...2.0.2) (2019-04-19)
+
+Version `2.0.2` fixes bugs related to renaming the **assets** option name to **tags**.
+
 <a name="2.0.1"></a>
 # [2.0.1](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.0...2.0.1) (2019-04-19)
 
