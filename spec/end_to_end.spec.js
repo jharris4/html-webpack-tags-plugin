@@ -28,7 +28,7 @@ const rimraf = require('rimraf');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackIncludeAssetsPlugin = require('../');
+const HtmlWebpackTagsPlugin = require('../');
 
 const OUTPUT_DIR = path.join(__dirname, '../dist');
 const OUTPUT_FILENAME = '[name].js';
@@ -71,7 +71,7 @@ describe('end to end', () => {
           module: WEBPACK_MODULE,
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.js', append: true, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: true, publicPath: false })
           ]
         }, () => {});
       };
@@ -90,7 +90,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.js', append: true, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: true, publicPath: false })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -119,7 +119,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.css', append: true, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.css', append: true, publicPath: false })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -148,7 +148,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.js', append: false, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: false, publicPath: false })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -177,7 +177,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.css', append: false, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.css', append: false, publicPath: false })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -206,8 +206,8 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: ['foo.css', 'foo.js'], append: false, publicPath: false, debug: true }),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: ['bar.css', 'bar.js'], append: true, publicPath: false, debug: true })
+            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'foo.js'], append: false, publicPath: false, debug: true }),
+            new HtmlWebpackTagsPlugin({ tags: ['bar.css', 'bar.js'], append: true, publicPath: false, debug: true })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -242,7 +242,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: ['foo.css', 'bar.css', { path: 'baz.css' }], append: true, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'bar.css', { path: 'baz.css' }], append: true, publicPath: false })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -275,7 +275,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: ['foo.css', 'bar.css'], append: false, publicPath: false })
+            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'bar.css'], append: false, publicPath: false })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -308,7 +308,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({
+            new HtmlWebpackTagsPlugin({
               files: ['fail.html'],
               tags: 'foobar.js',
               append: true,
@@ -340,7 +340,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({
+            new HtmlWebpackTagsPlugin({
               files: ['*.html'],
               tags: 'foobar.js',
               append: true,
@@ -376,7 +376,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: ['foo.js', 'foo.jsx'], append: true, jsExtensions: ['.js', '.jsx'] })
+            new HtmlWebpackTagsPlugin({ tags: ['foo.js', 'foo.jsx'], append: true, jsExtensions: ['.js', '.jsx'] })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -407,7 +407,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: ['foo.css', 'foo.style'], append: true, cssExtensions: ['.css', '.style'] })
+            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'foo.style'], append: true, cssExtensions: ['.css', '.style'] })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -441,7 +441,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.js', append: false, publicPath: true })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: false, publicPath: true })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -473,10 +473,10 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin(
+            new HtmlWebpackTagsPlugin(
               { tags: 'local-with-public-path.js', append: false, publicPath: true }
             ),
-            new HtmlWebpackIncludeAssetsPlugin(
+            new HtmlWebpackTagsPlugin(
               { tags: ['local-without-public-path.js', 'http://www.foo.com/foobar.js'], append: false, publicPath: false }
             )
           ]
@@ -514,10 +514,10 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin(
+            new HtmlWebpackTagsPlugin(
               { tags: 'local-with-public-path.js', append: false, publicPath: true }
             ),
-            new HtmlWebpackIncludeAssetsPlugin(
+            new HtmlWebpackTagsPlugin(
               { tags: ['//www.foo.com/foobar.js'], append: false, publicPath: false }
             )
           ]
@@ -553,7 +553,7 @@ describe('end to end', () => {
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
             new HtmlWebpackPlugin(),
-            new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.js', append: false, publicPath: 'abc/' })
+            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: false, publicPath: 'abc/' })
           ]
         }, (err, result) => {
           expect(err).toBeFalsy();
@@ -576,22 +576,7 @@ describe('end to end', () => {
     });
 
     describe('options.hash', () => {
-      beforeEach(() => {
-        this.hashTestWebpackConfig = {
-          entry: { ...WEBPACK_ENTRY },
-          output: {
-            ...WEBPACK_OUTPUT,
-            publicPath: 'myPublic'
-          },
-          module: { ...WEBPACK_MODULE },
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin({ hash: true })
-          ]
-        };
-      });
-
-      const createWebpackHashConfig = ({ webpackPublicPath, htmlOptions, options }) => {
+      const createWebpackHashConfig = ({ webpackPublicPath, htmlOptions, options, copyOptions }) => {
         return {
           entry: { ...WEBPACK_ENTRY },
           output: {
@@ -601,8 +586,9 @@ describe('end to end', () => {
           module: { ...WEBPACK_MODULE },
           plugins: [
             new MiniCssExtractPlugin({ filename: '[name].css' }),
+            ...(copyOptions ? [new CopyWebpackPlugin(copyOptions)] : []),
             new HtmlWebpackPlugin(htmlOptions),
-            new HtmlWebpackIncludeAssetsPlugin(options)
+            new HtmlWebpackTagsPlugin(options)
           ]
         };
       };
@@ -613,8 +599,17 @@ describe('end to end', () => {
       };
 
       it('should not append hash if hash options are not provided', done => {
-        this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.css', append: false, publicPath: true }));
-        webpack(this.hashTestWebpackConfig, (err, result) => {
+        webpack(createWebpackHashConfig({
+          webpackPublicPath: 'myPublic/',
+          htmlOptions: {
+            hash: true
+          },
+          options: {
+            tags: 'foobar.css',
+            append: false,
+            publicPath: true
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const hash = result.compilation.hash;
@@ -653,8 +648,16 @@ describe('end to end', () => {
 
       it('should not append hash if hash options are set to false', done => {
         webpack(
-          createWebpackHashConfig({ webpackPublicPath: 'myPublic/', htmlOptions: { hash: true }, options: { tags: 'foobar.css', append: false, publicPath: true, hash: false } }),
-          (err, result) => {
+          createWebpackHashConfig({
+            webpackPublicPath: 'myPublic/',
+            htmlOptions: { hash: true },
+            options: {
+              tags: 'foobar.css',
+              append: false,
+              publicPath: true,
+              hash: false
+            }
+          }), (err, result) => {
             expect(err).toBeFalsy();
             expect(JSON.stringify(result.compilation.errors)).toBe('[]');
             const hash = result.compilation.hash;
@@ -786,9 +789,16 @@ describe('end to end', () => {
       });
 
       it('should not append hash if hash option in this plugin set to false and hash options in HtmlWebpackPlugin config are set to false', done => {
-        this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
-        this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.css', append: false, publicPath: true, hash: false }));
-        webpack(this.hashTestWebpackConfig, (err, result) => {
+        webpack(createWebpackHashConfig({
+          webpackPublicPath: 'myPublic/',
+          htmlOptions: { hash: false },
+          options: {
+            tags: 'foobar.css',
+            append: false,
+            publicPath: true,
+            hash: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -810,9 +820,16 @@ describe('end to end', () => {
         const hashReplacer = (assetName, hash) => {
           return assetName.replace(/\[hash\]/, hash);
         };
-        this.hashTestWebpackConfig.plugins[1] = new HtmlWebpackPlugin({ hash: false });
-        this.hashTestWebpackConfig.plugins.push(new HtmlWebpackIncludeAssetsPlugin({ tags: 'foobar.[hash].css', append: false, publicPath: true, hash: hashReplacer }));
-        webpack(this.hashTestWebpackConfig, (err, result) => {
+        webpack(createWebpackHashConfig({
+          webpackPublicPath: 'myPublic/',
+          htmlOptions: { hash: false },
+          options: {
+            tags: 'foobar.[hash].css',
+            append: false,
+            publicPath: true,
+            hash: hashReplacer
+          }
+        }), (err, result) => {
           const theHash = result.compilation.hash;
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
@@ -837,20 +854,18 @@ describe('end to end', () => {
           assetName = assetName.replace(/\.css$/, '.' + hash + '.css');
           return assetName;
         };
-        this.hashTestWebpackConfig.plugins = [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
-          new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({
+        webpack(createWebpackHashConfig({
+          webpackPublicPath: 'myPublic/',
+          copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
+          options: {
             tags: [
               { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' },
               { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }
             ],
             hash: hashInjector,
             append: true
-          })
-        ];
-        webpack(this.hashTestWebpackConfig, (err, result) => {
+          }
+        }), (err, result) => {
           const theHash = result.compilation.hash;
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
@@ -886,7 +901,7 @@ describe('end to end', () => {
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [
               'foo.js',
               'foo.css',
@@ -935,7 +950,7 @@ describe('end to end', () => {
             template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
             inject: false
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{
               path: 'assets/astyle.css',
               sourcePath: 'spec/fixtures/astyle.css'
@@ -978,7 +993,7 @@ describe('end to end', () => {
             template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
             inject: false
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
@@ -1015,12 +1030,12 @@ describe('end to end', () => {
             template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
             inject: false
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle-1.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href-1', attributes: { rel: 'the-rel-1', sizes: '16x16' } }]
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle-2.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
@@ -1059,12 +1074,12 @@ describe('end to end', () => {
             template: path.join(__dirname, 'fixtures', 'index.html'),
             inject: true
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle-1.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href-1', attributes: { rel: 'the-rel-1', sizes: '16x16' } }]
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle-2.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
@@ -1102,7 +1117,7 @@ describe('end to end', () => {
           new HtmlWebpackPlugin({
             template: path.join(__dirname, 'fixtures', 'index.html')
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
@@ -1138,7 +1153,7 @@ describe('end to end', () => {
           new HtmlWebpackPlugin({
             template: path.join(__dirname, 'fixtures', 'index.html')
           }),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
@@ -1172,7 +1187,7 @@ describe('end to end', () => {
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
@@ -1205,7 +1220,7 @@ describe('end to end', () => {
         plugins: [
           new MiniCssExtractPlugin({ filename: '[name].css' }),
           new HtmlWebpackPlugin(),
-          new HtmlWebpackIncludeAssetsPlugin({
+          new HtmlWebpackTagsPlugin({
             tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
@@ -1282,7 +1297,7 @@ function runTestsForOption (options, runExtraTests) {
         new MiniCssExtractPlugin({ filename: '[name].css' }),
         ...(preHtmlPlugin ? [preHtmlPlugin] : []),
         new HtmlWebpackPlugin(htmlOptions),
-        new HtmlWebpackIncludeAssetsPlugin(options)
+        new HtmlWebpackTagsPlugin(options)
       ]
     };
   };
