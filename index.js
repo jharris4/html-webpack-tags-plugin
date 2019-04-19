@@ -56,16 +56,16 @@ function isFunction (v) {
   return typeof v === 'function';
 }
 
-function getExtensions (options, key) {
-  let extensions = DEFAULT_OPTIONS[key];
-  if (isDefined(options[key])) {
-    if (isString(options[key])) {
-      extensions = [options[key]];
+function getExtensions (options, optionExtensionName) {
+  let extensions = DEFAULT_OPTIONS[optionExtensionName];
+  if (isDefined(options[optionExtensionName])) {
+    if (isString(options[optionExtensionName])) {
+      extensions = [options[optionExtensionName]];
     } else {
-      extensions = options[key];
-      assert(isArray(extensions), `HtmlWebpackIncludeAssetsPlugin options.${key} should be a string or array of strings (${extensions})`);
+      extensions = options[optionExtensionName];
+      assert(isArray(extensions), `HtmlWebpackIncludeAssetsPlugin options.${optionExtensionName} should be a string or array of strings (${extensions})`);
       extensions.forEach(function (extension) {
-        assert(isString(extension), `HtmlWebpackIncludeAssetsPlugin options.${key} array should only contain strings (${extension})`);
+        assert(isString(extension), `HtmlWebpackIncludeAssetsPlugin options.${optionExtensionName} array should only contain strings (${extension})`);
       });
     }
   }
@@ -76,8 +76,8 @@ function createExtensionsRegex (extensions) {
   return new RegExp(`.*(${extensions.join('|')})$`);
 }
 
-function getHasExtensions (options, key) {
-  const regexp = createExtensionsRegex(getExtensions(options, key));
+function getHasExtensions (options, optionExtensionName) {
+  const regexp = createExtensionsRegex(getExtensions(options, optionExtensionName));
   return value => regexp.test(value);
 }
 
@@ -94,7 +94,7 @@ function getAssetTypeCheckers (options) {
   };
 }
 
-function splitLinkScriptTags (options, key, assetObjects) {
+function splitLinkScriptTags (options, optionName, assetObjects) {
   const linkObjects = [];
   const scriptObjects = [];
   const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options);
@@ -102,7 +102,7 @@ function splitLinkScriptTags (options, key, assetObjects) {
   assetObjects.forEach(assetObject => {
     if (isDefined(assetObject.type)) {
       const { type, ...others } = assetObject;
-      assert(isType(type), `HtmlWebpackIncludeAssetsPlugin options.${key} type must be css or js (${type})`);
+      assert(isType(type), `HtmlWebpackIncludeAssetsPlugin options.${optionName} type must be css or js (${type})`);
       (isCss(type) ? linkObjects : scriptObjects).push({
         ...others
       });
@@ -113,7 +113,7 @@ function splitLinkScriptTags (options, key, assetObjects) {
       } else if (isAssetTypeJs(path)) {
         scriptObjects.push(assetObject);
       } else {
-        assert(false, `HtmlWebpackIncludeAssetsPlugin options.${key} could not determine asset type for (${path})`);
+        assert(false, `HtmlWebpackIncludeAssetsPlugin options.${optionName} could not determine asset type for (${path})`);
       }
     }
   });
@@ -121,47 +121,47 @@ function splitLinkScriptTags (options, key, assetObjects) {
   return [linkObjects, scriptObjects];
 }
 
-function getAssetObjects (asset, key) {
+function getAssetObjects (asset, optionName) {
   let assetObjects;
-  assert(isString(asset) || isObject(asset), `HtmlWebpackIncludeAssetsPlugin options.${key} items must be an object or string`);
+  assert(isString(asset) || isObject(asset), `HtmlWebpackIncludeAssetsPlugin options.${optionName} items must be an object or string`);
   if (isString(asset)) {
     assetObjects = [{
       path: asset
     }];
   } else {
-    assert(isString(asset.path), `HtmlWebpackIncludeAssetsPlugin options.${key} object must have a string path property`);
+    assert(isString(asset.path), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object must have a string path property`);
     if (isDefined(asset.publicPath)) {
       const { publicPath } = asset;
-      assert(isBoolean(publicPath) || isFunction(publicPath), `HtmlWebpackIncludeAssetsPlugin options.${key} object publicPath should be a boolean or function`);
+      assert(isBoolean(publicPath) || isFunction(publicPath), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object publicPath should be a boolean or function`);
       if (isFunction(publicPath)) {
-        assert(isString(publicPath('', '')), `HtmlWebpackIncludeAssetsPlugin options.${key} object publicPath should be a function that returns a string`);
+        assert(isString(publicPath('', '')), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object publicPath should be a function that returns a string`);
       }
     }
     if (isDefined(asset.hash)) {
       const { hash } = asset;
-      assert(isBoolean(hash) || isFunction(hash), `HtmlWebpackIncludeAssetsPlugin options.${key} object hash should be a boolean or function`);
+      assert(isBoolean(hash) || isFunction(hash), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object hash should be a boolean or function`);
       if (isFunction(hash)) {
-        assert(isString(hash('', '')), `HtmlWebpackIncludeAssetsPlugin options.${key} object hash should be a function that returns a string`);
+        assert(isString(hash('', '')), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object hash should be a function that returns a string`);
       }
     }
     if (isDefined(asset.sourcePath)) {
-      assert(isString(asset.sourcePath), `HtmlWebpackIncludeAssetsPlugin options.${key} object should have a string sourcePath property`);
+      assert(isString(asset.sourcePath), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object should have a string sourcePath property`);
     }
     if (isDefined(asset.attributes)) {
       const { attributes } = asset;
-      assert(isObject(attributes), `HtmlWebpackIncludeAssetsPlugin options.${key} object should have an object attributes property`);
+      assert(isObject(attributes), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object should have an object attributes property`);
       Object.keys(attributes).forEach(attribute => {
         const value = attributes[attribute];
-        assert(isString(value) || isBoolean(value) || isNumber(value), `HtmlWebpackIncludeAssetsPlugin options.${key} object attribute values should strings, booleans or numbers`);
+        assert(isString(value) || isBoolean(value) || isNumber(value), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object attribute values should strings, booleans or numbers`);
       });
     }
     if (isDefined(asset.glob) || isDefined(asset.globPath)) {
       const { glob: assetGlob, globPath, ...otherAssetProperties } = asset;
-      assert(isString(assetGlob), `HtmlWebpackIncludeAssetsPlugin options.${key} object should have a string glob property`);
-      assert(isString(globPath), `HtmlWebpackIncludeAssetsPlugin options.${key} object should have a string globPath property`);
+      assert(isString(assetGlob), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object should have a string glob property`);
+      assert(isString(globPath), `HtmlWebpackIncludeAssetsPlugin options.${optionName} object should have a string globPath property`);
       const globAssets = glob.sync(assetGlob, { cwd: globPath });
       const globAssetPaths = globAssets.map(globAsset => slash(path.join(asset.path, globAsset)));
-      assert(globAssetPaths.length > 0, `HtmlWebpackIncludeAssetsPlugin options.${key} object glob found no files (${asset.path} ${assetGlob} ${globPath})`);
+      assert(globAssetPaths.length > 0, `HtmlWebpackIncludeAssetsPlugin options.${optionName} object glob found no files (${asset.path} ${assetGlob} ${globPath})`);
       assetObjects = [];
       globAssetPaths.forEach(globAssetPath => {
         assetObjects.push({
@@ -176,18 +176,18 @@ function getAssetObjects (asset, key) {
   return assetObjects;
 }
 
-function getAllAssetObjects (options, key) {
+function getAllAssetObjects (options, optionName) {
   let assetObjects;
-  if (isDefined(options[key])) {
-    let assets = options[key];
-    assert(isString(assets) || isObject(assets) || isArray(assets), `HtmlWebpackIncludeAssetsPlugin options.${key} should be a string, object, or array (${assets})`);
+  if (isDefined(options[optionName])) {
+    const assets = options[optionName];
+    assert(isString(assets) || isObject(assets) || isArray(assets), `HtmlWebpackIncludeAssetsPlugin options.${optionName} should be a string, object, or array (${assets})`);
     if (isArray(assets)) {
       assetObjects = [];
       assets.forEach(asset => {
-        assetObjects = assetObjects.concat(getAssetObjects(asset, key));
+        assetObjects = assetObjects.concat(getAssetObjects(asset, optionName));
       });
     } else {
-      assetObjects = getAssetObjects(assets, key);
+      assetObjects = getAssetObjects(assets, optionName);
     }
   }
   return assetObjects;
@@ -330,6 +330,7 @@ function getAssetPath (assetObject, usePublicPath, addPublicPath, useHash, addHa
 HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
   const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip } = options;
+  const { append, scripts, links } = options;
 
   // Hook into the html-webpack-plugin processing
   const onCompilation = compilation => {
@@ -346,8 +347,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
       const pluginPublicPath = assets.publicPath;
       const compilationHash = compilation.hash;
       const assetPromises = [];
-
-      const { links, scripts, append } = options;
 
       const addAsset = assetPath => {
         try {
@@ -407,7 +406,6 @@ HtmlWebpackIncludeAssetsPlugin.prototype.apply = function (compiler) {
         }
       }
 
-      const { append, scripts, links } = this.options;
       var pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
       var pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
 
