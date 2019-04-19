@@ -939,7 +939,7 @@ describe('end to end', () => {
   });
 
   describe('options.links', () => {
-    it('should append links and assets together with a custom index.html template when inject is false and append is set to false', done => {
+    it('should append links and tags together with a custom index.html template when inject is false and append is set to false', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -982,7 +982,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is false and append is set to true', done => {
+    it('should append links and tags together with a custom index.html template when inject is false and append is set to true', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1019,7 +1019,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is false and append is set to true and false', done => {
+    it('should append links and tags together with a custom index.html template when inject is false and append is set to true and false', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1063,7 +1063,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when inject is true and append is set to true and false', done => {
+    it('should append links and tags together with a custom index.html template when inject is true and append is set to true and false', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1107,7 +1107,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when append is set to false', done => {
+    it('should append links and tags together with a custom index.html template when append is set to false', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1143,7 +1143,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together with a custom index.html template when append is set to true', done => {
+    it('should append links and tags together with a custom index.html template when append is set to true', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1179,7 +1179,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together when append is set to false', done => {
+    it('should append links and tags together when append is set to false', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1212,7 +1212,7 @@ describe('end to end', () => {
       });
     });
 
-    it('should append links and assets together when append is set to true', done => {
+    it('should append links and tags together when append is set to true', done => {
       webpack({
         entry: WEBPACK_ENTRY,
         output: WEBPACK_OUTPUT,
@@ -1249,7 +1249,7 @@ describe('end to end', () => {
 
 function runTestsForOption (options, runExtraTests) {
   const {
-    optionName, // = 'assets' || 'scripts' || 'links'
+    optionName, // = 'tags' || 'scripts' || 'links'
     optionTag //   = 'script' || 'link'
   } = options;
 
