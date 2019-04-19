@@ -94,7 +94,7 @@ function getAssetTypeCheckers (options) {
   };
 }
 
-function splitLinkScriptAssets (options, key, assetObjects) {
+function splitLinkScriptTags (options, key, assetObjects) {
   const linkObjects = [];
   const scriptObjects = [];
   const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options);
@@ -258,9 +258,9 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
 
     let links = [];
     let scripts = [];
-    if (isDefined(options.assets)) {
-      const assetObjects = getAllAssetObjects(options, 'assets');
-      const [linkObjects, scriptObjects] = splitLinkScriptAssets(options, 'assets', assetObjects);
+    if (isDefined(options.tags)) {
+      const assetObjects = getAllAssetObjects(options, 'tags');
+      const [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', assetObjects);
       links = links.concat(linkObjects);
       scripts = scripts.concat(scriptObjects);
     }
