@@ -202,11 +202,6 @@ function HtmlWebpackIncludeAssetsPlugin (options) {
       append = options.append;
     }
 
-    // TODO - this is wrong, need to return both addPublicPath and usePublicPath to enable asset object override
-    // if (isDefined(options.usePublicPath)) {
-
-    // }
-
     let usePublicPath = DEFAULT_OPTIONS.usePublicPath;
     let addPublicPath = DEFAULT_OPTIONS.addPublicPath;
     if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
