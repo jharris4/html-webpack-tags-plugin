@@ -633,6 +633,51 @@ Will append the following `<script>` element into the index template html
 
 Note that the second link's href was not prefixed with the webpack `publicPath` because the second link asset's **`publicPath`** was set to `false`.
 
+
+_____
+
+Specifying **`scripts`** with **`external`** options:
+
+```javascript
+output: {
+  publicPath: '/my-public-path/'
+},
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/js', to: 'js/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackTagsPlugin({
+    tags: [],
+    scripts: [
+      {
+        path: 'asset/path',
+        external: {
+          packageName: 'react',
+          variableName: 'React'
+        },
+        attributes: {
+          type: 'text/javascript'
+        }
+      }
+    ]
+  })
+]
+```
+
+Will add the following `properties` to the `webpack.compilation.options.externals`:
+
+```js
+const compilationConfig = {
+  ...otherProperties,
+  externals: {
+    "react": "React"
+  }
+};
+```
+
+This can be useful to control which packages webpack is bundling allowing to control bundling for some packages yourself.
+
 _____
 
 Caveats
@@ -641,6 +686,8 @@ Caveats
 Some users have encountered issues with plugin ordering.
 
 - It is advisable to always place any `HtmlWebpackPlugin` plugins **before** any `HtmlWebpackTagsPlugin` plugins in your webpack config.
+
+---
 
 Changing `HtmlWebpackPlugin.options.inject` from its **default value of true** may cause **issues**.
 
