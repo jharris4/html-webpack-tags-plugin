@@ -938,6 +938,77 @@ describe('end to end', () => {
     });
   });
 
+  describe('multiple plugins', () => {
+    it('should output all files when multiple plugins are used with varying append', done => {
+      webpack({
+        entry: WEBPACK_ENTRY,
+        output: WEBPACK_OUTPUT,
+        module: WEBPACK_MODULE,
+        plugins: [
+          new MiniCssExtractPlugin({ filename: '[name].css' }),
+          new HtmlWebpackPlugin(),
+          new HtmlWebpackTagsPlugin({
+            tags: [
+              'foo.js',
+              'foo.css'
+            ],
+            append: true,
+            publicPath: false
+          }),
+          new HtmlWebpackTagsPlugin({
+            links: 'bar.css',
+            append: false,
+            publicPath: false
+          }),
+          new HtmlWebpackTagsPlugin({
+            links: {
+              path: 'bar2.css'
+            },
+            scripts: 'bar.js',
+            append: true,
+            publicPath: false
+          }),
+          new HtmlWebpackTagsPlugin({
+            links: 'car.css',
+            append: true,
+            publicPath: false
+          }),
+          new HtmlWebpackTagsPlugin({
+            scripts: 'car.js',
+            append: false,
+            publicPath: false
+          })
+        ]
+      }, (err, result) => {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        const htmlFile = path.resolve(__dirname, '../dist/index.html');
+        fs.readFile(htmlFile, 'utf8', (er, data) => {
+          expect(er).toBeFalsy();
+          const $ = cheerio.load(data);
+          const scripts = $('script');
+          const links = $('link');
+
+          expect(scripts.length).toBe(5);
+          expect(scripts.get(0)).toBeTag({ tagName: 'script', attributes: { src: 'car.js' } });
+          expect(scripts.get(1)).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+          expect(scripts.get(2)).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+          expect(scripts.get(3)).toBeTag({ tagName: 'script', attributes: { src: 'foo.js', type: 'text/javascript' } });
+          expect(scripts.get(4)).toBeTag({ tagName: 'script', attributes: { src: 'bar.js', type: 'text/javascript' } });
+
+          expect(links.length).toBe(5);
+          expect(links.get(0)).toBeTag({ tagName: 'link', attributes: { href: 'bar.css', rel: 'stylesheet' } });
+          expect(links.get(1)).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+          expect(links.get(2)).toBeTag({ tagName: 'link', attributes: { href: 'foo.css', rel: 'stylesheet' } });
+          expect(links.get(3)).toBeTag({ tagName: 'link', attributes: { href: 'bar2.css', rel: 'stylesheet' } });
+          expect(links.get(4)).toBeTag({ tagName: 'link', attributes: { href: 'car.css', rel: 'stylesheet' } });
+
+          done();
+        });
+      });
+    });
+  });
+
   describe('options.links', () => {
     it('should append links and tags together with a custom index.html template when inject is false and append is set to false', done => {
       webpack({
