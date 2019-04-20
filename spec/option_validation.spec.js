@@ -390,41 +390,49 @@ function runTestsForOption (optionName, type, runExtraTests) {
     });
   });
 
-  describe(`options.${optionName} var`, () => {
-    it(`should throw an error if any of the ${optionName} options are objects with var property that is not a string`, done => {
+  describe(`options.${optionName} external`, () => {
+    it(`should throw an error if any of the ${optionName} options are objects with external property that is not an object`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, var: 123 }, `bar${ext}`] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: 123 }, `bar${ext}`] });
       };
       if (isScript) {
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var and varName should both be strings)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should be an object)`));
       } else {
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var or varName should not be used)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should not be used on non script tags)`));
       }
       done();
     });
 
     if (isScript) {
-      it(`should not throw an error if any of the ${optionName} options are objects with var and varName properties that are strings`, done => {
+      it(`should not throw an error if any of the ${optionName} options are objects with valid external objects`, done => {
         const theFunction = () => {
-          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, var: 'a', varName: 'A' }, `bar${ext}`] });
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { packageName: 'a', variableName: 'A' } }, `bar${ext}`] });
         };
         expect(theFunction).not.toThrowError();
         done();
       });
 
-      it(`should throw an error if any of the ${optionName} options are objects with var but not varName string properties`, done => {
+      it(`should throw an error if any of the ${optionName} options are objects with external that is an empty object`, done => {
         const theFunction = () => {
-          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, var: 'a' }, `bar${ext}`] });
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { } }, `bar${ext}`] });
         };
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var and varName should both be strings)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should have a string packageName and variableName property)`));
         done();
       });
 
-      it(`should throw an error if any of the ${optionName} options are objects with varName but not var string properties`, done => {
+      it(`should throw an error if any of the ${optionName} options are objects with external that has packageName but not variableName string properties`, done => {
         const theFunction = () => {
-          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, varName: 'A' }, `bar${ext}`] });
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { packageName: 'a' } }, `bar${ext}`] });
         };
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} var and varName should both be strings)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should have a string variableName property)`));
+        done();
+      });
+
+      it(`should throw an error if any of the ${optionName} options are objects with external that has variableName but not packageName string properties`, done => {
+        const theFunction = () => {
+          return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { variableName: 'A' } }, `bar${ext}`] });
+        };
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should have a string packageName property)`));
         done();
       });
     }

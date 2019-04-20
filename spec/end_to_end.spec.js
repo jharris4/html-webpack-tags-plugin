@@ -1694,21 +1694,23 @@ function runTestsForOption (options, runExtraTests) {
   });
 
   if (isScript) {
-    describe(`options.${optionName} var`, () => {
-      it(`should add the webpack external when var and varName are used`, done => {
+    describe(`options.${optionName} external`, () => {
+      it(`should add the webpack external when external is used`, done => {
         webpack(createWebpackConfig({
           options: {
             [optionName]: {
               path: 'foobar',
-              var: 'myVar',
-              varName: 'myVarName',
+              external: {
+                packageName: '@scope/my-package',
+                variableName: 'MyPackage'
+              },
               sourcePath: path.join(FIXTURES_PATH, 'other')
             }
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          expect(JSON.stringify(result.compilation.options.externals)).toBe('{"myVarName":"myVar"}');
+          expect(JSON.stringify(result.compilation.options.externals)).toBe('{"@scope/my-package":"MyPackage"}');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
           fs.readFile(htmlFile, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
@@ -1725,7 +1727,7 @@ function runTestsForOption (options, runExtraTests) {
         });
       });
 
-      it(`should not add the webpack external when var and varName are not used`, done => {
+      it(`should not add the webpack external when external is not used`, done => {
         webpack(createWebpackConfig({
           options: {
             [optionName]: {

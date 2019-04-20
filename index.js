@@ -195,16 +195,21 @@ function getAllAssetObjects (options, optionName) {
   return assetObjects;
 }
 
-function filterVarAssetObjects (assetObjects, filterName, optionName) {
+function filterExternalAssetObjects (assetObjects, filterName, optionName) {
   const allowed = filterName === 'scripts';
   if (isArray(assetObjects)) {
     assetObjects.forEach(assetObject => {
-      if (isObject(assetObject) && (isDefined(assetObject.var) || isDefined(assetObject.varName))) {
+      if (isObject(assetObject) && isDefined(assetObject.external)) {
+        const { external } = assetObject;
         try {
           if (allowed) {
-            assert(isString(assetObject.var) && isString(assetObject.varName), `${PLUGIN_NAME} options.${optionName} var and varName should both be strings`);
+            assert(isObject(external), `${PLUGIN_NAME} options.${optionName} external should be an object`);
+            const { packageName, variableName } = external;
+            assert(isString(packageName) || isString(variableName), `${PLUGIN_NAME} options.${optionName} external should have a string packageName and variableName property`);
+            assert(isString(packageName), `${PLUGIN_NAME} options.${optionName} external should have a string packageName property`);
+            assert(isString(variableName), `${PLUGIN_NAME} options.${optionName} external should have a string variableName property`);
           } else {
-            assert(false, `${PLUGIN_NAME} options.${optionName} var or varName should not be used`);
+            assert(false, `${PLUGIN_NAME} options.${optionName} external should not be used on non script tags`);
           }
         } catch (err) {
           throw err;
@@ -283,19 +288,19 @@ function HtmlWebpackTagsPlugin (options) {
     if (isDefined(options.tags)) {
       const assetObjects = getAllAssetObjects(options, 'tags');
       let [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', assetObjects);
-      linkObjects = filterVarAssetObjects(linkObjects, 'links', 'tags');
-      scriptObjects = filterVarAssetObjects(scriptObjects, 'scripts', 'tags');
+      linkObjects = filterExternalAssetObjects(linkObjects, 'links', 'tags');
+      scriptObjects = filterExternalAssetObjects(scriptObjects, 'scripts', 'tags');
       links = links.concat(linkObjects);
       scripts = scripts.concat(scriptObjects);
     }
     if (isDefined(options.links)) {
       let linkObjects = getAllAssetObjects(options, 'links');
-      linkObjects = filterVarAssetObjects(linkObjects, 'links', 'links');
+      linkObjects = filterExternalAssetObjects(linkObjects, 'links', 'links');
       links = links.concat(linkObjects);
     }
     if (isDefined(options.scripts)) {
       let scriptObjects = getAllAssetObjects(options, 'scripts');
-      scriptObjects = filterVarAssetObjects(scriptObjects, 'scripts', 'scripts');
+      scriptObjects = filterExternalAssetObjects(scriptObjects, 'scripts', 'scripts');
       scripts = scripts.concat(scriptObjects);
     }
 
@@ -360,8 +365,9 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 
   const externals = compiler.options.externals || {};
   scripts.forEach(script => {
-    if (isString(script.var) && isString(script.varName)) {
-      externals[script.varName] = script.var;
+    const { external } = script;
+    if (isObject(external)) {
+      externals[external.packageName] = external.variableName;
     }
   });
   compiler.options.externals = externals;
@@ -440,8 +446,8 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         }
       }
 
-      var pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
-      var pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
+      let pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
+      let pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
 
       pluginHead = pluginHead.slice(
         append ? pluginHead.length - links.length : 0,
