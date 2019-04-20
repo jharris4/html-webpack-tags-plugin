@@ -8,9 +8,9 @@ by letting you specify script or link tags to inject.
 Prior Version
 ------------
 
-- `html-webpack-tags-plugin` requires ** Node >= 8.6 **
+- `html-webpack-tags-plugin` requires **Node >= 8.6**.
 - This plugin used to be called `html-webpack-include-assets-plugin`.
-- For older version of Node, please install [html-webpack-include-assets-plugin version 1.x](https://github.com/jharris4/html-webpack-tags-plugin/releases/tag/1.0.10) and consult the [old readme](https://github.com/jharris4/html-webpack-tags-plugin/blob/master/README.V1.md)
+- For older version of Node, please install [html-webpack-include-assets-plugin version 1.x](https://github.com/jharris4/html-webpack-tags-plugin/releases/tag/1.0.10).
 
 Motivation
 ------------
@@ -228,10 +228,10 @@ When tag assets are specified as **Object**s, the following tag asset options ar
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
-|**`path`**|`{String}`|`**required**`|The tag asset file path|
-|**`type`**|`{'js'\|'css'}`|`undefined`|For **`tags`** tag assets this may be used to specify whether the tag is a `link` or a `script`|
-|**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with asset path for each match result|
-|**`attributes`**|`{Object}`|`undefined`|The attributes to be injected into the html tags. Some attributes are filtered out by `html-webpack-plugin`. **Requires** that you set the `html-webpack-plugin` options to: `{ inject: true }`|
+|**`path`**|`{String}`|**`required`**|The tag asset file path|
+|**`type`**|`{'js'\|'css'}`|`undefined`|For **`tags`** assets this may be used to specify whether the tag is a `link` or a `script`|
+|**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together these two options specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with asset path for each match result|
+|**`attributes`**|`{Object}`|`undefined`|The attributes to be injected into the html tags. Some attributes are filtered out by `html-webpack-plugin`. **(Recommended:** set `html-webpack-plugin` option: `{ inject: true }`**)**|
 |**`sourcePath`**|`{String}`|`undefined`|Specify a source path to be added as an entry to `html-webpack-plugin`. Useful to trigger webpack recompilation after the asset has changed|
 |**`hash`**|`{Boolean\|Function}`|`undefined`|Whether to inject the the webpack `compilation.hash` into the asset path|
 |**`publicPath`**|`{Boolean\|Function}`|`undefined`|Whether to inject the (webpack) `publicPath` into the asset path|
@@ -355,7 +355,7 @@ plugins: [
 
 _____
 
-Using custom **`publicPath`**:
+Using custom **`jsExtensions`**:
 
 ```javascript
 plugins: [
@@ -683,25 +683,59 @@ _____
 Caveats
 -------
 
+___
+
+#### Plugin Ordering
+
 Some users have encountered issues with plugin ordering.
 
 - It is advisable to always place any `HtmlWebpackPlugin` plugins **before** any `HtmlWebpackTagsPlugin` plugins in your webpack config.
 
 ---
 
-Changing `HtmlWebpackPlugin.options.inject` from its **default value of true** may cause **issues**.
+#### Webpack `externals`
 
-- This plugin **requires** `HtmlWebpackPlugin.options.inject` to be `true` for attribute injection to work.
+Setting the **`external`** option for a `script` asset may require caution to ensure that the scripts are in the correct order. This will be verified once this plugin package has `browser testing` capabilities.
 
+In the meantime it is advisable to always set **`append`** to **false** so that `external` \<script\> tags are always inserted **before** the `webpack` bundle \<script\> tags.
 
-If you setup your webpack config to have `HtmlWebpackPlugin.options.inject: false` like this:
+---
+
+#### HtmlWebpackPlugin `inject` option
+
+Changing HtmlWebpackPlugin **`inject`** option from its `default value` of **true** may cause issues.
+
+- This plugin **recommends** that the HtmlWebpackPlugin **`inject`** option to be **true** for attribute injection to work.
+
+**Disabling injection** means that you are agreeing to template how the tags should be generated in your `templates/index.html` file like this:
+
+```html
+<html>
+  <head>
+    <!-- other head content -->
+    <% for (var cssIndex = 0; cssIndex < htmlWebpackPlugin.files.css.length; cssIndex++) { %>
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[cssIndex] %>">
+    <% } %>
+  </head>
+  <body>
+    <!-- other body content -->
+    <% for (var jsIndex = 0; jsIndex < htmlWebpackPlugin.files.js.length; jsIndex++) { %>
+    <script src="<%= htmlWebpackPlugin.files.js[jsIndex] %>"></script>
+    <% } %>
+  </body>
+</html>
+```
+
+The default templating engine for `html-webpack-plugin` seems to be based on **`lodash`**.
+
+With the above template we might use the following `webpack` config which **disables** **`inject`**:
 
 ```javascript
 output: {
   publicPath: '/the-public-path/'
 },
 plugins: [
-  new HtmlWebpackPlugin({ inject: false }),
+  new HtmlWebpackPlugin({ <b>inject: false</b> }),
   new HtmlWebpackTagsPlugin({
     tags: [{ path: 'css/bootstrap-theme.min.css', attributes: { id: 'bootstrapTheme' } }],
     links: [{ href: 'the-ref', attributes: { rel: 'icon' } }],
@@ -710,36 +744,15 @@ plugins: [
 ]
 ```
 
-You will need to add the following to your *template* `index.html` to get tags to be **generated**:
+The problem is that the `template syntax` does not seem to allow injection of more than `one attribute value`, namely the `path` (**`href`** or **`src`**)
+
+This means it will **generate** an `index.html` that is **missing** all of the script **`attributes`** like this:
 
 ```html
 <head>
-  <!-- other head content -->
-  <% for (var cssIndex = 0; cssIndex < htmlWebpackPlugin.files.css.length; cssIndex++) { %>
-    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[cssIndex] %>">
-  <% } %>
-</head>
-<body>
-  <!-- other body content -->
-  <% for (var jsIndex = 0; jsIndex < htmlWebpackPlugin.files.js.length; jsIndex++) { %>
-    <script src="<%= htmlWebpackPlugin.files.js[jsIndex] %>"></script>
-  <% } %>
-</body>
-```
-
-Using the (lodash) `template syntax` like this for css and js files is necessary when you turn injection off.
-
-But, the `template syntax` does not allow injection of more than `one attribute value`.
-
-This means it will **generate** an `index.html` that looks like this:
-
-```html
-<head>
-  <link rel="stylesheet" href="/the-public-path/css/bootstrap-theme.min.css">
-  <link rel="stylesheet" href="/the-public-path/the-ref">
+  <link href="/the-public-path/css/bootstrap-theme.min.css">
+  <link href="/the-public-path/the-ref">
 </head>
 ```
 
-None of the `link` elements have any of the `attributes` we specified for the `tags` or `links`.
-
-This is because `HtmlWebpackPlugin.options.inject` needs to be set to `true` for `attributes` injection to work.
+If the templating engine supports injection of **entire tags** instead of just the `href`/`src` attribute value then working with **`inject`** set to **false** may be possible.
