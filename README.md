@@ -17,7 +17,7 @@ Motivation
 
 When using a plugin such as [copy-webpack-plugin](https://github.com/webpack-contrib/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
-This plugin lets you manually resolve such issues, and also lets you inject the webpack `publicPath` or compilation `hash` into your assets paths if you so choose.
+This plugin lets you manually resolve such issues, and also lets you inject the webpack `publicPath` or compilation `hash` into your tag asset paths if you so choose.
 
 Installation
 ------------
@@ -472,6 +472,6 @@ This means it will **generate** an `index.html` that looks like this:
 </head>
 ```
 
-None of the `link` elements have any of the `attributes` we specified for the `assets` or `links`.
+None of the `link` elements have any of the `attributes` we specified for the `tags` or `links`.
 
 This is because `HtmlWebpackPlugin.options.inject` needs to be set to `true` for `attributes` injection to work.
