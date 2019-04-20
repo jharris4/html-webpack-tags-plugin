@@ -53,6 +53,28 @@ const WEBPACK_MODULE = {
   rules: [WEBPACK_CSS_RULE]
 };
 
+const createWebpackConfig = ({ webpackPublicPath, htmlOptions, options, copyOptions, useHtmlPlugin = true }) => {
+  const createTagsPlugin = opts => new HtmlWebpackTagsPlugin(opts);
+  const copyPlugins = copyOptions ? [new CopyWebpackPlugin(copyOptions)] : [];
+  const tagsPlugins = Array.isArray(options) ? options.map(createTagsPlugin) : [createTagsPlugin(options)];
+  const htmlPlugins = useHtmlPlugin ? [new HtmlWebpackPlugin(htmlOptions)] : [];
+
+  return {
+    entry: { ...WEBPACK_ENTRY },
+    output: {
+      ...WEBPACK_OUTPUT,
+      publicPath: webpackPublicPath
+    },
+    module: { ...WEBPACK_MODULE },
+    plugins: [
+      new MiniCssExtractPlugin({ filename: '[name].css' }),
+      ...copyPlugins,
+      ...htmlPlugins,
+      ...tagsPlugins
+    ]
+  };
+};
+
 describe('end to end', () => {
   beforeEach(done => {
     rimraf(OUTPUT_DIR, done);
@@ -62,18 +84,13 @@ describe('end to end', () => {
     it('should throw an error if html-webpack-plugin is not in the webpack config', done => {
       const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
       const theFunction = () => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: {
-            path: OUTPUT_DIR,
-            filename: '[name].js'
-          },
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: true, publicPath: false })
-          ]
-        }, () => {});
+        webpack(createWebpackConfig({
+          useHtmlPlugin: false,
+          options: {
+            tags: 'foobar.js',
+            publicPath: false
+          }
+        }), () => {});
       };
       expect(theFunction).toThrowError(theError);
       done();
@@ -83,16 +100,13 @@ describe('end to end', () => {
   describe('main options', () => {
     describe('options.append', () => {
       it('should include a single js file and append it', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: true, publicPath: false })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: 'foobar.js',
+            append: true,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -112,16 +126,13 @@ describe('end to end', () => {
       });
 
       it('should include a single css file and append it', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.css', append: true, publicPath: false })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: 'foobar.css',
+            append: true,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -141,16 +152,13 @@ describe('end to end', () => {
       });
 
       it('should include a single js file and prepend it', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: false, publicPath: false })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: 'foobar.js',
+            append: false,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -170,16 +178,13 @@ describe('end to end', () => {
       });
 
       it('should include a single css file and prepend it', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.css', append: false, publicPath: false })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: 'foobar.css',
+            append: false,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -199,17 +204,20 @@ describe('end to end', () => {
       });
 
       it('should support appending and prepending at the same time', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'foo.js'], append: false, publicPath: false, debug: true }),
-            new HtmlWebpackTagsPlugin({ tags: ['bar.css', 'bar.js'], append: true, publicPath: false, debug: true })
+        webpack(createWebpackConfig({
+          options: [
+            {
+              tags: ['foo.css', 'foo.js'],
+              append: false,
+              publicPath: false
+            },
+            {
+              tags: ['bar.css', 'bar.js'],
+              append: true,
+              publicPath: false
+            }
           ]
-        }, (err, result) => {
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -235,16 +243,17 @@ describe('end to end', () => {
       });
 
       it('should include multiple css files and append them in order', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'bar.css', { path: 'baz.css' }], append: true, publicPath: false })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: [
+              'foo.css',
+              'bar.css',
+              { path: 'baz.css' }
+            ],
+            append: true,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -268,16 +277,13 @@ describe('end to end', () => {
       });
 
       it('should include multiple css files and prepend them in order', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'bar.css'], append: false, publicPath: false })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: ['foo.css', 'bar.css'],
+            append: false,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -301,21 +307,14 @@ describe('end to end', () => {
 
     describe('options.files', () => {
       it('should not include if not present in defined files', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({
-              files: ['fail.html'],
-              tags: 'foobar.js',
-              append: true,
-              publicPath: false
-            })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            files: ['fail.html'],
+            tags: 'foobar.js',
+            append: true,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -333,21 +332,14 @@ describe('end to end', () => {
       });
 
       it('should include if present in defined files', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({
-              files: ['*.html'],
-              tags: 'foobar.js',
-              append: true,
-              publicPath: false
-            })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            files: ['*.html'],
+            tags: 'foobar.js',
+            append: true,
+            publicPath: false
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -369,16 +361,13 @@ describe('end to end', () => {
 
     describe('options.jsExtensions', () => {
       it('should include all js type files when multiple jsExtensions are specified', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: ['foo.js', 'foo.jsx'], append: true, jsExtensions: ['.js', '.jsx'] })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: ['foo.js', 'foo.jsx'],
+            append: true,
+            jsExtensions: ['.js', '.jsx']
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -400,16 +389,13 @@ describe('end to end', () => {
 
     describe('options.cssExtensions', () => {
       it('should include all css type files when multiple cssExtensions are specified', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: WEBPACK_OUTPUT,
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: ['foo.css', 'foo.style'], append: true, cssExtensions: ['.css', '.style'] })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          options: {
+            tags: ['foo.css', 'foo.style'],
+            append: true,
+            cssExtensions: ['.css', '.style']
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -431,19 +417,14 @@ describe('end to end', () => {
 
     describe('options.publicPath', () => {
       it('should prefix the publicPath if the publicPath option is set to true', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: {
-            ...WEBPACK_OUTPUT,
-            publicPath: 'thePublicPath'
-          },
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: false, publicPath: true })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          webpackPublicPath: 'thePublicPath',
+          options: {
+            tags: 'foobar.js',
+            append: false,
+            publicPath: true
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -463,24 +444,24 @@ describe('end to end', () => {
       });
 
       it('should not prefix the publicPath if the publicPath option is set to false', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: {
-            ...WEBPACK_OUTPUT,
-            publicPath: 'thePublicPath'
-          },
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin(
-              { tags: 'local-with-public-path.js', append: false, publicPath: true }
-            ),
-            new HtmlWebpackTagsPlugin(
-              { tags: ['local-without-public-path.js', 'http://www.foo.com/foobar.js'], append: false, publicPath: false }
-            )
+        webpack(createWebpackConfig({
+          webpackPublicPath: 'thePublicPath',
+          options: [
+            {
+              tags: 'local-with-public-path.js',
+              append: false,
+              publicPath: true
+            },
+            {
+              tags: [
+                'local-without-public-path.js',
+                'http://www.foo.com/foobar.js'
+              ],
+              append: false,
+              publicPath: false
+            }
           ]
-        }, (err, result) => {
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -504,24 +485,21 @@ describe('end to end', () => {
       });
 
       it('should not prefix the publicPath if the publicPath option is set to false and the asset is a protocol-relative path', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: {
-            ...WEBPACK_OUTPUT,
-            publicPath: 'thePublicPath'
-          },
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin(
-              { tags: 'local-with-public-path.js', append: false, publicPath: true }
-            ),
-            new HtmlWebpackTagsPlugin(
-              { tags: ['//www.foo.com/foobar.js'], append: false, publicPath: false }
-            )
+        webpack(createWebpackConfig({
+          webpackPublicPath: 'thePublicPath',
+          options: [
+            {
+              tags: 'local-with-public-path.js',
+              append: false,
+              publicPath: true
+            },
+            {
+              tags: '//www.foo.com/foobar.js',
+              append: false,
+              publicPath: false
+            }
           ]
-        }, (err, result) => {
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -543,19 +521,14 @@ describe('end to end', () => {
       });
 
       it('should prefix the value of the publicPath option if the publicPath option is set to a string', done => {
-        webpack({
-          entry: WEBPACK_ENTRY,
-          output: {
-            ...WEBPACK_OUTPUT,
-            publicPath: 'thePublicPath'
-          },
-          module: WEBPACK_MODULE,
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            new HtmlWebpackPlugin(),
-            new HtmlWebpackTagsPlugin({ tags: 'foobar.js', append: false, publicPath: 'abc/' })
-          ]
-        }, (err, result) => {
+        webpack(createWebpackConfig({
+          webpackPublicPath: 'thePublicPath',
+          options: {
+            tags: 'foobar.js',
+            append: false,
+            publicPath: 'abc/'
+          }
+        }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -576,30 +549,13 @@ describe('end to end', () => {
     });
 
     describe('options.hash', () => {
-      const createWebpackHashConfig = ({ webpackPublicPath, htmlOptions, options, copyOptions }) => {
-        return {
-          entry: { ...WEBPACK_ENTRY },
-          output: {
-            ...WEBPACK_OUTPUT,
-            publicPath: webpackPublicPath
-          },
-          module: { ...WEBPACK_MODULE },
-          plugins: [
-            new MiniCssExtractPlugin({ filename: '[name].css' }),
-            ...(copyOptions ? [new CopyWebpackPlugin(copyOptions)] : []),
-            new HtmlWebpackPlugin(htmlOptions),
-            new HtmlWebpackTagsPlugin(options)
-          ]
-        };
-      };
-
       const appendHash = (v, hash) => {
         if (hash.length > 0) hash = '?' + hash;
         return v + hash;
       };
 
       it('should not append hash if hash options are not provided', done => {
-        webpack(createWebpackHashConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: 'myPublic/',
           htmlOptions: {
             hash: true
@@ -648,7 +604,7 @@ describe('end to end', () => {
 
       it('should not append hash if hash options are set to false', done => {
         webpack(
-          createWebpackHashConfig({
+          createWebpackConfig({
             webpackPublicPath: 'myPublic/',
             htmlOptions: { hash: true },
             options: {
@@ -695,7 +651,7 @@ describe('end to end', () => {
       });
 
       it('should append hash if hash options are set to true', done => {
-        webpack(createWebpackHashConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: 'myPublic/',
           htmlOptions: { hash: true },
           options: {
@@ -742,7 +698,7 @@ describe('end to end', () => {
       });
 
       it('should append hash if hash option in this plugin set to true but hash options in HtmlWebpackPlugin config are set to false', done => {
-        webpack(createWebpackHashConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: 'myPublic/',
           htmlOptions: { hash: false },
           options: {
@@ -789,7 +745,7 @@ describe('end to end', () => {
       });
 
       it('should not append hash if hash option in this plugin set to false and hash options in HtmlWebpackPlugin config are set to false', done => {
-        webpack(createWebpackHashConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: 'myPublic/',
           htmlOptions: { hash: false },
           options: {
@@ -820,7 +776,7 @@ describe('end to end', () => {
         const hashReplacer = (assetName, hash) => {
           return assetName.replace(/\[hash\]/, hash);
         };
-        webpack(createWebpackHashConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: 'myPublic/',
           htmlOptions: { hash: false },
           options: {
@@ -854,7 +810,7 @@ describe('end to end', () => {
           assetName = assetName.replace(/\.css$/, '.' + hash + '.css');
           return assetName;
         };
-        webpack(createWebpackHashConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: 'myPublic/',
           copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
           options: {
@@ -894,27 +850,20 @@ describe('end to end', () => {
 
   describe('option.tags', () => {
     it('should include a mixture of js and css files', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin(),
-          new HtmlWebpackTagsPlugin({
-            tags: [
-              'foo.js',
-              'foo.css',
-              { path: 'baz', type: 'css' },
-              { path: 'bar.js' },
-              'bar.css',
-              { path: 'qux', type: 'js' }
-            ],
-            append: true,
-            publicPath: false
-          })
-        ]
-      }, (err, result) => {
+      webpack(createWebpackConfig({
+        options: {
+          tags: [
+            'foo.js',
+            'foo.css',
+            { path: 'baz', type: 'css' },
+            { path: 'bar.js' },
+            'bar.css',
+            { path: 'qux', type: 'js' }
+          ],
+          append: true,
+          publicPath: false
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -940,46 +889,36 @@ describe('end to end', () => {
 
   describe('multiple plugins', () => {
     it('should output all files when multiple plugins are used with varying append', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin(),
-          new HtmlWebpackTagsPlugin({
-            tags: [
-              'foo.js',
-              'foo.css'
-            ],
+      webpack(createWebpackConfig({
+        options: [
+          {
+            tags: [ 'foo.js', 'foo.css' ],
             append: true,
             publicPath: false
-          }),
-          new HtmlWebpackTagsPlugin({
+          },
+          {
             links: 'bar.css',
             append: false,
             publicPath: false
-          }),
-          new HtmlWebpackTagsPlugin({
-            links: {
-              path: 'bar2.css'
-            },
+          },
+          {
+            links: { path: 'bar2.css' },
             scripts: 'bar.js',
             append: true,
             publicPath: false
-          }),
-          new HtmlWebpackTagsPlugin({
+          },
+          {
             links: 'car.css',
             append: true,
             publicPath: false
-          }),
-          new HtmlWebpackTagsPlugin({
+          },
+          {
             scripts: 'car.js',
             append: false,
             publicPath: false
-          })
+          }
         ]
-      }, (err, result) => {
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1010,30 +949,24 @@ describe('end to end', () => {
   });
 
   describe('options.links', () => {
-    it('should append links and tags together with a custom index.html template when inject is false and append is set to false', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({
-            template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
-            inject: false
-          }),
-          new HtmlWebpackTagsPlugin({
-            tags: [{
-              path: 'assets/astyle.css',
-              sourcePath: 'spec/fixtures/astyle.css'
-            }],
-            append: false,
-            links: [{
-              path: 'the-href',
-              attributes: { rel: 'the-rel', sizes: '16x16' }
-            }]
-          })
-        ]
-      }, (err, result) => {
+    it('should prepend links and tags together with a custom index.html template when inject is false and append is set to false', done => {
+      webpack(createWebpackConfig({
+        htmlOptions: {
+          template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
+          inject: false
+        },
+        options: {
+          tags: [{
+            path: 'assets/astyle.css',
+            sourcePath: 'spec/fixtures/astyle.css'
+          }],
+          append: false,
+          links: [{
+            path: 'the-href',
+            attributes: { rel: 'the-rel', sizes: '16x16' }
+          }]
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1054,23 +987,23 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together with a custom index.html template when inject is false and append is set to true', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({
-            template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
-            inject: false
-          }),
-          new HtmlWebpackTagsPlugin({
-            tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
-            append: true,
-            links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
-          })
-        ]
-      }, (err, result) => {
+      webpack(createWebpackConfig({
+        htmlOptions: {
+          template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
+          inject: false
+        },
+        options: {
+          tags: [{
+            path: 'assets/astyle.css',
+            sourcePath: 'spec/fixtures/astyle.css'
+          }],
+          append: true,
+          links: [{
+            path: 'the-href',
+            attributes: { rel: 'the-rel', sizes: '16x16' }
+          }]
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1091,28 +1024,24 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together with a custom index.html template when inject is false and append is set to true and false', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({
-            template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
-            inject: false
-          }),
-          new HtmlWebpackTagsPlugin({
+      webpack(createWebpackConfig({
+        htmlOptions: {
+          template: path.join(__dirname, 'fixtures', 'index-no-inject.html'),
+          inject: false
+        },
+        options: [
+          {
             tags: [{ path: 'assets/astyle-1.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href-1', attributes: { rel: 'the-rel-1', sizes: '16x16' } }]
-          }),
-          new HtmlWebpackTagsPlugin({
+          },
+          {
             tags: [{ path: 'assets/astyle-2.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
-          })
+          }
         ]
-      }, (err, result) => {
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1135,28 +1064,24 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together with a custom index.html template when inject is true and append is set to true and false', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({
-            template: path.join(__dirname, 'fixtures', 'index.html'),
-            inject: true
-          }),
-          new HtmlWebpackTagsPlugin({
+      webpack(createWebpackConfig({
+        htmlOptions: {
+          template: path.join(__dirname, 'fixtures', 'index.html'),
+          inject: true
+        },
+        options: [
+          {
             tags: [{ path: 'assets/astyle-1.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: true,
             links: [{ path: 'the-href-1', attributes: { rel: 'the-rel-1', sizes: '16x16' } }]
-          }),
-          new HtmlWebpackTagsPlugin({
+          },
+          {
             tags: [{ path: 'assets/astyle-2.css', sourcePath: 'spec/fixtures/astyle.css' }],
             append: false,
             links: [{ path: 'the-href-2', attributes: { rel: 'the-rel-2', sizes: '16x16' } }]
-          })
+          }
         ]
-      }, (err, result) => {
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1179,22 +1104,16 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together with a custom index.html template when append is set to false', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({
-            template: path.join(__dirname, 'fixtures', 'index.html')
-          }),
-          new HtmlWebpackTagsPlugin({
-            tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
-            append: false,
-            links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
-          })
-        ]
-      }, (err, result) => {
+      webpack(createWebpackConfig({
+        htmlOptions: {
+          template: path.join(__dirname, 'fixtures', 'index.html')
+        },
+        options: {
+          tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
+          append: false,
+          links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1215,22 +1134,16 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together with a custom index.html template when append is set to true', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin({
-            template: path.join(__dirname, 'fixtures', 'index.html')
-          }),
-          new HtmlWebpackTagsPlugin({
-            tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
-            append: true,
-            links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
-          })
-        ]
-      }, (err, result) => {
+      webpack(createWebpackConfig({
+        htmlOptions: {
+          template: path.join(__dirname, 'fixtures', 'index.html')
+        },
+        options: {
+          tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
+          append: true,
+          links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1251,20 +1164,13 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together when append is set to false', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin(),
-          new HtmlWebpackTagsPlugin({
-            tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
-            append: false,
-            links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
-          })
-        ]
-      }, (err, result) => {
+      webpack(createWebpackConfig({
+        options: {
+          tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
+          append: false,
+          links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1284,20 +1190,13 @@ describe('end to end', () => {
     });
 
     it('should append links and tags together when append is set to true', done => {
-      webpack({
-        entry: WEBPACK_ENTRY,
-        output: WEBPACK_OUTPUT,
-        module: WEBPACK_MODULE,
-        plugins: [
-          new MiniCssExtractPlugin({ filename: '[name].css' }),
-          new HtmlWebpackPlugin(),
-          new HtmlWebpackTagsPlugin({
-            tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
-            append: true,
-            links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
-          })
-        ]
-      }, (err, result) => {
+      webpack(createWebpackConfig({
+        options: {
+          tags: [{ path: 'assets/astyle.css', sourcePath: 'spec/fixtures/astyle.css' }],
+          append: true,
+          links: [{ path: 'the-href', attributes: { rel: 'the-rel', sizes: '16x16' } }]
+        }
+      }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1328,55 +1227,42 @@ function runTestsForOption (options, runExtraTests) {
   const optionAttr = isScript ? 'src' : 'href';
   const optionType = isScript ? 'js' : 'css';
 
-  const createWebpackConfig = ({
-    webpackPublicPath = void 0,
-    preHtmlPlugin = void 0,
-    htmlOptions = {},
-    options = {}
-  }) => {
+  const createWebpackOptionConfig = ({ webpackPublicPath, copyOptions, htmlOptions, options }) => {
     if (optionName === 'tags' && options.tags) {
+      // Hacks to make sure tags don't throw errors due to file extensions vs type etc
       const type = optionTag === 'script' ? 'js' : 'css';
-      const savedTags = options.tags;
-      let tags;
-      if (savedTags !== void 0) {
-        if (Array.isArray(savedTags)) {
-          tags = [];
-          savedTags.forEach(asset => {
-            if (typeof asset === 'object') {
-              tags.push({ ...asset, type });
-            } else {
-              tags.push({ path: asset, type });
-            }
-          });
-        } else if (typeof savedTags === 'object') {
-          tags = { ...savedTags, type };
-        } else {
-          tags = { path: savedTags, type };
-        }
-        if (tags) {
-          options.tags = tags;
+      if (options && typeof options === 'object') {
+        const savedTags = options.tags;
+        let tags;
+        if (savedTags !== void 0) {
+          if (Array.isArray(savedTags)) {
+            tags = [];
+            savedTags.forEach(asset => {
+              if (typeof asset === 'object') {
+                tags.push({ ...asset, type });
+              } else {
+                tags.push({ path: asset, type });
+              }
+            });
+          } else if (typeof savedTags === 'object') {
+            tags = { ...savedTags, type };
+          } else {
+            tags = { path: savedTags, type };
+          }
+          if (tags) {
+            options.tags = tags;
+          }
         }
       }
     }
-    return {
-      entry: { ...WEBPACK_ENTRY },
-      output: {
-        ...WEBPACK_OUTPUT,
-        ...(webpackPublicPath ? { publicPath: webpackPublicPath } : {})
-      },
-      module: { ...WEBPACK_MODULE },
-      plugins: [
-        new MiniCssExtractPlugin({ filename: '[name].css' }),
-        ...(preHtmlPlugin ? [preHtmlPlugin] : []),
-        new HtmlWebpackPlugin(htmlOptions),
-        new HtmlWebpackTagsPlugin(options)
-      ]
-    };
+    return createWebpackConfig({
+      webpackPublicPath, htmlOptions, options, copyOptions
+    });
   };
 
   describe(`options.${optionName}`, () => {
     it(`should not include ${optionName} when an empty array is provided`, done => {
-      webpack(createWebpackConfig({ options: { [optionName]: [] } }), (err, result) => {
+      webpack(createWebpackOptionConfig({ options: { [optionName]: [] } }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1394,7 +1280,7 @@ function runTestsForOption (options, runExtraTests) {
     });
 
     it(`should not include ${optionName} when nothing is provided`, done => {
-      webpack(createWebpackConfig({ options: {} }), (err, result) => {
+      webpack(createWebpackOptionConfig({ options: {} }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1414,7 +1300,7 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`option.${optionName} and options.append`, () => {
     it(`should prepend when the ${optionName} are all valid and append is set to false`, done => {
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         options: {
           append: false,
           [optionName]: [{
@@ -1442,7 +1328,7 @@ function runTestsForOption (options, runExtraTests) {
     });
 
     it(`should append when the ${optionName} are all valid and append is set to true`, done => {
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         options: {
           append: true,
           [optionName]: [{
@@ -1472,7 +1358,7 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`option.${optionName} attributes`, () => {
     it(`should add the given ${optionName} attributes to the matching tag`, done => {
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         options: {
           append: false,
           [optionName]: [
@@ -1525,7 +1411,7 @@ function runTestsForOption (options, runExtraTests) {
         return v + hash;
       };
 
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         webpackPublicPath: 'thePublicPath/',
         htmlOptions: { hash: true },
         options: {
@@ -1578,7 +1464,7 @@ function runTestsForOption (options, runExtraTests) {
 
     if (optionTag === 'link') {
       it(`should output ${optionName} attributes other than path`, done => {
-        webpack(createWebpackConfig({
+        webpack(createWebpackOptionConfig({
           options: {
             append: false,
             [optionName]: [
@@ -1605,7 +1491,7 @@ function runTestsForOption (options, runExtraTests) {
 
       it(`should output ${optionName} attributes and inject the publicPath only when ${optionName} object publicPath is not false`, done => {
         const publicPath = '/pub-path/';
-        webpack(createWebpackConfig({
+        webpack(createWebpackOptionConfig({
           webpackPublicPath: publicPath,
           options: {
             append: false,
@@ -1639,8 +1525,8 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`option.${optionName} glob`, () => {
     it(`should include any files for a ${optionName} glob that does match files`, done => {
-      webpack(createWebpackConfig({
-        preHtmlPlugin: new CopyWebpackPlugin([{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }]),
+      webpack(createWebpackOptionConfig({
+        copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
         options: {
           [optionName]: [
             { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*-a' },
@@ -1670,7 +1556,7 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`options.${optionName} sourcePath`, () => {
     it(`should not throw an error when the ${optionName} sourcePath points to a valid js file`, done => {
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         options: {
           [optionName]: {
             path: 'foobar',
@@ -1698,7 +1584,7 @@ function runTestsForOption (options, runExtraTests) {
 
     it(`should throw an error when the ${optionName} sourcePath does not point to a valid js file`, done => {
       const badFilename = 'does-not-exist.js';
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         options: {
           [optionName]: {
             path: 'foobar.js',
@@ -1715,7 +1601,7 @@ function runTestsForOption (options, runExtraTests) {
     });
 
     it(`should not throw an error when ${optionName} sourcePath is used and the css file exists`, done => {
-      webpack(createWebpackConfig({
+      webpack(createWebpackOptionConfig({
         options: {
           [optionName]: [{
             path: 'assets/afile',
@@ -1743,7 +1629,7 @@ function runTestsForOption (options, runExtraTests) {
 
     it(`should throw an error when ${optionName} sourcePath is used and the css file does not exist`, done => {
       const theFunction = () => {
-        webpack(createWebpackConfig({
+        webpack(createWebpackOptionConfig({
           options: {
             [optionName]: [{
               path: 'assets/astyle.css',
@@ -1767,7 +1653,7 @@ function runTestsForOption (options, runExtraTests) {
   if (isScript) {
     describe(`options.${optionName} external`, () => {
       it(`should add the webpack external when external is used`, done => {
-        webpack(createWebpackConfig({
+        webpack(createWebpackOptionConfig({
           options: {
             [optionName]: {
               path: 'foobar',
@@ -1799,7 +1685,7 @@ function runTestsForOption (options, runExtraTests) {
       });
 
       it(`should not add the webpack external when external is not used`, done => {
-        webpack(createWebpackConfig({
+        webpack(createWebpackOptionConfig({
           options: {
             [optionName]: {
               path: 'foobar',
