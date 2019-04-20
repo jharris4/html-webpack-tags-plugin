@@ -42,6 +42,7 @@ Version `2.0.0` is a full rewrite of this plugin using ES6 instead of ES5 source
 ### BREAKING CHANGES
 
 * **Node >= 8.6** is now required due to the use of `object spread` syntax in the plugin source code
+* **append** option now defaults to **true**
 
 
 <a name="1.0.10"></a>
