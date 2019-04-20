@@ -122,6 +122,7 @@ The available options are:
   - `sourcePath:string` (optional) - property may be used to specify a source path to be added as an entry to `html-webpack-plugin`. This can be useful as it will trigger a recompilation after the assets have changed when using `webpack-dev-server` or `webpack-dev-middleware` in development mode.
   - `publicPath:boolean|function(path:string, publicPath:string) => any:string` (optional) - Controls whether the webpack `publicPath` will be injected into the asset path. `true` mean always. `false` means never. `function` means manual, `undefined` means use global settings.
   - `hash:boolean|function(path:string, hash:string) => any:string` (optional) - Controls whether the webpack `compilation hash` will be injected into the asset path. `true` mean always. `false` means never. `function` means manual, `undefined` means use global settings.
+  - `external:object({ packageName:string, variableName:string })` (**only** for **script** tags) - When specified together cause `{ packageName: variableName }` to be added to [webpack config's externals](https://webpack.js.org/configuration/externals/).
 
 -----
 
