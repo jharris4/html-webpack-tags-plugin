@@ -98,7 +98,7 @@ The available options are:
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
-|**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing tags|
+|**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing tags (should be set to **false** when using any `script` tag asset **`external`**) |
 |**`files`**|`{Array<String>}`|`[]`|If specified this plugin will only inject tags into the html-webpack-plugin instances that are injecting into these files  (uses [minimatch](https://github.com/isaacs/minimatch))|
 |**`jsExtensions`**|`{String\|Array<String>}`|`['.js']`|The file extensions to use when determining if a `tag` in the `tags` option is a `script`|
 |**`cssExtensions`**|`{String\|Array<String>}`|`['.css']`|The file extensions to use when determining if a `tag` in the `tags` option is a `link`|
@@ -676,7 +676,12 @@ const compilationConfig = {
 };
 ```
 
-This can be useful to control which packages webpack is bundling allowing to control bundling for some packages yourself.
+This can be useful to control which packages webpack is bundling versus ones you can serve from a CDN.
+
+Note that `script` tags with **`external`** specified need to be placed **before** the webpack bundle tags.
+
+This means that you should always set **`append`** to **false** when using the `script` **`external`** option.
+
 
 _____
 
@@ -695,9 +700,11 @@ Some users have encountered issues with plugin ordering.
 
 #### Webpack `externals`
 
-Setting the **`external`** option for a `script` asset may require caution to ensure that the scripts are in the correct order. This will be verified once this plugin package has `browser testing` capabilities.
+Setting the **`external`** option for a `script` asset requires caution to ensure that the scripts are in the correct order.
 
-In the meantime it is advisable to always set **`append`** to **false** so that `external` \<script\> tags are always inserted **before** the `webpack` bundle \<script\> tags.
+- It is advisable to always set **`append`** to **false** so that `external` \<script\> tags are always inserted **before** the `webpack` bundle \<script\> tags.
+
+- The order that you use when you specify a list of external links matters. For example, `<script src="react.s"/>` should come before `<script src="react-router.s"/>` if `react-router` has a peer dependency on `react`
 
 ---
 
