@@ -1691,9 +1691,9 @@ function runTestsForOption (options, runExtraTests) {
             fs.readFile(path.join(EXTERNALS_OUTPUT_DIR, 'app.js'), 'utf8', (appError, appData) => {
               expect(appError).toBeFalsy();
 
-              expect(appData).toContain('this is the result for fakeA');
-              expect(appData).not.toContain('this is the result for fakeB');
-              expect(appData).toContain('this is the result for fakeC');
+              expect(appData).toContain('% webpack fakeA %');
+              expect(appData).not.toContain('% webpack fakeB %');
+              expect(appData).toContain('% webpack fakeC %');
 
               done();
             });
@@ -1728,9 +1728,9 @@ function runTestsForOption (options, runExtraTests) {
             fs.readFile(path.join(EXTERNALS_OUTPUT_DIR, 'app.js'), 'utf8', (appError, appData) => {
               expect(appError).toBeFalsy();
 
-              expect(appData).toContain('this is the result for fakeA');
-              expect(appData).toContain('this is the result for fakeB');
-              expect(appData).toContain('this is the result for fakeC');
+              expect(appData).toContain('% webpack fakeA %');
+              expect(appData).toContain('% webpack fakeB %');
+              expect(appData).toContain('% webpack fakeC %');
 
               done();
             });

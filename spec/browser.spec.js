@@ -200,9 +200,10 @@ describe('browser', () => {
           expect(errors.length).toBe(0);
           const $ = cheerio.load(content);
           const divs = $('div.fake');
-          expect($(divs.get(0)).contents().toString()).toBe('this is the result for fakeA');
-          expect($(divs.get(1)).contents().toString()).toBe('this is the result for bundled fakeB');
-          expect($(divs.get(2)).contents().toString()).toBe('this is the result for fakeC');
+
+          expect($(divs.get(0)).contents().toString()).toBe('% webpack fakeA %');
+          expect($(divs.get(1)).contents().toString()).toBe('% external fakeB %');
+          expect($(divs.get(2)).contents().toString()).toBe('% webpack fakeC %');
 
           done();
         });
