@@ -203,7 +203,7 @@ describe('browser', () => {
 
           expect($(divs.get(0)).contents().toString()).toBe('% webpack fakeA %');
           expect($(divs.get(1)).contents().toString()).toBe('% external fakeB %');
-          expect($(divs.get(2)).contents().toString()).toBe('% webpack fakeC %');
+          expect($(divs.get(2)).contents().toString()).toBe('% webpack fakeC % - depends on - % external fakeB %');
 
           done();
         });
