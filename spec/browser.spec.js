@@ -145,11 +145,18 @@ async function getBrowserContent (options) {
     const { closeServer } = await startServer(options);
     const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
+    const errors = [];
+    page.on('pageerror', err => {
+      errors.push(err);
+    });
     await page.goto('http://' + serverHost + ':' + serverPort);
     const content = await page.content();
     await browser.close();
     await closeServer();
-    return content;
+    return {
+      content,
+      errors
+    };
   } catch (error) {
     throw error;
   }
@@ -160,7 +167,7 @@ describe('browser', () => {
     rimraf(EXTERNALS_OUTPUT_DIR, done);
   });
 
-  it('should render a valid configuration in the browser', done => {
+  it('should render properly in the browser when an external script is used and append is set to false', done => {
     webpack(createWebpackConfig({
       copyOptions: [{ from: path.join(EXTERNALS_MODULES_PATH, 'fake-b-package', 'fake-b-bundle.js'), to: 'fake-b-bundle.js' }],
       htmlOptions: {
@@ -189,12 +196,55 @@ describe('browser', () => {
       expect(JSON.stringify(result.compilation.errors)).toBe('[]');
 
       getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
-        .then(content => {
+        .then(({ content, errors }) => {
+          expect(errors).toBeFalsy();
           const $ = cheerio.load(content);
           const divs = $('div.fake');
           expect($(divs.get(0)).contents().toString()).toBe('this is the result for fakeA');
           expect($(divs.get(1)).contents().toString()).toBe('this is the result for bundled fakeB');
           expect($(divs.get(2)).contents().toString()).toBe('this is the result for fakeC');
+
+          done();
+        });
+    });
+  });
+
+  it('should throw an error in the browser when an external script is used and append is set to true', done => {
+    webpack(createWebpackConfig({
+      copyOptions: [{ from: path.join(EXTERNALS_MODULES_PATH, 'fake-b-package', 'fake-b-bundle.js'), to: 'fake-b-bundle.js' }],
+      htmlOptions: {
+        template: EXTERNALS_TEMPLATE_FILE
+      },
+      options: {
+        scripts: {
+          path: 'fake-b-bundle.js',
+          external: {
+            packageName: 'fake-b-package',
+            variableName: 'FakeB'
+          }
+        },
+        links: {
+          path: 'data:;base64,=',
+          attributes: {
+            rel: 'icon'
+          }
+        },
+        append: true,
+        publicPath: false,
+        hash: false
+      }
+    }), (err, result) => {
+      expect(err).toBeFalsy();
+      expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+
+      getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
+        .then(({ content, errors }) => {
+          expect(errors.length).toBe(1);
+          expect(errors[0].message).toContain('FakeB is not defined');
+
+          const $ = cheerio.load(content);
+          const divs = $('div.fake');
+          expect(divs.length).toBe(0);
 
           done();
         });
