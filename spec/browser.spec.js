@@ -141,7 +141,7 @@ async function startServer ({ serverPort, secure = false, path = EXTERNALS_OUTPU
 
 async function getBrowserContent (options) {
   try {
-    const { serverHost, serverPort } = options;
+    const { serverHost, serverPort, waitForSelector } = options;
     const { closeServer } = await startServer(options);
     const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
@@ -150,6 +150,9 @@ async function getBrowserContent (options) {
       errors.push(err);
     });
     await page.goto('http://' + serverHost + ':' + serverPort);
+    if (waitForSelector !== void 0) {
+      await page.waitForSelector(waitForSelector);
+    }
     const content = await page.content();
     await browser.close();
     await closeServer();
@@ -201,6 +204,7 @@ describe('browser', () => {
           const $ = cheerio.load(content);
           const divs = $('div.fake');
 
+          expect(divs.length).toBe(3);
           expect($(divs.get(0)).contents().toString()).toBe('% webpack fakeA %');
           expect($(divs.get(1)).contents().toString()).toBe('% external fakeB %');
           expect($(divs.get(2)).contents().toString()).toBe('% webpack fakeC % - depends on - % external fakeB %');
@@ -252,7 +256,151 @@ describe('browser', () => {
     });
   });
 
-  it('should render correctly to the browser when two external scripts are used and append is set to false', done => {
+  it('should render correctly to the browser when a non-webpack external script is used with append set to false', done => {
+    webpack(createWebpackConfig({
+      copyOptions: [
+        {
+          from: path.join(EXTERNALS_MODULES_PATH, 'fake-b-package', 'fake-b-bundle.js'),
+          to: 'fake-b-bundle.js'
+        },
+        {
+          from: path.join(EXTERNALS_MODULES_PATH, 'fake-other-package', 'fake-other-bundle.js'),
+          to: 'fake-other-bundle.js'
+        }
+      ],
+      htmlOptions: {
+        template: EXTERNALS_TEMPLATE_FILE
+      },
+      options: [
+        {
+          scripts: [
+            {
+              path: 'fake-b-bundle.js',
+              external: {
+                packageName: 'fake-b-package',
+                variableName: 'FakeB'
+              }
+            }
+          ],
+          links: {
+            path: 'data:;base64,=',
+            attributes: {
+              rel: 'icon'
+            }
+          },
+          append: false,
+          publicPath: false,
+          hash: false
+        },
+        {
+          scripts: {
+            path: 'fake-other-bundle.js',
+            external: {
+              packageName: 'fake-other-package',
+              variableName: 'FakeOther'
+            }
+          },
+          append: false,
+          publicPath: false,
+          hash: false
+        }
+      ]
+    }), (err, result) => {
+      expect(err).toBeFalsy();
+      expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+
+      getBrowserContent({
+        serverHost: SERVER_HOST,
+        serverPort: SERVER_PORT
+        // waitForSelector: '.fake-other'
+      })
+        .then(({ content, errors }) => {
+          expect(errors.length).toBe(0);
+          const $ = cheerio.load(content);
+          const divs = $('div.fake');
+
+          expect(divs.length).toBe(3);
+          expect($(divs.get(0)).contents().toString()).toBe('% webpack fakeA %');
+          expect($(divs.get(1)).contents().toString()).toBe('% external fakeB %');
+          expect($(divs.get(2)).contents().toString()).toBe('% webpack fakeC % - depends on - % external fakeB %');
+
+          done();
+        });
+    });
+  });
+
+  it('should render correctly to the browser when a non-webpack external script is used with append set to true', done => {
+    webpack(createWebpackConfig({
+      copyOptions: [
+        {
+          from: path.join(EXTERNALS_MODULES_PATH, 'fake-b-package', 'fake-b-bundle.js'),
+          to: 'fake-b-bundle.js'
+        },
+        {
+          from: path.join(EXTERNALS_MODULES_PATH, 'fake-other-package', 'fake-other-bundle.js'),
+          to: 'fake-other-bundle.js'
+        }
+      ],
+      htmlOptions: {
+        template: EXTERNALS_TEMPLATE_FILE
+      },
+      options: [
+        {
+          scripts: [
+            {
+              path: 'fake-b-bundle.js',
+              external: {
+                packageName: 'fake-b-package',
+                variableName: 'FakeB'
+              }
+            }
+          ],
+          links: {
+            path: 'data:;base64,=',
+            attributes: {
+              rel: 'icon'
+            }
+          },
+          append: false,
+          publicPath: false,
+          hash: false
+        },
+        {
+          scripts: {
+            path: 'fake-other-bundle.js',
+            external: {
+              packageName: 'fake-other-package',
+              variableName: 'FakeOther'
+            }
+          },
+          append: true,
+          publicPath: false,
+          hash: false
+        }
+      ]
+    }), (err, result) => {
+      expect(err).toBeFalsy();
+      expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+
+      getBrowserContent({
+        serverHost: SERVER_HOST,
+        serverPort: SERVER_PORT
+        // waitForSelector: '.fake-other'
+      })
+        .then(({ content, errors }) => {
+          expect(errors.length).toBe(0);
+          const $ = cheerio.load(content);
+          const divs = $('div.fake');
+
+          expect(divs.length).toBe(1);
+          expect($(divs.get(0)).contents().toString()).toBe('% fakeOther %');
+
+          done();
+        });
+    });
+  });
+
+  it('should render correctly to the browser when two external scripts are used', done => {
     webpack(createWebpackConfig({
       copyOptions: [
         {
@@ -304,6 +452,7 @@ describe('browser', () => {
           const $ = cheerio.load(content);
           const divs = $('div.fake');
 
+          expect(divs.length).toBe(3);
           expect($(divs.get(0)).contents().toString()).toBe('% external fakeA %');
           expect($(divs.get(1)).contents().toString()).toBe('% external fakeB %');
           expect($(divs.get(2)).contents().toString()).toBe('% webpack fakeC % - depends on - % external fakeB %');
@@ -313,7 +462,7 @@ describe('browser', () => {
     });
   });
 
-  it('should render correctly to the browser when two dependency linked scripts are used and append is set to false', done => {
+  it('should render correctly to the browser when two dependency linked scripts are used', done => {
     webpack(createWebpackConfig({
       copyOptions: [
         {
@@ -365,6 +514,7 @@ describe('browser', () => {
           const $ = cheerio.load(content);
           const divs = $('div.fake');
 
+          expect(divs.length).toBe(3);
           expect($(divs.get(0)).contents().toString()).toBe('% webpack fakeA %');
           expect($(divs.get(1)).contents().toString()).toBe('% external fakeB %');
           expect($(divs.get(2)).contents().toString()).toBe('% external fakeC % - depends on - % external fakeB %');
@@ -374,7 +524,7 @@ describe('browser', () => {
     });
   });
 
-  it('should throw an error in the browser when two dependency linked scripts are specified in the wrong order and append is set to false', done => {
+  it('should throw an error in the browser when two dependency linked scripts are specified in the wrong order', done => {
     webpack(createWebpackConfig({
       copyOptions: [
         {
