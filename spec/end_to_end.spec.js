@@ -815,8 +815,8 @@ describe('end to end', () => {
           copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
           options: {
             tags: [
-              { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.js' },
-              { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*.css' }
+              { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*-a.js' },
+              { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*-a.css' }
             ],
             hash: hashInjector,
             append: true
@@ -834,8 +834,8 @@ describe('end to end', () => {
             expect($('script[src^="myPublic/style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'myPublic/style.js', type: 'text/javascript' } });
             expect($('script[src^="myPublic/app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'myPublic/app.js', type: 'text/javascript' } });
             expect($('link[href^="myPublic/style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'myPublic/style.css', rel: 'stylesheet' } });
-            expect($('link[href^="myPublic/assets/glob.' + theHash + '.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'myPublic/assets/glob.' + theHash + '.css', rel: 'stylesheet' } });
-            expect($('script[src^="myPublic/assets/glob.' + theHash + '.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'myPublic/assets/glob.' + theHash + '.js', type: 'text/javascript' } });
+            expect($('link[href^="myPublic/assets/glob-a.' + theHash + '.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'myPublic/assets/glob-a.' + theHash + '.css', rel: 'stylesheet' } });
+            expect($('script[src^="myPublic/assets/glob-a.' + theHash + '.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'myPublic/assets/glob-a.' + theHash + '.js', type: 'text/javascript' } });
             done();
           });
         });
@@ -1226,43 +1226,11 @@ function runTestsForOption (options, runExtraTests) {
   const isScript = optionTag === 'script';
   const optionAttr = isScript ? 'src' : 'href';
   const optionType = isScript ? 'js' : 'css';
-
-  const createWebpackOptionConfig = ({ webpackPublicPath, copyOptions, htmlOptions, options }) => {
-    if (optionName === 'tags' && options.tags) {
-      // Hacks to make sure tags don't throw errors due to file extensions vs type etc
-      const type = optionTag === 'script' ? 'js' : 'css';
-      if (options && typeof options === 'object') {
-        const savedTags = options.tags;
-        let tags;
-        if (savedTags !== void 0) {
-          if (Array.isArray(savedTags)) {
-            tags = [];
-            savedTags.forEach(asset => {
-              if (typeof asset === 'object') {
-                tags.push({ ...asset, type });
-              } else {
-                tags.push({ path: asset, type });
-              }
-            });
-          } else if (typeof savedTags === 'object') {
-            tags = { ...savedTags, type };
-          } else {
-            tags = { path: savedTags, type };
-          }
-          if (tags) {
-            options.tags = tags;
-          }
-        }
-      }
-    }
-    return createWebpackConfig({
-      webpackPublicPath, htmlOptions, options, copyOptions
-    });
-  };
+  const ext = isScript ? '.js' : '.css';
 
   describe(`options.${optionName}`, () => {
     it(`should not include ${optionName} when an empty array is provided`, done => {
-      webpack(createWebpackOptionConfig({ options: { [optionName]: [] } }), (err, result) => {
+      webpack(createWebpackConfig({ options: { [optionName]: [] } }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1280,7 +1248,7 @@ function runTestsForOption (options, runExtraTests) {
     });
 
     it(`should not include ${optionName} when nothing is provided`, done => {
-      webpack(createWebpackOptionConfig({ options: {} }), (err, result) => {
+      webpack(createWebpackConfig({ options: {} }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const htmlFile = path.resolve(__dirname, '../dist/index.html');
@@ -1300,11 +1268,11 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`option.${optionName} and options.append`, () => {
     it(`should prepend when the ${optionName} are all valid and append is set to false`, done => {
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         options: {
           append: false,
           [optionName]: [{
-            path: 'the-href',
+            path: `the-href${ext}`,
             attributes: { rel: 'the-rel' }
           }]
         }
@@ -1320,15 +1288,15 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${optionAttr}="the-href"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'the-href', rel: 'the-rel' } });
-          expect($($(optionTag).get(0))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'the-href', rel: 'the-rel' } });
+          expect($(`${optionTag}[${optionAttr}="the-href${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `the-href${ext}`, rel: 'the-rel' } });
+          expect($($(optionTag).get(0))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `the-href${ext}`, rel: 'the-rel' } });
           done();
         });
       });
     });
 
     it(`should append when the ${optionName} are all valid and append is set to true`, done => {
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         options: {
           append: true,
           [optionName]: [{
@@ -1358,13 +1326,13 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`option.${optionName} attributes`, () => {
     it(`should add the given ${optionName} attributes to the matching tag`, done => {
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         options: {
           append: false,
           [optionName]: [
-            { path: 'assets/abc', attributes: { id: 'abc' } },
-            { path: 'assets/def', attributes: { id: 'def', media: 'screen' } },
-            { path: 'assets/ghi' }]
+            { path: `assets/abc${ext}`, attributes: { id: 'abc' } },
+            { path: `assets/def${ext}`, attributes: { id: 'def', media: 'screen' } },
+            { path: `assets/ghi${ext}` }]
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
@@ -1379,25 +1347,25 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${optionAttr}="assets/abc"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}="assets/abc${ext}"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [optionAttr]: 'assets/abc',
+              [optionAttr]: `assets/abc${ext}`,
               id: 'abc'
             }
           });
-          expect($(`${optionTag}[${optionAttr}="assets/def"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}="assets/def${ext}"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [optionAttr]: 'assets/def',
+              [optionAttr]: `assets/def${ext}`,
               id: 'def',
               media: 'screen'
             }
           });
-          expect($(`${optionTag}[${optionAttr}="assets/ghi"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}="assets/ghi${ext}"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [optionAttr]: 'assets/ghi'
+              [optionAttr]: `assets/ghi${ext}`
             }
           });
           done();
@@ -1411,14 +1379,14 @@ function runTestsForOption (options, runExtraTests) {
         return v + hash;
       };
 
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         webpackPublicPath: 'thePublicPath/',
         htmlOptions: { hash: true },
         options: {
           [optionName]: [
-            { path: 'assets/abc', attributes: { id: 'abc' } },
-            { path: 'assets/def', attributes: { id: 'def', media: 'screen' } },
-            { path: 'assets/ghi' }
+            { path: `assets/abc${ext}`, attributes: { id: 'abc' } },
+            { path: `assets/def${ext}`, attributes: { id: 'def', media: 'screen' } },
+            { path: `assets/ghi${ext}` }
           ],
           append: false,
           hash: true
@@ -1436,25 +1404,25 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src^="thePublicPath/app.js"]')).toBeTag({ tagName: 'script', attributes: { type: 'text/javascript', src: appendHash('thePublicPath/app.js', hash) } });
           expect($('script[src^="thePublicPath/style.js"]')).toBeTag({ tagName: 'script', attributes: { type: 'text/javascript', src: appendHash('thePublicPath/style.js', hash) } });
           expect($('link[href^="thePublicPath/style.css"]')).toBeTag({ tagName: 'link', attributes: { rel: 'stylesheet', href: appendHash('thePublicPath/style.css', hash) } });
-          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/abc"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/abc${ext}"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [optionAttr]: appendHash('thePublicPath/assets/abc', hash),
+              [optionAttr]: appendHash(`thePublicPath/assets/abc${ext}`, hash),
               id: 'abc'
             }
           });
-          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/def"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/def${ext}"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [optionAttr]: appendHash('thePublicPath/assets/def', hash),
+              [optionAttr]: appendHash(`thePublicPath/assets/def${ext}`, hash),
               id: 'def',
               media: 'screen'
             }
           });
-          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/ghi"]`)).toBeTag({
+          expect($(`${optionTag}[${optionAttr}^="thePublicPath/assets/ghi${ext}"]`)).toBeTag({
             tagName: optionTag,
             attributes: {
-              [optionAttr]: appendHash('thePublicPath/assets/ghi', hash)
+              [optionAttr]: appendHash(`thePublicPath/assets/ghi${ext}`, hash)
             }
           });
           done();
@@ -1464,7 +1432,7 @@ function runTestsForOption (options, runExtraTests) {
 
     if (optionTag === 'link') {
       it(`should output ${optionName} attributes other than path`, done => {
-        webpack(createWebpackOptionConfig({
+        webpack(createWebpackConfig({
           options: {
             append: false,
             [optionName]: [
@@ -1491,14 +1459,14 @@ function runTestsForOption (options, runExtraTests) {
 
       it(`should output ${optionName} attributes and inject the publicPath only when ${optionName} object publicPath is not false`, done => {
         const publicPath = '/pub-path/';
-        webpack(createWebpackOptionConfig({
+        webpack(createWebpackConfig({
           webpackPublicPath: publicPath,
           options: {
             append: false,
             [optionName]: [
-              { path: '/the-href', publicPath: false, attributes: { rel: 'the-rel-a', a: 'abc', x: 'xyz' } },
-              { path: 'the-href-1', publicPath: true, attributes: { rel: 'the-rel-b', a: '123', x: '789' } },
-              { path: 'the-href-2', attributes: { rel: 'the-rel-c', a: '___', x: '---' } }
+              { path: `/the-href${ext}`, publicPath: false, attributes: { rel: 'the-rel-a', a: 'abc', x: 'xyz' } },
+              { path: `the-href-1${ext}`, publicPath: true, attributes: { rel: 'the-rel-b', a: '123', x: '789' } },
+              { path: `the-href-2${ext}`, attributes: { rel: 'the-rel-c', a: '___', x: '---' } }
             ]
           }
         }), (err, result) => {
@@ -1513,9 +1481,9 @@ function runTestsForOption (options, runExtraTests) {
             expect($('script[src="' + publicPath + 'app.js"]')).toBeTag({ tagName: 'script', attributes: { src: publicPath + 'app.js', type: 'text/javascript' } });
             expect($('script[src="' + publicPath + 'style.js"]')).toBeTag({ tagName: 'script', attributes: { src: publicPath + 'style.js', type: 'text/javascript' } });
             expect($('link[href="' + publicPath + 'style.css"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'style.css', rel: 'stylesheet' } });
-            expect($('link[href="/the-href"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href', rel: 'the-rel-a', a: 'abc', x: 'xyz' } });
-            expect($('link[href="' + publicPath + 'the-href-1"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'the-href-1', rel: 'the-rel-b', a: '123', x: '789' } });
-            expect($('link[href="' + publicPath + 'the-href-2"]')).toBeTag({ tagName: 'link', attributes: { href: publicPath + 'the-href-2', rel: 'the-rel-c', a: '___', x: '---' } });
+            expect($(`link[href="/the-href${ext}"]`)).toBeTag({ tagName: 'link', attributes: { href: `/the-href${ext}`, rel: 'the-rel-a', a: 'abc', x: 'xyz' } });
+            expect($(`link[href="${publicPath}the-href-1${ext}"]`)).toBeTag({ tagName: 'link', attributes: { href: `${publicPath}the-href-1${ext}`, rel: 'the-rel-b', a: '123', x: '789' } });
+            expect($(`link[href="${publicPath}the-href-2${ext}"]`)).toBeTag({ tagName: 'link', attributes: { href: `${publicPath}the-href-2${ext}`, rel: 'the-rel-c', a: '___', x: '---' } });
             done();
           });
         });
@@ -1525,12 +1493,12 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`option.${optionName} glob`, () => {
     it(`should include any files for a ${optionName} glob that does match files`, done => {
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
         options: {
           [optionName]: [
-            { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*-a' },
-            { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*-b' }
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: `glob-a*${ext}` },
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: `glob-b*${ext}` }
           ],
           append: true
         }
@@ -1546,8 +1514,8 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${optionAttr}="assets/glob-a"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'assets/glob-a' } });
-          expect($(`${optionTag}[${optionAttr}="assets/glob-b"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'assets/glob-b' } });
+          expect($(`${optionTag}[${optionAttr}="assets/glob-a${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/glob-a${ext}` } });
+          expect($(`${optionTag}[${optionAttr}="assets/glob-b${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/glob-b${ext}` } });
           done();
         });
       });
@@ -1556,10 +1524,10 @@ function runTestsForOption (options, runExtraTests) {
 
   describe(`options.${optionName} sourcePath`, () => {
     it(`should not throw an error when the ${optionName} sourcePath points to a valid js file`, done => {
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         options: {
           [optionName]: {
-            path: 'foobar',
+            path: `foobar${ext}`,
             sourcePath: path.join(FIXTURES_PATH, 'other')
           }
         }
@@ -1575,8 +1543,8 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${optionAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
-          expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+          expect($(`${optionTag}[${optionAttr}="foobar${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
+          expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
           done();
         });
       });
@@ -1584,7 +1552,7 @@ function runTestsForOption (options, runExtraTests) {
 
     it(`should throw an error when the ${optionName} sourcePath does not point to a valid js file`, done => {
       const badFilename = 'does-not-exist.js';
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         options: {
           [optionName]: {
             path: 'foobar.js',
@@ -1601,10 +1569,10 @@ function runTestsForOption (options, runExtraTests) {
     });
 
     it(`should not throw an error when ${optionName} sourcePath is used and the css file exists`, done => {
-      webpack(createWebpackOptionConfig({
+      webpack(createWebpackConfig({
         options: {
           [optionName]: [{
-            path: 'assets/afile',
+            path: `assets/afile${ext}`,
             sourcePath: 'spec/fixtures/other'
           }],
           append: false
@@ -1621,7 +1589,7 @@ function runTestsForOption (options, runExtraTests) {
           expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
           expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
           expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-          expect($(`${optionTag}[${optionAttr}="assets/afile"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'assets/afile' } });
+          expect($(`${optionTag}[${optionAttr}="assets/afile${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/afile${ext}` } });
           done();
         });
       });
@@ -1629,7 +1597,7 @@ function runTestsForOption (options, runExtraTests) {
 
     it(`should throw an error when ${optionName} sourcePath is used and the css file does not exist`, done => {
       const theFunction = () => {
-        webpack(createWebpackOptionConfig({
+        webpack(createWebpackConfig({
           options: {
             [optionName]: [{
               path: 'assets/astyle.css',
@@ -1653,10 +1621,10 @@ function runTestsForOption (options, runExtraTests) {
   if (isScript) {
     describe(`options.${optionName} external`, () => {
       it(`should add the webpack external when external is used`, done => {
-        webpack(createWebpackOptionConfig({
+        webpack(createWebpackConfig({
           options: {
             [optionName]: {
-              path: 'foobar',
+              path: `foobar${ext}`,
               external: {
                 packageName: '@scope/my-package',
                 variableName: 'MyPackage'
@@ -1677,18 +1645,18 @@ function runTestsForOption (options, runExtraTests) {
             expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
             expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
             expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-            expect($(`${optionTag}[${optionAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
-            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+            expect($(`${optionTag}[${optionAttr}="foobar${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
+            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
             done();
           });
         });
       });
 
       it(`should not add the webpack external when external is not used`, done => {
-        webpack(createWebpackOptionConfig({
+        webpack(createWebpackConfig({
           options: {
             [optionName]: {
-              path: 'foobar',
+              path: `foobar${ext}`,
               sourcePath: path.join(FIXTURES_PATH, 'other')
             }
           }
@@ -1705,8 +1673,8 @@ function runTestsForOption (options, runExtraTests) {
             expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
             expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
             expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
-            expect($(`${optionTag}[${optionAttr}="foobar"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
-            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: 'foobar' } });
+            expect($(`${optionTag}[${optionAttr}="foobar${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
+            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
             done();
           });
         });
