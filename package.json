@@ -15,6 +15,12 @@
     "test": "jasmine",
     "debug": "node-debug jasmine"
   },
+  "semistandard": {
+    "ignore": [
+      "spec/**/*-bundle.js",
+      "spec/dist/**"
+    ]
+  },
   "unmockedModulePathPatterns": [
     "jasmine-expect"
   ],
@@ -42,10 +48,12 @@
     "cheerio": "^1.0.0-rc.3",
     "copy-webpack-plugin": "^5.0.2",
     "css-loader": "^2.1.1",
+    "express": "^4.16.4",
     "html-webpack-plugin": "^3.2.0",
     "jasmine": "^3.4.0",
     "jasmine-expect": "^4.0.1",
     "mini-css-extract-plugin": "^0.6.0",
+    "puppeteer": "1.14.0",
     "rimraf": "^2.6.3",
     "semistandard": "^13.0.1",
     "style-loader": "^0.23.1",

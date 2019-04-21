@@ -8,4 +8,4 @@ const fakeResults = fakes.map(fake => fake());
 
 const fakeResultsHTML = fakeResults.map(fakeResult => '<div class="fake">' + fakeResult + '</div>').join('');
 
-document.getElementById('root').innerHTML = fakeResultsHTML;
+document.getElementById('external-root').innerHTML = fakeResultsHTML;
