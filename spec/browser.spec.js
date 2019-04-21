@@ -197,7 +197,7 @@ describe('browser', () => {
 
       getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
         .then(({ content, errors }) => {
-          expect(errors).toBeFalsy();
+          expect(errors.length).toBe(0);
           const $ = cheerio.load(content);
           const divs = $('div.fake');
           expect($(divs.get(0)).contents().toString()).toBe('this is the result for fakeA');
