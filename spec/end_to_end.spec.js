@@ -31,11 +31,17 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackTagsPlugin = require('../');
 
 const OUTPUT_DIR = path.join(__dirname, '../dist');
+const HTML_FILE = path.join(OUTPUT_DIR, 'index.html');
 const OUTPUT_FILENAME = '[name].js';
 
 const FIXTURES_PATH = path.join(__dirname, './fixtures');
 const FIXTURES_ENTRY = path.join(FIXTURES_PATH, 'entry.js');
 const FIXTURES_STYLE = path.join(FIXTURES_PATH, 'app.css');
+
+const EXTERNALS_PATH = path.join(FIXTURES_PATH, 'external');
+const EXTERNALS_ENTRY = path.join(EXTERNALS_PATH, 'external-entry.js');
+const EXTERNALS_OUPUT_DIR = path.join(EXTERNALS_PATH, 'dist');
+const EXTERNALS_HTML_FILE = path.join(EXTERNALS_OUPUT_DIR, 'index.html');
 
 const WEBPACK_CSS_RULE = { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] };
 
@@ -55,6 +61,7 @@ const WEBPACK_MODULE = {
 
 const createWebpackConfig = ({
   webpackEntry,
+  webpackOutput,
   webpackPublicPath,
   copyOptions,
   htmlOptions,
@@ -73,6 +80,7 @@ const createWebpackConfig = ({
     },
     output: {
       ...WEBPACK_OUTPUT,
+      ...(webpackOutput !== void 0 ? { path: webpackOutput } : {}),
       ...(webpackPublicPath !== void 0 ? { publicPath: webpackPublicPath } : {})
     },
     module: { ...WEBPACK_MODULE },
@@ -119,8 +127,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(3);
@@ -145,8 +152,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -171,8 +177,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(3);
@@ -197,8 +202,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -230,8 +234,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(4);
@@ -266,8 +269,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -296,8 +298,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -327,8 +328,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -352,8 +352,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(3);
@@ -380,8 +379,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(4);
@@ -408,8 +406,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -437,8 +434,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(3);
@@ -474,8 +470,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(5);
@@ -512,8 +507,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(4);
@@ -541,8 +535,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(3);
@@ -579,8 +572,7 @@ describe('end to end', () => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const hash = result.compilation.hash;
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -627,8 +619,7 @@ describe('end to end', () => {
             expect(err).toBeFalsy();
             expect(JSON.stringify(result.compilation.errors)).toBe('[]');
             const hash = result.compilation.hash;
-            const htmlFile = path.resolve(__dirname, '../dist/index.html');
-            fs.readFile(htmlFile, 'utf8', (er, data) => {
+            fs.readFile(HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
               expect($('script').length).toBe(2);
@@ -674,8 +665,7 @@ describe('end to end', () => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const hash = result.compilation.hash;
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -721,8 +711,7 @@ describe('end to end', () => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           const hash = result.compilation.hash;
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -767,8 +756,7 @@ describe('end to end', () => {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -799,8 +787,7 @@ describe('end to end', () => {
           const theHash = result.compilation.hash;
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -835,8 +822,7 @@ describe('end to end', () => {
           const theHash = result.compilation.hash;
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(3);
@@ -876,8 +862,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(5);
@@ -931,8 +916,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           const scripts = $('script');
@@ -979,8 +963,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1016,8 +999,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1054,8 +1036,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1094,8 +1075,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1126,8 +1106,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1156,8 +1135,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(3);
@@ -1183,8 +1161,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1209,8 +1186,7 @@ describe('end to end', () => {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1243,8 +1219,7 @@ function runTestsForOption (options, runExtraTests) {
       webpack(createWebpackConfig({ options: { [optionName]: [] } }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1261,8 +1236,7 @@ function runTestsForOption (options, runExtraTests) {
       webpack(createWebpackConfig({ options: {} }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2);
@@ -1289,8 +1263,7 @@ function runTestsForOption (options, runExtraTests) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
@@ -1317,8 +1290,7 @@ function runTestsForOption (options, runExtraTests) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
@@ -1347,8 +1319,7 @@ function runTestsForOption (options, runExtraTests) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 3 : 0));
@@ -1405,8 +1376,7 @@ function runTestsForOption (options, runExtraTests) {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
         const hash = result.compilation.hash;
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 3 : 0));
@@ -1452,8 +1422,7 @@ function runTestsForOption (options, runExtraTests) {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2);
@@ -1482,8 +1451,7 @@ function runTestsForOption (options, runExtraTests) {
         }), (err, result) => {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2 + (optionTag === 'script' ? 3 : 0));
@@ -1515,8 +1483,7 @@ function runTestsForOption (options, runExtraTests) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 2 : 0));
@@ -1544,8 +1511,7 @@ function runTestsForOption (options, runExtraTests) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
@@ -1590,8 +1556,7 @@ function runTestsForOption (options, runExtraTests) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(JSON.stringify(result.compilation.errors)).toBe('[]');
-        const htmlFile = path.resolve(__dirname, '../dist/index.html');
-        fs.readFile(htmlFile, 'utf8', (er, data) => {
+        fs.readFile(HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
           expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
@@ -1646,8 +1611,7 @@ function runTestsForOption (options, runExtraTests) {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           expect(JSON.stringify(result.compilation.options.externals)).toBe('{"@scope/my-package":"MyPackage"}');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
@@ -1674,8 +1638,7 @@ function runTestsForOption (options, runExtraTests) {
           expect(err).toBeFalsy();
           expect(JSON.stringify(result.compilation.errors)).toBe('[]');
           expect(JSON.stringify(result.compilation.options.externals)).toBe('{}');
-          const htmlFile = path.resolve(__dirname, '../dist/index.html');
-          fs.readFile(htmlFile, 'utf8', (er, data) => {
+          fs.readFile(HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
             expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
@@ -1686,6 +1649,82 @@ function runTestsForOption (options, runExtraTests) {
             expect($(`${optionTag}[${optionAttr}="foobar${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
             expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
             done();
+          });
+        });
+      });
+
+      it('should remove the specified fake package from the webpack bundles when external option is specified', done => {
+        webpack(createWebpackConfig({
+          webpackEntry: EXTERNALS_ENTRY,
+          webpackOutput: EXTERNALS_OUPUT_DIR,
+          options: {
+            scripts: {
+              path: 'fake-b',
+              external: {
+                packageName: 'fake-b-package',
+                variableName: 'FakeB'
+              }
+            },
+            append: true,
+            publicPath: false
+          }
+        }), (webpackError, webpackResult) => {
+          expect(webpackError).toBeFalsy();
+          expect(JSON.stringify(webpackResult.compilation.errors)).toBe('[]');
+          fs.readFile(EXTERNALS_HTML_FILE, 'utf8', (htmlError, htmlData) => {
+            expect(htmlError).toBeFalsy();
+            const $ = cheerio.load(htmlData);
+            expect($('script').length).toBe(3);
+            expect($('link').length).toBe(1);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+
+            fs.readFile(path.join(EXTERNALS_OUPUT_DIR, 'app.js'), 'utf8', (appError, appData) => {
+              expect(appError).toBeFalsy();
+
+              expect(appData).toContain('this is the result for fakeA');
+              expect(appData).not.toContain('this is the result for fakeB');
+              expect(appData).toContain('this is the result for fakeC');
+
+              done();
+            });
+          });
+        });
+      });
+
+      it('should not remove any fake packages when external option is not specified', done => {
+        webpack(createWebpackConfig({
+          webpackEntry: EXTERNALS_ENTRY,
+          webpackOutput: EXTERNALS_OUPUT_DIR,
+          options: {
+            scripts: {
+              path: 'fake-b'
+            },
+            append: true,
+            publicPath: false
+          }
+        }), (webpackError, webpackResult) => {
+          expect(webpackError).toBeFalsy();
+          expect(JSON.stringify(webpackResult.compilation.errors)).toBe('[]');
+          fs.readFile(EXTERNALS_HTML_FILE, 'utf8', (htmlError, htmlData) => {
+            expect(htmlError).toBeFalsy();
+            const $ = cheerio.load(htmlData);
+            expect($('script').length).toBe(2 + (optionTag === 'script' ? 1 : 0));
+            expect($('link').length).toBe(1 + (optionTag === 'link' ? 1 : 0));
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+
+            fs.readFile(path.join(EXTERNALS_OUPUT_DIR, 'app.js'), 'utf8', (appError, appData) => {
+              expect(appError).toBeFalsy();
+
+              expect(appData).toContain('this is the result for fakeA');
+              expect(appData).toContain('this is the result for fakeB');
+              expect(appData).toContain('this is the result for fakeC');
+
+              done();
+            });
           });
         });
       });

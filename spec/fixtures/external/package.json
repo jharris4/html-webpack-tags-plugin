@@ -1,0 +1,33 @@
+{
+  "name": "html-webpack-tags-plugin-test",
+  "version": "1.0.0",
+  "main": "browser-entry.js",
+  "scripts": {
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jharris4/html-webpack-tags-plugin.git"
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "html-webpack-plugin",
+    "html",
+    "tags",
+    "inject",
+    "include",
+    "assets"
+  ],
+  "author": "Jon Harris <harris.jb@gmail.com> (https://github.com/jharris4)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jharris4/html-webpack-tags-plugin/issues"
+  },
+  "homepage": "https://github.com/jharris4/html-webpack-tags-plugin",
+  "dependencies": {
+    "fake-a-package": "1.0.0",
+    "fake-b-package": "1.0.0",
+    "fake-c-package": "1.0.0"
+  }
+}
