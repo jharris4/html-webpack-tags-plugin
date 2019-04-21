@@ -53,17 +53,27 @@ const WEBPACK_MODULE = {
   rules: [WEBPACK_CSS_RULE]
 };
 
-const createWebpackConfig = ({ webpackPublicPath, htmlOptions, options, copyOptions, useHtmlPlugin = true }) => {
+const createWebpackConfig = ({
+  webpackEntry,
+  webpackPublicPath,
+  copyOptions,
+  htmlOptions,
+  options
+}) => {
   const createTagsPlugin = opts => new HtmlWebpackTagsPlugin(opts);
-  const copyPlugins = copyOptions ? [new CopyWebpackPlugin(copyOptions)] : [];
-  const tagsPlugins = Array.isArray(options) ? options.map(createTagsPlugin) : [createTagsPlugin(options)];
-  const htmlPlugins = useHtmlPlugin ? [new HtmlWebpackPlugin(htmlOptions)] : [];
+
+  const copyPlugins = copyOptions !== false ? [new CopyWebpackPlugin(copyOptions)] : [];
+  const htmlPlugins = htmlOptions !== false ? [new HtmlWebpackPlugin(htmlOptions)] : [];
+  const tagsPlugins = Array.isArray(options) ? options.map(createTagsPlugin) : options !== false ? [createTagsPlugin(options)] : [];
 
   return {
-    entry: { ...WEBPACK_ENTRY },
+    entry: {
+      ...WEBPACK_ENTRY,
+      ...(webpackEntry !== void 0 ? { app: webpackEntry } : {})
+    },
     output: {
       ...WEBPACK_OUTPUT,
-      publicPath: webpackPublicPath
+      ...(webpackPublicPath !== void 0 ? { publicPath: webpackPublicPath } : {})
     },
     module: { ...WEBPACK_MODULE },
     plugins: [
@@ -85,7 +95,7 @@ describe('end to end', () => {
       const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
       const theFunction = () => {
         webpack(createWebpackConfig({
-          useHtmlPlugin: false,
+          htmlOptions: false,
           options: {
             tags: 'foobar.js',
             publicPath: false
