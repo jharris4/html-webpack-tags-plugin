@@ -704,7 +704,7 @@ Setting the **`external`** option for a `script` asset requires caution to ensur
 
 - It is advisable to always set **`append`** to **false** so that `external` \<script\> tags are always inserted **before** the `webpack` bundle \<script\> tags.
 
-- The order that you use when you specify a list of external links matters. For example, `<script src="react.s"/>` should come before `<script src="react-router.s"/>` if `react-router` has a peer dependency on `react`
+- The order that you use when you specify a list of external links matters. For example, `<script src="react.js"/>` should come before `<script src="react-router.s"/>` if `react-router` has a peer dependency on `react`.
 
 ---
 
