@@ -3,7 +3,7 @@ const assert = require('assert');
 const minimatch = require('minimatch');
 const glob = require('glob');
 const path = require('path');
-const slash = require('slash');
+const slash = require('slash'); // fixes slashes for windows
 
 const PLUGIN_NAME = 'HtmlWebpackTagsPlugin';
 
@@ -339,21 +339,21 @@ function getAssetPath (assetObject, usePublicPath, addPublicPath, useHash, addHa
 
   if (isDefined(publicPath)) {
     if (publicPath === true) {
-      path = addPublicPath(path, webpackPublicPath);
+      path = slash(addPublicPath(path, webpackPublicPath));
     } else if (isFunction(publicPath)) {
-      path = publicPath(path, webpackPublicPath);
+      path = slash(publicPath(path, webpackPublicPath));
     }
   } else if (usePublicPath) {
-    path = addPublicPath(path, webpackPublicPath);
+    path = slash(addPublicPath(path, webpackPublicPath));
   }
   if (isDefined(hash)) {
     if (hash === true) {
-      path = addHash(path, compilationHash);
+      path = slash(addHash(path, compilationHash));
     } else if (isFunction(hash)) {
-      path = hash(path, compilationHash);
+      path = slash(hash(path, compilationHash));
     }
   } else if (useHash) {
-    path = addHash(path, compilationHash);
+    path = slash(addHash(path, compilationHash));
   }
   return path;
 }
