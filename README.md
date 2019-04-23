@@ -238,6 +238,7 @@ When tag assets are specified as **Object**s, the following tag asset options ar
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
 |**`path`**|`{String}`|**`required`**|The tag asset file path|
+|**`append`**|`{Boolean}`|`undefined`| This can be used to override the plugin level **`append`** option at a tag level|
 |**`type`**|`{'js'\|'css'}`|`undefined`|For **`tags`** assets this may be used to specify whether the tag is a `link` or a `script`|
 |**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together these two options specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with asset path for each match result|
 |**`attributes`**|`{Object}`|`undefined`|The attributes to be injected into the html tags. Some attributes are filtered out by `html-webpack-plugin`. **(Recommended:** set `html-webpack-plugin` option: `{ inject: true }`**)**|
