@@ -3,7 +3,7 @@ const assert = require('assert');
 const minimatch = require('minimatch');
 const glob = require('glob');
 const path = require('path');
-const slash = require('slash'); // fixes slashes for windows
+const slash = require('slash'); // fixes slashes in file paths for windows
 
 const PLUGIN_NAME = 'HtmlWebpackTagsPlugin';
 
