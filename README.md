@@ -233,7 +233,7 @@ new HtmlWebpackTagsPlugin({
 
 ---
 
-When tag assets are specified as **Object**s, the following tag asset options are available:
+When tags are specified as **Object**s, the following `tag object` options are available:
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
@@ -249,7 +249,7 @@ When tag assets are specified as **Object**s, the following tag asset options ar
 
 ---
 
-The asset **`hash`** asset option may be used to override the main **`hash`** option:
+The `tag object` **`hash`** option may be used to override the main **`hash`** option:
 
 ```js
 const pluginOptions = {
@@ -285,7 +285,7 @@ const pluginOptionsDisabled = {
 
 ---
 
-The asset **`publicPath`** asset option may be used to override the main **`publicPath`** option:
+The `tag object` **`publicPath`** option may be used to override the main **`publicPath`** option:
 
 ```js
 const pluginOptions = {
@@ -343,7 +343,11 @@ plugins: [
 
 _____
 
-**`append`** and `prepend` at the same time:
+Using the **`append`** option set to **true** and **false** at the same time:
+
+## **Note on Plugin Ordering**
+
+When **`append`** is set to **false** and there are multiple instances of this plugins, the second plugin's tags will be inserted before the first plugin's tags.
 
 ```javascript
 plugins: [
@@ -395,9 +399,11 @@ plugins: [
 ]
 ```
 
+This will override `webpack`'s `publicPath` setting for the purposes of path prefixing.
+
 _____
 
-Or to include tag assets **without** prepending the **`publicPath`**:
+Or to inject `tag objects` **without** prepending the **`publicPath`**:
 
 ```javascript
 plugins: [
@@ -411,7 +417,7 @@ plugins: [
 
 _____
 
-Manually specifying a tag asset **`type`**:
+Manually specifying a tag `tag object` **`type`**:
 
 ```javascript
 plugins: [
@@ -437,7 +443,7 @@ plugins: [
 
 _____
 
-Adding custom **`attributes`** to asset tags:
+Adding custom **`attributes`** to `tag objects`:
 
 The bootstrap-theme `<link>` tag will be given an `id="bootstrapTheme"` attribute.
 
@@ -461,7 +467,7 @@ plugins: [
 
 _____
 
-Using **`hash`** to inject the webpack compilation hash:
+Using the **`hash`** option to inject the webpack compilation hash:
 
 When the **`hash`** option is set to `true`, asset paths will be injected with a hash value.
 
@@ -484,7 +490,7 @@ The **`addHash`** option can be used to control how the hash is injected.
 
 _____
 
-Using **`hash`** to customize the injection of the webpack compilation hash:
+Using the **`hash`** option to customize the injection of the webpack compilation hash:
 
 When the **`hash`** option is set to a `function`, asset paths will be replaced with the result of executing that function.
 
@@ -510,7 +516,7 @@ plugins: [
 
 _____
 
-Specifying specific **`files`**:
+Specifying specific `html-webpack-plugin` instances to inject to with the **`files`** option:
 
 ```javascript
 plugins: [
@@ -539,7 +545,7 @@ plugins: [
 
 _____
 
-Specifying tag assets usings a **`glob`**:
+Specifying `tag object` path searches usings a **`glob`**:
 
 Note that since `copy-webpack-plugin` does not actually copy the files to webpack's output directory until *after* `html-webpack-plugin` has completed, it is necessary to use the **`globPath`** to retrieve filename matches relative to the original location of any such files.
 
@@ -559,7 +565,7 @@ plugins: [
 
 _____
 
-Specifying **`links`** (tags that are only **link** tags):
+Using the **`links`** option to inject `link` tags:
 
 ```javascript
 output: {
@@ -607,7 +613,7 @@ Note that the second link's href was not prefixed with the webpack `publicPath` 
 
 _____
 
-Specifying **`scripts`** (tags that are only **script** tags):
+Using the **`scripts`** option to inject `script` tags:
 
 ```javascript
 output: {
@@ -706,11 +712,13 @@ Some users have encountered issues with plugin ordering.
 
 - It is advisable to always place any `HtmlWebpackPlugin` plugins **before** any `HtmlWebpackTagsPlugin` plugins in your webpack config.
 
+- When **`append`** is **false** tags are injected before any other tags. This means that if you have two instances of this plugin both with append set to false, then the `second` plugin's tags will be injected **before** the `first` plugin's tags.
+
 ---
 
 #### Webpack `externals`
 
-Setting the **`external`** option for a `script` asset requires caution to ensure that the scripts are in the correct order.
+Setting the **`external`** option for a `script` `tag object` requires caution to ensure that the scripts are in the correct order.
 
 - It is advisable to always set **`append`** to **false** so that `external` \<script\> tags are always inserted **before** the `webpack` bundle \<script\> tags.
 
