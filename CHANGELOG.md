@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.6"></a>
+# [2.0.6](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.5...2.0.6) (2019-04-23)
+
+Version `2.0.6` fixes use of this plugin with [html-webpack-plugin@4.x](https://github.com/jantimon/html-webpack-plugin). [[#45](https://github.com/jharris4/html-webpack-tags-plugin/issues/45)]
+
 <a name="2.0.5"></a>
 # [2.0.5](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.4...2.0.5) (2019-04-23)
 
@@ -14,7 +19,7 @@ Version `2.0.4` includes adding browser tests to this package, updated documenta
 
 ### Bug Fixes
 
-* Fix **windows** `path` formatting issues introduced in the `2.x` version rewrite. [#47](https://github.com/jharris4/html-webpack-tags-plugin/issues/44)
+* Fix **windows** `path` formatting issues introduced in the `2.x` version rewrite. [[#44](https://github.com/jharris4/html-webpack-tags-plugin/issues/44)]
 
 <a name="2.0.3"></a>
 # [2.0.3](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.2...2.0.3) (2019-04-19)
