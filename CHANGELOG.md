@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.5"></a>
+# [2.0.5](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.4...2.0.5) (2019-04-23)
+
+Version `2.0.5` adds support for specifying the append option at the tag level.
+
 <a name="2.0.4"></a>
 # [2.0.4](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.3...2.0.4) (2019-04-22)
 
