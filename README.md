@@ -28,6 +28,15 @@ Install the plugin with npm:
 $ npm install --save-dev html-webpack-tags-plugin
 ```
 
+Deployment
+----------
+
+[html-webpack-deploy-plugin](https://github.com/jharris4/html-webpack-deploy-plugin) is a plugin that enhances this plugin with capabilities such as:
+ - copying your local files and injecting them as html tags with easy to use syntax
+ - copying package files from your local node_modules and having them versioned automatically as they are injected as html tags
+ - easy configuration to stop webpack from processing certain node_modules packages so you can handle shipping certain package bundles yourself
+ - easy to use CDN settings so you can inject package tags that serve from a CDN for optimal performance
+
 Basic Usage
 -----------
 Require the plugin in your webpack config:
