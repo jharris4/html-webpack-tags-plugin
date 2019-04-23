@@ -338,6 +338,8 @@ function HtmlWebpackTagsPlugin (options) {
       });
     }
 
+    const htmlPluginName = isDefined(options.htmlPluginName) ? options.htmlPluginName : 'html-webpack-plugin';
+
     this.options = {
       links,
       linksPrepend,
@@ -350,7 +352,8 @@ function HtmlWebpackTagsPlugin (options) {
       addPublicPath,
       useHash,
       addHash,
-      shouldSkip
+      shouldSkip,
+      htmlPluginName
     };
   }
 }
@@ -382,7 +385,7 @@ function getTagPath (tagObject, usePublicPath, addPublicPath, useHash, addHash, 
 
 HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
-  const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip } = options;
+  const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip, htmlPluginName } = options;
   const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend } = options;
 
   const externals = compiler.options.externals || {};
@@ -464,11 +467,14 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
       const pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
       const pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
 
-      const headPrepend = pluginHead.slice(0, linksPrepend.length);
-      const headAppend = pluginHead.slice(pluginHead.length - linksAppend.length);
+      const pluginLinks = pluginHead.filter(({ tagName }) => tagName === 'link');
+      const pluginScripts = pluginBody.filter(({ tagName }) => tagName === 'script');
 
-      const bodyPrepend = pluginBody.slice(0, scriptsPrepend.length);
-      const bodyAppend = pluginBody.slice(pluginBody.length - scriptsAppend.length);
+      const headPrepend = pluginLinks.slice(0, linksPrepend.length);
+      const headAppend = pluginLinks.slice(pluginLinks.length - linksAppend.length);
+
+      const bodyPrepend = pluginScripts.slice(0, scriptsPrepend.length);
+      const bodyAppend = pluginScripts.slice(pluginScripts.length - scriptsAppend.length);
 
       const copyAttributes = (tags, tagObjects) => {
         tags.forEach((tag, i) => {
@@ -499,8 +505,15 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackTagsPlugin', onBeforeHtmlGeneration);
         compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackTagsPlugin', onAlterAssetTag);
       } else {
-        const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
-        throw new Error(message);
+        const HtmlWebpackPlugin = require(htmlPluginName);
+        if (HtmlWebpackPlugin.getHooks) {
+          const hooks = HtmlWebpackPlugin.getHooks(compilation);
+          hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
+          hooks.alterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+        } else {
+          const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
+          throw new Error(message);
+        }
       }
     } else {
       // Webpack < 4
