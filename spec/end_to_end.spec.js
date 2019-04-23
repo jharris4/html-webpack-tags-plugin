@@ -258,6 +258,56 @@ describe('end to end', () => {
         });
       });
 
+      it('should support overriding append at the tag level', done => {
+        webpack(createWebpackConfig({
+          options: [
+            {
+              tags: [
+                'foo.css',
+                { path: 'foo.js', append: true }
+              ],
+              scripts: 'baz.js',
+              append: false,
+              publicPath: false
+            },
+            {
+              tags: [
+                { path: 'bar.css', append: false },
+                'bar.js'
+              ],
+              links: 'baz.css',
+              append: true,
+              publicPath: false
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(4);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="foo.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'foo.js', type: 'text/javascript' } });
+            expect($('script[src="bar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'bar.js', type: 'text/javascript' } });
+            expect($('script[src="baz.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'baz.js', type: 'text/javascript' } });
+            expect($($('script').get(0))).toBeTag({ tagName: 'script', attributes: { src: 'baz.js', type: 'text/javascript' } });
+            expect($($('script').get(3))).toBeTag({ tagName: 'script', attributes: { src: 'foo.js', type: 'text/javascript' } });
+            expect($($('script').get(4))).toBeTag({ tagName: 'script', attributes: { src: 'bar.js', type: 'text/javascript' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('link[href="foo.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'foo.css', rel: 'stylesheet' } });
+            expect($('link[href="bar.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'bar.css', rel: 'stylesheet' } });
+            expect($('link[href="baz.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'baz.css', rel: 'stylesheet' } });
+            expect($($('link').get(0))).toBeTag({ tagName: 'link', attributes: { href: 'bar.css', rel: 'stylesheet' } });
+            expect($($('link').get(1))).toBeTag({ tagName: 'link', attributes: { href: 'foo.css', rel: 'stylesheet' } });
+            expect($($('link').get(3))).toBeTag({ tagName: 'link', attributes: { href: 'baz.css', rel: 'stylesheet' } });
+            done();
+          });
+        });
+      });
+
       it('should include multiple css files and append them in order', done => {
         webpack(createWebpackConfig({
           options: {
