@@ -108,22 +108,20 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       rimraf(FIXTURES_OUTPUT_DIR, done);
     });
 
-    if (!isHtmlNext) {
-      it('should throw an error if html-webpack-plugin is not in the webpack config', done => {
-        const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
-        const theFunction = () => {
-          webpack(createWebpackConfig({
-            htmlOptions: false,
-            options: {
-              tags: 'foobar.js',
-              publicPath: false
-            }
-          }), () => { });
-        };
-        expect(theFunction).toThrowError(theError);
-        done();
-      });
-    }
+    it('should throw an error if html-webpack-plugin is not in the webpack config', done => {
+      const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
+      const theFunction = () => {
+        webpack(createWebpackConfig({
+          htmlOptions: false,
+          options: {
+            tags: 'foobar.js',
+            publicPath: false
+          }
+        }), () => { });
+      };
+      expect(theFunction).toThrowError(theError);
+      done();
+    });
 
     describe('main options', () => {
       describe('options.append', () => {

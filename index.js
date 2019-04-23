@@ -508,6 +508,11 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         const HtmlWebpackPlugin = require(htmlPluginName);
         if (HtmlWebpackPlugin.getHooks) {
           const hooks = HtmlWebpackPlugin.getHooks(compilation);
+          const htmlPlugins = compilation.options.plugins.filter(plugin => plugin instanceof HtmlWebpackPlugin);
+          if (htmlPlugins.length === 0) {
+            const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
+            throw new Error(message);
+          }
           hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
           hooks.alterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
         } else {
