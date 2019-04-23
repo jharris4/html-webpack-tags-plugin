@@ -107,7 +107,7 @@ The available options are:
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
-|**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing tags (should be set to **false** when using any `script` tag **`external`**) |
+|**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing or webpack bundle tags (should be set to **false** when using any `script` tag **`external`**) |
 |**`files`**|`{Array<String>}`|`[]`|If specified this plugin will only inject tags into the html-webpack-plugin instances that are injecting into these files  (uses [minimatch](https://github.com/isaacs/minimatch))|
 |**`jsExtensions`**|`{String\|Array<String>}`|`['.js']`|The file extensions to use when determining if a `tag` in the `tags` option is a `script`|
 |**`cssExtensions`**|`{String\|Array<String>}`|`['.css']`|The file extensions to use when determining if a `tag` in the `tags` option is a `link`|
@@ -120,6 +120,66 @@ The available options are:
 |**`links`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` html tags|
 |**`scripts`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<script>` html tags|
 |**`tags`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` or `<script>` html tags depending on the tag `type`|
+
+---
+
+The **`append`** option controls whether tags are injected before or after `webpack` or `template` tags.
+
+If multiple plugins are used with **`append`** set to **false** then the **tags will be injected in reverse order**.
+
+This sample `index.html` template:
+
+```html
+<html>
+  <head><link href="template-link"></head>
+  <body><script src="template-script"></script></body>
+</html>
+```
+
+And this sample `webpack` config:
+```js
+{
+  entry: {
+    'app': 'app.js',
+    'style': 'style.css' // also generates style.js
+  },
+  plugins: [
+    new HtmlWebpackTagsPlugin({
+      append: false, links: 'plugin-a-link', script: 'plugin-a-script'
+    }),
+    new HtmlWebpackTagsPlugin({
+      append: false, links: 'plugin-b-link', script: 'plugin-b-script'
+    }),
+    new HtmlWebpackTagsPlugin({
+      append: true, links: 'plugin-c-link', script: 'plugin-c-script'
+    }),
+    new HtmlWebpackTagsPlugin({
+      append: true, links: 'plugin-d-link', script: 'plugin-d-script'
+    })
+  ]
+}
+```
+
+Will generate approximately this html:
+```html
+<head>
+  <link href="plugin-b-link">
+  <link href="plugin-a-link">
+  <link href="template-link">
+  <link href="style.css">
+  <link href="plugin-c-link">
+  <link href="plugin-d-link">
+</head>
+<body>
+  <script src="plugin-b-script"></script>
+  <script src="plugin-a-script"></script>
+  <script src="template-script"></script>
+  <script src="app.js"></script>
+  <script src="style.js"></script>
+  <script src="plugin-c-link"></script>
+  <script src="plugin-d-link"></script>
+</body>
+```
 
 ---
 
