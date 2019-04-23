@@ -171,7 +171,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains string and a boolean`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo.js`, true, `bar.css`] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, true, `bar${ext}`] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} items must be an object or string)`));
@@ -180,7 +180,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
 
     it(`should not throw an error if the ${optionName} contains strings and objects`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo.js`, { path: `file.js` }, `bar.css`] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `file${ext}` }, `bar${ext}`] });
       };
 
       expect(theFunction).not.toThrowError();
@@ -200,7 +200,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
 
     it(`should throw an error if the ${optionName} contains an element that is an object with a non string path`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: 123, type: 'js' }, { path: 'c.css' }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: 123, type: 'js' }, { path: `c${ext}` }] });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object must have a string path property)`));
@@ -353,9 +353,18 @@ function runTestsForOption (optionName, type, runExtraTests) {
       done();
     });
 
+    it(`should throw an error if any of the ${optionName} options are objects with a globPath property that is not a string`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, globPath: 123, type: 'js' }, `bar${ext}`] });
+      };
+
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string glob property)`));
+      done();
+    });
+
     it(`should throw an error if any of the ${optionName} options are objects with glob specified but globPath missing`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, glob: 'withoutExtensions*' }, `bar${ext}`], append: false });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, glob: `withoutExtensions*` }, `bar${ext}`], append: false });
       };
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string globPath property)`));
       done();
@@ -371,7 +380,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
 
     it(`should throw an error if any of the ${optionName} options are objects with glob that does not match any files`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'assets/', globPath: FIXTURES_PATH, glob: 'nonexistant*.js' }, { path: 'assets/', globPath: FIXTURES_PATH, glob: 'nonexistant*.css' }], append: true });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: 'assets/', globPath: FIXTURES_PATH, glob: `nonexistant*${ext}` }], append: true });
       };
 
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object glob found no files)`));
