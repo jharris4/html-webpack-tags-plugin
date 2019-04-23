@@ -217,6 +217,26 @@ function runTestsForOption (optionName, type, runExtraTests) {
     });
   });
 
+  describe(`options.${optionName} append`, () => {
+    it(`should throw an error if the ${optionName} contains an element that is an object with a non boolean append`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, append: 123 }, { path: `c${ext}` }] });
+      };
+
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object append should be a boolean)`));
+      done();
+    });
+
+    it(`should not throw an error if the ${optionName} contains elements that are all objects that have a boolean append`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}`, append: true }, { path: `b${ext}`, append: false }, { path: `c${ext}`, append: true }] });
+      };
+
+      expect(theFunction).not.toThrowError();
+      done();
+    });
+  });
+
   describe(`options.${optionName} publicPath`, () => {
     it(`should throw an error if the ${optionName} contains an element that is an object with publicPath set to string`, done => {
       const theFunction = () => {

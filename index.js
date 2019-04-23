@@ -96,24 +96,24 @@ function getAssetTypeCheckers (options) {
   };
 }
 
-function splitLinkScriptTags (options, optionName, assetObjects) {
+function splitLinkScriptTags (options, optionName, tagObjects) {
   const linkObjects = [];
   const scriptObjects = [];
   const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options);
 
-  assetObjects.forEach(assetObject => {
-    if (isDefined(assetObject.type)) {
-      const { type, ...others } = assetObject;
+  tagObjects.forEach(tagObject => {
+    if (isDefined(tagObject.type)) {
+      const { type, ...others } = tagObject;
       assert(isType(type), `${PLUGIN_NAME} options.${optionName} type must be css or js (${type})`);
       (isCss(type) ? linkObjects : scriptObjects).push({
         ...others
       });
     } else {
-      const { path } = assetObject;
+      const { path } = tagObject;
       if (isAssetTypeCss(path)) {
-        linkObjects.push(assetObject);
+        linkObjects.push(tagObject);
       } else if (isAssetTypeJs(path)) {
-        scriptObjects.push(assetObject);
+        scriptObjects.push(tagObject);
       } else {
         assert(false, `${PLUGIN_NAME} options.${optionName} could not determine asset type for (${path})`);
       }
@@ -123,84 +123,98 @@ function splitLinkScriptTags (options, optionName, assetObjects) {
   return [linkObjects, scriptObjects];
 }
 
-function getAssetObjects (asset, optionName) {
-  let assetObjects;
-  assert(isString(asset) || isObject(asset), `${PLUGIN_NAME} options.${optionName} items must be an object or string`);
-  if (isString(asset)) {
-    assetObjects = [{
-      path: asset
+function getTagObjects (tag, optionName) {
+  let tagObjects;
+  assert(isString(tag) || isObject(tag), `${PLUGIN_NAME} options.${optionName} items must be an object or string`);
+  if (isString(tag)) {
+    tagObjects = [{
+      path: tag
     }];
   } else {
-    assert(isString(asset.path), `${PLUGIN_NAME} options.${optionName} object must have a string path property`);
-    if (isDefined(asset.publicPath)) {
-      const { publicPath } = asset;
+    assert(isString(tag.path), `${PLUGIN_NAME} options.${optionName} object must have a string path property`);
+    if (isDefined(tag.append)) {
+      assert(isBoolean(tag.append), `${PLUGIN_NAME} options.${optionName} object append should be a boolean`);
+    }
+    if (isDefined(tag.publicPath)) {
+      const { publicPath } = tag;
       assert(isBoolean(publicPath) || isFunction(publicPath), `${PLUGIN_NAME} options.${optionName} object publicPath should be a boolean or function`);
       if (isFunction(publicPath)) {
         assert(isString(publicPath('', '')), `${PLUGIN_NAME} options.${optionName} object publicPath should be a function that returns a string`);
       }
     }
-    if (isDefined(asset.hash)) {
-      const { hash } = asset;
+    if (isDefined(tag.hash)) {
+      const { hash } = tag;
       assert(isBoolean(hash) || isFunction(hash), `${PLUGIN_NAME} options.${optionName} object hash should be a boolean or function`);
       if (isFunction(hash)) {
         assert(isString(hash('', '')), `${PLUGIN_NAME} options.${optionName} object hash should be a function that returns a string`);
       }
     }
-    if (isDefined(asset.sourcePath)) {
-      assert(isString(asset.sourcePath), `${PLUGIN_NAME} options.${optionName} object should have a string sourcePath property`);
+    if (isDefined(tag.sourcePath)) {
+      assert(isString(tag.sourcePath), `${PLUGIN_NAME} options.${optionName} object should have a string sourcePath property`);
     }
-    if (isDefined(asset.attributes)) {
-      const { attributes } = asset;
+    if (isDefined(tag.attributes)) {
+      const { attributes } = tag;
       assert(isObject(attributes), `${PLUGIN_NAME} options.${optionName} object should have an object attributes property`);
       Object.keys(attributes).forEach(attribute => {
         const value = attributes[attribute];
         assert(isString(value) || isBoolean(value) || isNumber(value), `${PLUGIN_NAME} options.${optionName} object attribute values should strings, booleans or numbers`);
       });
     }
-    if (isDefined(asset.glob) || isDefined(asset.globPath)) {
-      const { glob: assetGlob, globPath, ...otherAssetProperties } = asset;
+    if (isDefined(tag.glob) || isDefined(tag.globPath)) {
+      const { glob: assetGlob, globPath, ...otherAssetProperties } = tag;
       assert(isString(assetGlob), `${PLUGIN_NAME} options.${optionName} object should have a string glob property`);
       assert(isString(globPath), `${PLUGIN_NAME} options.${optionName} object should have a string globPath property`);
       const globAssets = glob.sync(assetGlob, { cwd: globPath });
-      const globAssetPaths = globAssets.map(globAsset => slash(path.join(asset.path, globAsset)));
-      assert(globAssetPaths.length > 0, `${PLUGIN_NAME} options.${optionName} object glob found no files (${asset.path} ${assetGlob} ${globPath})`);
-      assetObjects = [];
+      const globAssetPaths = globAssets.map(globAsset => slash(path.join(tag.path, globAsset)));
+      assert(globAssetPaths.length > 0, `${PLUGIN_NAME} options.${optionName} object glob found no files (${tag.path} ${assetGlob} ${globPath})`);
+      tagObjects = [];
       globAssetPaths.forEach(globAssetPath => {
-        assetObjects.push({
+        tagObjects.push({
           ...otherAssetProperties,
           path: globAssetPath
         });
       });
     } else {
-      assetObjects = [asset];
+      tagObjects = [tag];
     }
   }
-  return assetObjects;
+  return tagObjects;
 }
 
-function getAllAssetObjects (options, optionName) {
-  let assetObjects;
+function getAllTagObjects (options, append, optionName) {
+  let tagObjects;
   if (isDefined(options[optionName])) {
-    const assets = options[optionName];
-    assert(isString(assets) || isObject(assets) || isArray(assets), `${PLUGIN_NAME} options.${optionName} should be a string, object, or array (${assets})`);
-    if (isArray(assets)) {
-      assetObjects = [];
-      assets.forEach(asset => {
-        assetObjects = assetObjects.concat(getAssetObjects(asset, optionName));
+    const tags = options[optionName];
+    assert(isString(tags) || isObject(tags) || isArray(tags), `${PLUGIN_NAME} options.${optionName} should be a string, object, or array (${tags})`);
+    if (isArray(tags)) {
+      tagObjects = [];
+      tags.forEach(asset => {
+        tagObjects = tagObjects.concat(getTagObjects(asset, optionName));
       });
     } else {
-      assetObjects = getAssetObjects(assets, optionName);
+      tagObjects = getTagObjects(tags, optionName);
     }
   }
-  return assetObjects;
+  if (tagObjects) {
+    tagObjects = tagObjects.map(tag => {
+      if (!isDefined(tag.append)) {
+        tag = {
+          ...tag,
+          append: append
+        };
+      }
+      return tag;
+    });
+  }
+  return tagObjects;
 }
 
-function filterExternalAssetObjects (assetObjects, filterName, optionName) {
+function filterExternalTagObjects (tagObjects, filterName, optionName) {
   const allowed = filterName === 'scripts';
-  if (isArray(assetObjects)) {
-    assetObjects.forEach(assetObject => {
-      if (isObject(assetObject) && isDefined(assetObject.external)) {
-        const { external } = assetObject;
+  if (isArray(tagObjects)) {
+    tagObjects.forEach(tagObject => {
+      if (isObject(tagObject) && isDefined(tagObject.external)) {
+        const { external } = tagObject;
         try {
           if (allowed) {
             assert(isObject(external), `${PLUGIN_NAME} options.${optionName} external should be an object`);
@@ -217,7 +231,7 @@ function filterExternalAssetObjects (assetObjects, filterName, optionName) {
       }
     });
   }
-  return assetObjects;
+  return tagObjects;
 }
 
 function HtmlWebpackTagsPlugin (options) {
@@ -286,23 +300,27 @@ function HtmlWebpackTagsPlugin (options) {
     let links = [];
     let scripts = [];
     if (isDefined(options.tags)) {
-      const assetObjects = getAllAssetObjects(options, 'tags');
-      let [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', assetObjects);
-      linkObjects = filterExternalAssetObjects(linkObjects, 'links', 'tags');
-      scriptObjects = filterExternalAssetObjects(scriptObjects, 'scripts', 'tags');
+      const tagObjects = getAllTagObjects(options, append, 'tags');
+      let [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', tagObjects);
+      linkObjects = filterExternalTagObjects(linkObjects, 'links', 'tags');
+      scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'tags');
       links = links.concat(linkObjects);
       scripts = scripts.concat(scriptObjects);
     }
     if (isDefined(options.links)) {
-      let linkObjects = getAllAssetObjects(options, 'links');
-      linkObjects = filterExternalAssetObjects(linkObjects, 'links', 'links');
+      let linkObjects = getAllTagObjects(options, append, 'links');
+      linkObjects = filterExternalTagObjects(linkObjects, 'links', 'links');
       links = links.concat(linkObjects);
     }
     if (isDefined(options.scripts)) {
-      let scriptObjects = getAllAssetObjects(options, 'scripts');
-      scriptObjects = filterExternalAssetObjects(scriptObjects, 'scripts', 'scripts');
+      let scriptObjects = getAllTagObjects(options, append, 'scripts');
+      scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'scripts');
       scripts = scripts.concat(scriptObjects);
     }
+    const linksPrepend = links.filter(({ append }) => !append);
+    const linksAppend = links.filter(({ append }) => append);
+    const scriptsPrepend = scripts.filter(({ append }) => !append);
+    const scriptsAppend = scripts.filter(({ append }) => append);
 
     let shouldSkip = () => false;
     if (isDefined(options.files)) {
@@ -322,8 +340,12 @@ function HtmlWebpackTagsPlugin (options) {
 
     this.options = {
       links,
+      linksPrepend,
+      linksAppend,
       scripts,
-      append: append,
+      scriptsPrepend,
+      scriptsAppend,
+      append,
       usePublicPath,
       addPublicPath,
       useHash,
@@ -333,9 +355,9 @@ function HtmlWebpackTagsPlugin (options) {
   }
 }
 
-function getAssetPath (assetObject, usePublicPath, addPublicPath, useHash, addHash, webpackPublicPath, compilationHash) {
-  const { publicPath, hash } = assetObject;
-  let { path } = assetObject;
+function getTagPath (tagObject, usePublicPath, addPublicPath, useHash, addHash, webpackPublicPath, compilationHash) {
+  const { publicPath, hash } = tagObject;
+  let { path } = tagObject;
 
   if (isDefined(publicPath)) {
     if (publicPath === true) {
@@ -361,7 +383,7 @@ function getAssetPath (assetObject, usePublicPath, addPublicPath, useHash, addHa
 HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
   const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip } = options;
-  const { append, scripts, links } = options;
+  const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend } = options;
 
   const externals = compiler.options.externals || {};
   scripts.forEach(script => {
@@ -396,28 +418,21 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         }
       };
 
-      const jsPaths = [];
-      const cssPaths = [];
-      scripts.forEach(script => {
-        if (isString(script.sourcePath)) {
-          assetPromises.push(addAsset(script.sourcePath));
+      const getPath = tag => {
+        if (isString(tag.sourcePath)) {
+          assetPromises.push(addAsset(tag.sourcePath));
         }
-        jsPaths.push(getAssetPath(script, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash));
-      });
-      links.forEach(link => {
-        if (isString(link.sourcePath)) {
-          assetPromises.push(addAsset(link.sourcePath));
-        }
-        cssPaths.push(getAssetPath(link, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash));
-      });
+        return getTagPath(tag, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash);
+      };
 
-      if (append) {
-        assets.js = assets.js.concat(jsPaths);
-        assets.css = assets.css.concat(cssPaths);
-      } else {
-        assets.js = jsPaths.concat(assets.js);
-        assets.css = cssPaths.concat(assets.css);
-      }
+      const jsPrependPaths = scriptsPrepend.map(getPath);
+      const jsAppendPaths = scriptsAppend.map(getPath);
+
+      const cssPrependPaths = linksPrepend.map(getPath);
+      const cssAppendPaths = linksAppend.map(getPath);
+
+      assets.js = jsPrependPaths.concat(assets.js).concat(jsAppendPaths);
+      assets.css = cssPrependPaths.concat(assets.css).concat(cssAppendPaths);
 
       Promise.all(assetPromises).then(
         () => {
@@ -446,38 +461,29 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         }
       }
 
-      let pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
-      let pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
+      const pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
+      const pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
 
-      pluginHead = pluginHead.slice(
-        append ? pluginHead.length - links.length : 0,
-        append ? pluginHead.length : links.length
-      );
+      const headPrepend = pluginHead.slice(0, linksPrepend.length);
+      const headAppend = pluginHead.slice(pluginHead.length - linksAppend.length);
 
-      pluginBody = pluginBody.slice(
-        append ? pluginHead.length - scripts.length : 0,
-        append ? pluginHead.length : scripts.length
-      );
+      const bodyPrepend = pluginBody.slice(0, scriptsPrepend.length);
+      const bodyAppend = pluginBody.slice(pluginBody.length - scriptsAppend.length);
 
-      pluginBody.forEach(function (tag, i) {
-        const { attributes } = scripts[i];
-        if (attributes) {
-          const { attributes: tagAttributes } = tag;
-          Object.keys(attributes).forEach(attribute => {
-            tagAttributes[attribute] = attributes[attribute];
-          });
-        }
-      });
+      const copyAttributes = (tags, tagObjects) => {
+        tags.forEach((tag, i) => {
+          const { attributes } = tagObjects[i];
+          if (attributes) {
+            const { attributes: tagAttributes } = tag;
+            Object.keys(attributes).forEach(attribute => {
+              tagAttributes[attribute] = attributes[attribute];
+            });
+          }
+        });
+      };
 
-      pluginHead.forEach(function (tag, i) {
-        const { attributes } = links[i];
-        if (attributes) {
-          const { attributes: tagAttributes } = tag;
-          Object.keys(attributes).forEach(attribute => {
-            tagAttributes[attribute] = attributes[attribute];
-          });
-        }
-      });
+      copyAttributes(headPrepend.concat(headAppend), linksPrepend.concat(linksAppend));
+      copyAttributes(bodyPrepend.concat(bodyAppend), scriptsPrepend.concat(scriptsAppend));
 
       if (callback) {
         callback(null, htmlPluginData);
