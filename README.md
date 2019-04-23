@@ -17,7 +17,7 @@ Motivation
 
 When using a plugin such as [copy-webpack-plugin](https://github.com/webpack-contrib/copy-webpack-plugin) you may have assets output to your build directory that are not detected/output by the html-webpack-plugin.
 
-This plugin lets you manually resolve such issues, and also lets you inject the webpack `publicPath` or compilation `hash` into your tag asset paths if you so choose.
+This plugin lets you manually resolve such issues, and also lets you inject the webpack `publicPath` or compilation `hash` into your tag paths if you so choose.
 
 Installation
 ------------
@@ -107,19 +107,19 @@ The available options are:
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
-|**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing tags (should be set to **false** when using any `script` tag asset **`external`**) |
+|**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing tags (should be set to **false** when using any `script` tag **`external`**) |
 |**`files`**|`{Array<String>}`|`[]`|If specified this plugin will only inject tags into the html-webpack-plugin instances that are injecting into these files  (uses [minimatch](https://github.com/isaacs/minimatch))|
 |**`jsExtensions`**|`{String\|Array<String>}`|`['.js']`|The file extensions to use when determining if a `tag` in the `tags` option is a `script`|
 |**`cssExtensions`**|`{String\|Array<String>}`|`['.css']`|The file extensions to use when determining if a `tag` in the `tags` option is a `link`|
-|**`useHash`**|`{Boolean}`|`false`|Whether to inject the webpack `compilation.hash` into the tag asset paths|
-|**`addHash`**|`{Function(assetPath:String, hash:String):String}`|`see above`|The function to call when injecting the `hash` into the tag asset paths|
+|**`useHash`**|`{Boolean}`|`false`|Whether to inject the webpack `compilation.hash` into the tag paths|
+|**`addHash`**|`{Function(assetPath:String, hash:String):String}`|`see above`|The function to call when injecting the `hash` into the tag paths|
 |**`hash`**|`{Boolean\|Function}`|`undefined`|Shortcut to specifying `useHash` and `addHash`|
-|**`usePublicPath`**|`{Boolean}`|`true`|Whether to inject the (webpack) `publicPath` into the tag asset paths|
-|**`addPublicPath`**|`{Function(assetPath:String, publicPath:String):String}`|`see above`|Whether to inject the `publicPath` into the tag asset paths|
+|**`usePublicPath`**|`{Boolean}`|`true`|Whether to inject the (webpack) `publicPath` into the tag paths|
+|**`addPublicPath`**|`{Function(assetPath:String, publicPath:String):String}`|`see above`|Whether to inject the `publicPath` into the tag paths|
 |**`publicPath`**|`{Boolean\|String\|Function}`|`undefined`|Shortcut to specifying `usePublicPath` and `addPublicPath`|
-|**`links`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tag assets to inject as `<link>` html tags|
-|**`scripts`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tag assets to inject as `<script>` html tags|
-|**`tags`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tag assets to inject as `<link>` or `<script>` html tags depending on the tag asset `type`|
+|**`links`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` html tags|
+|**`scripts`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<script>` html tags|
+|**`tags`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` or `<script>` html tags depending on the tag `type`|
 
 ---
 
@@ -174,7 +174,7 @@ const isTheSameAsString = {
 
 ---
 
-When the **`tags`** option is used the type of the specified tag asset(s) is inferred either from the file extension or an optional **`type`** option that may be one of: `'js' \| 'css'`|
+When the **`tags`** option is used the type of the specified tag(s) is inferred either from the file extension or an optional **`type`** option that may be one of: `'js' \| 'css'`|
 
 The inferred type is used to split the **`tags`** option into `tagLinks` and `tagScripts` that are injected **before** any specified **`links`** or **`scripts`** options.
 
@@ -203,7 +203,7 @@ new HtmlWebpackTagsPlugin({
 ```
 ---
 
-The tag assets for the **`tags`**, **`links`** or **`scripts`** options values can be specified in several ways:
+The `value` of the **`tags`**, **`links`** or **`scripts`** options can be specified in several ways:
 
 - as a **String**:
 
@@ -237,15 +237,15 @@ When tags are specified as **Object**s, the following `tag object` options are a
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
-|**`path`**|`{String}`|**`required`**|The tag asset file path|
+|**`path`**|`{String}`|**`required`**|The tag file path (used for the `href` or `src` tag attribute)|
 |**`append`**|`{Boolean}`|`undefined`| This can be used to override the plugin level **`append`** option at a tag level|
 |**`type`**|`{'js'\|'css'}`|`undefined`|For **`tags`** assets this may be used to specify whether the tag is a `link` or a `script`|
-|**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together these two options specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with asset path for each match result|
+|**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together these two options specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with path for each match result|
 |**`attributes`**|`{Object}`|`undefined`|The attributes to be injected into the html tags. Some attributes are filtered out by `html-webpack-plugin`. **(Recommended:** set `html-webpack-plugin` option: `{ inject: true }`**)**|
 |**`sourcePath`**|`{String}`|`undefined`|Specify a source path to be added as an entry to `html-webpack-plugin`. Useful to trigger webpack recompilation after the asset has changed|
-|**`hash`**|`{Boolean\|Function}`|`undefined`|Whether to inject the the webpack `compilation.hash` into the asset path|
-|**`publicPath`**|`{Boolean\|Function}`|`undefined`|Whether to inject the (webpack) `publicPath` into the asset path|
-|**`external`**|`{Object({ packageName: String, variableName: String})}`|`undefined`|When specified for **script** tag assets causes `{ packageName: variableName }` to be added to the [webpack config's externals](https://webpack.js.org/configuration/externals/)|
+|**`hash`**|`{Boolean\|Function}`|`undefined`|Whether to inject the the webpack `compilation.hash` into the tag's path|
+|**`publicPath`**|`{Boolean\|Function}`|`undefined`|Whether to inject the (webpack) `publicPath` into the tag's path|
+|**`external`**|`{Object({ packageName: String, variableName: String})}`|`undefined`|When specified for **script** tags causes `{ packageName: variableName }` to be added to the [webpack config's externals](https://webpack.js.org/configuration/externals/)|
 
 ---
 
@@ -469,7 +469,7 @@ _____
 
 Using the **`hash`** option to inject the webpack compilation hash:
 
-When the **`hash`** option is set to `true`, asset paths will be injected with a hash value.
+When the **`hash`** option is set to `true`, tag paths will be injected with a hash value.
 
 The **`addHash`** option can be used to control how the hash is injected.
 
@@ -492,7 +492,7 @@ _____
 
 Using the **`hash`** option to customize the injection of the webpack compilation hash:
 
-When the **`hash`** option is set to a `function`, asset paths will be replaced with the result of executing that function.
+When the **`hash`** option is set to a `function`, tag paths will be replaced with the result of executing that function.
 
 ```javascript
 plugins: [
