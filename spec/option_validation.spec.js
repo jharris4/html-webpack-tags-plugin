@@ -99,6 +99,101 @@ describe('option validation', () => {
       expect(theFunction).toThrowError(/(options should specify a publicPath that is either a boolean or a string)/);
       done();
     });
+
+    it('should throw an error if the usePublicPath flag is not a boolean', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ usePublicPath: 123 });
+      };
+
+      expect(theFunction).toThrowError(/(options.usePublicPath should be a boolean)/);
+      done();
+    });
+
+    it('should throw an error if the addPublicPath option is not a function', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ addPublicPath: 123 });
+      };
+
+      expect(theFunction).toThrowError(/(options.addPublicPath should be a function)/);
+      done();
+    });
+
+    it('should throw an error if publicPath and usePublicPath are specified together', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ publicPath: true, usePublicPath: false });
+      };
+
+      expect(theFunction).toThrowError(/(options.publicPath should not be used with either usePublicPath or addPublicPath)/);
+      done();
+    });
+
+    it('should throw an error if publicPath and addPublicPath are specified together', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ publicPath: true, addPublicPath: () => '' });
+      };
+
+      expect(theFunction).toThrowError(/(options.publicPath should not be used with either usePublicPath or addPublicPath)/);
+      done();
+    });
+  });
+
+  describe('options.hash', () => {
+    it('should throw an error if the hash option is not a boolean or function', done => {
+      const nonBooleanCheck = [123, 'not a boolean', /regex/, [], {}];
+
+      nonBooleanCheck.forEach(val => {
+        const theCheck = () => {
+          return new HtmlWebpackTagsPlugin({ tags: [], append: true, publicPath: true, hash: val });
+        };
+        expect(theCheck).toThrowError(/(options.hash should be a boolean or a function)/);
+      });
+      done();
+    });
+
+    it('should throw an error if the hash is a string', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ hash: 'my-hash' });
+      };
+
+      expect(theFunction).toThrowError(/(options.hash should be a boolean or a function)/);
+      done();
+    });
+
+    it('should throw an error if the useHash flag is not a boolean', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ useHash: 123 });
+      };
+
+      expect(theFunction).toThrowError(/(options.useHash should be a boolean)/);
+      done();
+    });
+
+    it('should throw an error if the addHash option is not a function', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ addHash: 123 });
+      };
+
+      expect(theFunction).toThrowError(/(options.addHash should be a function)/);
+      done();
+    });
+
+    it('should throw an error if hash and useHash are specified together', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ hash: true, useHash: false });
+      };
+
+      expect(theFunction).toThrowError(/(options.hash should not be used with either useHash or addHash)/);
+      done();
+    });
+
+    it('should throw an error if hash and addHash are specified together', done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ hash: true, addHash: () => '' });
+      };
+
+      expect(theFunction).toThrowError(/(options.hash should not be used with either useHash or addHash)/);
+      done();
+    });
   });
 
   describe('options.files', () => {
@@ -121,20 +216,6 @@ describe('option validation', () => {
         return new HtmlWebpackTagsPlugin({ tags: ['foo.js', 'bar.css'], append: false, files: ['abc', true, 'def'] });
       };
       expect(theFunction).toThrowError(/(options\.files should be an array of strings)/);
-      done();
-    });
-  });
-
-  describe('options.hash', () => {
-    it('should throw an error if the hash option is not a boolean or function', done => {
-      const nonBooleanCheck = [123, 'not a boolean', /regex/, [], {}];
-
-      nonBooleanCheck.forEach(val => {
-        const theCheck = () => {
-          return new HtmlWebpackTagsPlugin({ tags: [], append: true, publicPath: true, hash: val });
-        };
-        expect(theCheck).toThrowError(/(options.hash should be a boolean or a function)/);
-      });
       done();
     });
   });

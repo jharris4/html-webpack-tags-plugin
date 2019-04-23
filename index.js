@@ -96,7 +96,7 @@ function getAssetTypeCheckers (options) {
   };
 }
 
-function splitLinkScriptTags (options, optionName, tagObjects) {
+function splitLinkScriptTags (tagObjects, options, optionName) {
   const linkObjects = [];
   const scriptObjects = [];
   const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options);
@@ -246,6 +246,7 @@ function HtmlWebpackTagsPlugin (options) {
     let usePublicPath = DEFAULT_OPTIONS.usePublicPath;
     let addPublicPath = DEFAULT_OPTIONS.addPublicPath;
     if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
+      assert(!isDefined(options.publicPath), `${PLUGIN_NAME} options.publicPath should not be used with either usePublicPath or addPublicPath`);
       if (isDefined(options.usePublicPath)) {
         assert(isBoolean(options.usePublicPath), `${PLUGIN_NAME} options.usePublicPath should be a boolean`);
         usePublicPath = options.usePublicPath;
@@ -276,6 +277,7 @@ function HtmlWebpackTagsPlugin (options) {
     let useHash = DEFAULT_OPTIONS.useHash;
     let addHash = DEFAULT_OPTIONS.addHash;
     if (isDefined(options.useHash) || isDefined(options.addHash)) {
+      assert(!isDefined(options.hash), `${PLUGIN_NAME} options.hash should not be used with either useHash or addHash`);
       if (isDefined(options.useHash)) {
         assert(isBoolean(options.useHash), `${PLUGIN_NAME} options.useHash should be a boolean`);
         useHash = options.useHash;
@@ -301,7 +303,7 @@ function HtmlWebpackTagsPlugin (options) {
     let scripts = [];
     if (isDefined(options.tags)) {
       const tagObjects = getAllTagObjects(options, append, 'tags');
-      let [linkObjects, scriptObjects] = splitLinkScriptTags(options, 'tags', tagObjects);
+      let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags');
       linkObjects = filterExternalTagObjects(linkObjects, 'links', 'tags');
       scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'tags');
       links = links.concat(linkObjects);
