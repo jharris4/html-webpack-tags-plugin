@@ -218,15 +218,15 @@ function filterExternalTagObjects (tagObjects, filterName, optionName) {
   return tagObjects;
 }
 
-function getShouldSkip (files, pluginName) {
+function getShouldSkip (files, optionPath) {
   let shouldSkip = () => false;
   if (isDefined(files)) {
-    assert((isString(files) || isArray(files)), `${pluginName}options.files should be a string or array`);
+    assert((isString(files) || isArray(files)), `${optionPath} should be a string or array`);
     if (isString(files)) {
       files = [files];
     } else if (isArray(files)) {
       files.forEach(file => {
-        assert(isString(file), `${pluginName}options.files should be an array of strings`);
+        assert(isString(file), `${optionPath} should be an array of strings`);
       });
     }
     shouldSkip = htmlPluginData => !files.some(function (file) {
@@ -236,31 +236,28 @@ function getShouldSkip (files, pluginName) {
   return shouldSkip;
 }
 
-function getValidatedMainOptions (options, pluginName) {
-  assert(isObject(options), `${pluginName} options should be an object`);
-  let append = DEFAULT_OPTIONS.append;
+function getValidatedMainOptions (options, optionPath, defaultOptions = DEFAULT_OPTIONS) {
+  assert(isObject(options), `${optionPath} should be an object`);
+  let { append, usePublicPath, addPublicPath, useHash, addHash } = defaultOptions;
   if (isDefined(options.append)) {
-    assert(isBoolean(options.append), `${pluginName}options.append should be a boolean`);
+    assert(isBoolean(options.append), `${optionPath}.append should be a boolean`);
     append = options.append;
   }
-
-  let usePublicPath = DEFAULT_OPTIONS.usePublicPath;
-  let addPublicPath = DEFAULT_OPTIONS.addPublicPath;
   if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
-    assert(!isDefined(options.publicPath), `${pluginName}options.publicPath should not be used with either usePublicPath or addPublicPath`);
+    assert(!isDefined(options.publicPath), `${optionPath}.publicPath should not be used with either usePublicPath or addPublicPath`);
     if (isDefined(options.usePublicPath)) {
-      assert(isBoolean(options.usePublicPath), `${pluginName}options.usePublicPath should be a boolean`);
+      assert(isBoolean(options.usePublicPath), `${optionPath}.usePublicPath should be a boolean`);
       usePublicPath = options.usePublicPath;
     }
     if (isDefined(options.addPublicPath)) {
-      assert(isFunction(options.addPublicPath), `${pluginName}options.addPublicPath should be a function`);
-      assert(isString(options.addPublicPath('', '')), `${pluginName}options.addPublicPath should be a function that returns a string`);
+      assert(isFunction(options.addPublicPath), `${optionPath}.addPublicPath should be a function`);
+      assert(isString(options.addPublicPath('', '')), `${optionPath}.addPublicPath should be a function that returns a string`);
       addPublicPath = options.addPublicPath;
     }
   } else if (isDefined(options.publicPath)) {
     const { publicPath } = options;
     assert(isBoolean(publicPath) || isString(publicPath) || isFunction(publicPath),
-      `${pluginName}options should specify a publicPath that is either a boolean or a string or a function`);
+      `${optionPath}.publicPath should be either a boolean or a string or a function`);
     if (isBoolean(publicPath)) {
       usePublicPath = publicPath;
     } else if (isString(publicPath)) {
@@ -269,37 +266,40 @@ function getValidatedMainOptions (options, pluginName) {
       const oldAddPublicPath = addPublicPath;
       addPublicPath = path => oldAddPublicPath(path, publicPath);
     } else {
-      assert(isString(publicPath('', '')), `${pluginName}options.publicPath should be a function that returns a string`);
+      assert(isString(publicPath('', '')), `${optionPath}.publicPath should be a function that returns a string`);
       usePublicPath = true;
       addPublicPath = publicPath;
     }
   }
-
-  let useHash = DEFAULT_OPTIONS.useHash;
-  let addHash = DEFAULT_OPTIONS.addHash;
   if (isDefined(options.useHash) || isDefined(options.addHash)) {
-    assert(!isDefined(options.hash), `${pluginName}options.hash should not be used with either useHash or addHash`);
+    assert(!isDefined(options.hash), `${optionPath}.hash should not be used with either useHash or addHash`);
     if (isDefined(options.useHash)) {
-      assert(isBoolean(options.useHash), `${pluginName}options.useHash should be a boolean`);
+      assert(isBoolean(options.useHash), `${optionPath}.useHash should be a boolean`);
       useHash = options.useHash;
     }
     if (isDefined(options.addHash)) {
-      assert(isFunction(options.addHash), `${pluginName}options.addHash should be a function`);
-      assert(isString(options.addHash('', '')), `${pluginName}options.addHash should be a function that returns a string`);
+      assert(isFunction(options.addHash), `${optionPath}.addHash should be a function`);
+      assert(isString(options.addHash('', '')), `${optionPath}.addHash should be a function that returns a string`);
       addHash = options.addHash;
     }
   } else if (isDefined(options.hash)) {
     const { hash } = options;
-    assert(isBoolean(hash) || isFunction(hash), `${pluginName}options.hash should be a boolean or a function`);
+    assert(isBoolean(hash) || isFunction(hash), `${optionPath}.hash should be a boolean or a function`);
     if (isBoolean(hash)) {
       useHash = hash;
     } else {
-      assert(isString(hash('', '')), `${pluginName}options.hash should be a function that returns a string`);
+      assert(isString(hash('', '')), `${optionPath}.hash should be a function that returns a string`);
       useHash = true;
       addHash = hash;
     }
   }
+
+  const cleanOptions = { ...options };
+  delete cleanOptions['publicPath'];
+  delete cleanOptions['hash'];
+
   return {
+    ...cleanOptions,
     append,
     usePublicPath,
     addPublicPath,
@@ -311,7 +311,7 @@ function getValidatedMainOptions (options, pluginName) {
 function getValidatedOptions (options, pluginName) {
   assert(isObject(options), `${pluginName} options should be an object`);
 
-  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, pluginName);
+  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, pluginName + '.options');
 
   let links = [];
   let scripts = [];
@@ -338,7 +338,7 @@ function getValidatedOptions (options, pluginName) {
   const scriptsPrepend = scripts.filter(({ append }) => !append);
   const scriptsAppend = scripts.filter(({ append }) => append);
 
-  const shouldSkip = getShouldSkip(options.files, pluginName);
+  const shouldSkip = getShouldSkip(options.files, pluginName + ' options.files');
 
   return {
     links,

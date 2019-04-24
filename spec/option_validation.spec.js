@@ -96,7 +96,7 @@ describe('option validation', () => {
         return new HtmlWebpackTagsPlugin({ publicPath: 123 });
       };
 
-      expect(theFunction).toThrowError(/(options should specify a publicPath that is either a boolean or a string)/);
+      expect(theFunction).toThrowError(/(options.publicPath should be either a boolean or a string or a function)/);
       done();
     });
 

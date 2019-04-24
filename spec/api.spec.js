@@ -28,10 +28,10 @@ describe('api', () => {
       const { getValidatedMainOptions } = HtmlWebpackTagsPlugin.api;
       expect(typeof getValidatedMainOptions === 'function');
       const theFunction = () => {
-        return getValidatedMainOptions({ append: '123' }, 'pluginName');
+        return getValidatedMainOptions({ append: '123' }, 'pluginName.options');
       };
 
-      expect(theFunction).toThrowError(/(pluginNameoptions.append should be a boolean)/);
+      expect(theFunction).toThrowError(/(pluginName.options.append should be a boolean)/);
       done();
     });
 
@@ -39,7 +39,7 @@ describe('api', () => {
       const { getValidatedMainOptions } = HtmlWebpackTagsPlugin.api;
       expect(typeof getValidatedMainOptions === 'function');
       const theFunction = () => {
-        return getValidatedMainOptions({ append: true }, 'pluginName');
+        return getValidatedMainOptions({ append: true }, 'pluginName.options');
       };
 
       expect(theFunction).not.toThrowError();
@@ -59,10 +59,10 @@ describe('api', () => {
       const { getShouldSkip } = HtmlWebpackTagsPlugin.api;
       expect(typeof getShouldSkip === 'function');
       const theFunction = () => {
-        return getShouldSkip([123], 'pluginName');
+        return getShouldSkip([123], 'plugin-name.options.files');
       };
 
-      expect(theFunction).toThrowError(/(pluginNameoptions.files should be an array of strings)/);
+      expect(theFunction).toThrowError(/(plugin-name.options.files should be an array of strings)/);
       done();
     });
 
@@ -70,7 +70,7 @@ describe('api', () => {
       const { getShouldSkip } = HtmlWebpackTagsPlugin.api;
       expect(typeof getShouldSkip === 'function');
       const theFunction = () => {
-        return getShouldSkip(['the-file'], 'pluginName');
+        return getShouldSkip(['the-file'], 'plugin-name.options.files');
       };
 
       expect(theFunction).not.toThrowError();
