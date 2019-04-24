@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.8"></a>
+# [2.0.8](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.7...2.0.8) (2019-04-23)
+
+Version `2.0.8` adds an `api` property to the plugin constructor, allowing reuse of option validation by other plugins.
+
 <a name="2.0.7"></a>
 # [2.0.7](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.6...2.0.7) (2019-04-23)
 
