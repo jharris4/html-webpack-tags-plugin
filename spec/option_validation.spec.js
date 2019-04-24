@@ -506,9 +506,9 @@ function runTestsForOption (optionName, type, runExtraTests) {
         return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: 123 }, `bar${ext}`] });
       };
       if (isScript) {
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should be an object)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.external should be an object)`));
       } else {
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should not be used on non script tags)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.external should not be used on non script tags)`));
       }
       done();
     });
@@ -526,7 +526,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         const theFunction = () => {
           return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { } }, `bar${ext}`] });
         };
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should have a string packageName and variableName property)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.external should have a string packageName and variableName property)`));
         done();
       });
 
@@ -534,7 +534,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         const theFunction = () => {
           return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { packageName: 'a' } }, `bar${ext}`] });
         };
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should have a string variableName property)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.external should have a string variableName property)`));
         done();
       });
 
@@ -542,7 +542,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         const theFunction = () => {
           return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `a${ext}`, external: { variableName: 'A' } }, `bar${ext}`] });
         };
-        expect(theFunction).toThrowError(new RegExp(`(options.${optionName} external should have a string packageName property)`));
+        expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.external should have a string packageName property)`));
         done();
       });
     }

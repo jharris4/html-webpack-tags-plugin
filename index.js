@@ -42,16 +42,16 @@ const IS = {
 
 const { isDefined, isObject, isBoolean, isNumber, isString, isArray, isFunction } = IS;
 
-function getExtensions (options, optionExtensionName) {
+function getExtensions (options, optionExtensionName, optionPath) {
   let extensions = DEFAULT_OPTIONS[optionExtensionName];
   if (isDefined(options[optionExtensionName])) {
     if (isString(options[optionExtensionName])) {
       extensions = [options[optionExtensionName]];
     } else {
       extensions = options[optionExtensionName];
-      assert(isArray(extensions), `${PLUGIN_NAME} options.${optionExtensionName} should be a string or array of strings (${extensions})`);
+      assert(isArray(extensions), `${optionPath}.${optionExtensionName} should be a string or array of strings (${extensions})`);
       extensions.forEach(function (extension) {
-        assert(isString(extension), `${PLUGIN_NAME} options.${optionExtensionName} array should only contain strings (${extension})`);
+        assert(isString(extension), `${optionPath}.${optionExtensionName} array should only contain strings (${extension})`);
       });
     }
   }
@@ -62,14 +62,14 @@ function createExtensionsRegex (extensions) {
   return new RegExp(`.*(${extensions.join('|')})$`);
 }
 
-function getHasExtensions (options, optionExtensionName) {
-  const regexp = createExtensionsRegex(getExtensions(options, optionExtensionName));
+function getHasExtensions (options, optionExtensionName, optionPath) {
+  const regexp = createExtensionsRegex(getExtensions(options, optionExtensionName, optionPath));
   return value => regexp.test(value);
 }
 
-function getAssetTypeCheckers (options) {
-  const hasJsExtensions = getHasExtensions(options, 'jsExtensions');
-  const hasCssExtensions = getHasExtensions(options, 'cssExtensions');
+function getAssetTypeCheckers (options, optionPath) {
+  const hasJsExtensions = getHasExtensions(options, 'jsExtensions', optionPath);
+  const hasCssExtensions = getHasExtensions(options, 'cssExtensions', optionPath);
   return {
     isAssetTypeCss (value) {
       return hasCssExtensions(value);
@@ -80,15 +80,15 @@ function getAssetTypeCheckers (options) {
   };
 }
 
-function splitLinkScriptTags (tagObjects, options, optionName) {
+function splitLinkScriptTags (tagObjects, options, optionName, optionPath) {
   const linkObjects = [];
   const scriptObjects = [];
-  const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options);
+  const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options, optionPath);
 
   tagObjects.forEach(tagObject => {
     if (isDefined(tagObject.type)) {
       const { type, ...others } = tagObject;
-      assert(isType(type), `${PLUGIN_NAME} options.${optionName} type must be css or js (${type})`);
+      assert(isType(type), `${optionPath}.${optionName} type must be css or js (${type})`);
       (isCss(type) ? linkObjects : scriptObjects).push({
         ...others
       });
@@ -99,7 +99,7 @@ function splitLinkScriptTags (tagObjects, options, optionName) {
       } else if (isAssetTypeJs(path)) {
         scriptObjects.push(tagObject);
       } else {
-        assert(false, `${PLUGIN_NAME} options.${optionName} could not determine asset type for (${path})`);
+        assert(false, `${optionPath}.${optionName} could not determine asset type for (${path})`);
       }
     }
   });
@@ -107,50 +107,50 @@ function splitLinkScriptTags (tagObjects, options, optionName) {
   return [linkObjects, scriptObjects];
 }
 
-function getTagObjects (tag, optionName) {
+function getTagObjects (tag, optionName, optionPath) {
   let tagObjects;
-  assert(isString(tag) || isObject(tag), `${PLUGIN_NAME} options.${optionName} items must be an object or string`);
+  assert(isString(tag) || isObject(tag), `${optionPath}.${optionName} items must be an object or string`);
   if (isString(tag)) {
     tagObjects = [{
       path: tag
     }];
   } else {
-    assert(isString(tag.path), `${PLUGIN_NAME} options.${optionName} object must have a string path property`);
+    assert(isString(tag.path), `${optionPath}.${optionName} object must have a string path property`);
     if (isDefined(tag.append)) {
-      assert(isBoolean(tag.append), `${PLUGIN_NAME} options.${optionName} object append should be a boolean`);
+      assert(isBoolean(tag.append), `${optionPath}.${optionName} object append should be a boolean`);
     }
     if (isDefined(tag.publicPath)) {
       const { publicPath } = tag;
-      assert(isBoolean(publicPath) || isFunction(publicPath), `${PLUGIN_NAME} options.${optionName} object publicPath should be a boolean or function`);
+      assert(isBoolean(publicPath) || isFunction(publicPath), `${optionPath}.${optionName} object publicPath should be a boolean or function`);
       if (isFunction(publicPath)) {
-        assert(isString(publicPath('', '')), `${PLUGIN_NAME} options.${optionName} object publicPath should be a function that returns a string`);
+        assert(isString(publicPath('', '')), `${optionPath}.${optionName} object publicPath should be a function that returns a string`);
       }
     }
     if (isDefined(tag.hash)) {
       const { hash } = tag;
-      assert(isBoolean(hash) || isFunction(hash), `${PLUGIN_NAME} options.${optionName} object hash should be a boolean or function`);
+      assert(isBoolean(hash) || isFunction(hash), `${optionPath}.${optionName} object hash should be a boolean or function`);
       if (isFunction(hash)) {
-        assert(isString(hash('', '')), `${PLUGIN_NAME} options.${optionName} object hash should be a function that returns a string`);
+        assert(isString(hash('', '')), `${optionPath}.${optionName} object hash should be a function that returns a string`);
       }
     }
     if (isDefined(tag.sourcePath)) {
-      assert(isString(tag.sourcePath), `${PLUGIN_NAME} options.${optionName} object should have a string sourcePath property`);
+      assert(isString(tag.sourcePath), `${optionPath}.${optionName} object should have a string sourcePath property`);
     }
     if (isDefined(tag.attributes)) {
       const { attributes } = tag;
-      assert(isObject(attributes), `${PLUGIN_NAME} options.${optionName} object should have an object attributes property`);
+      assert(isObject(attributes), `${optionPath}.${optionName} object should have an object attributes property`);
       Object.keys(attributes).forEach(attribute => {
         const value = attributes[attribute];
-        assert(isString(value) || isBoolean(value) || isNumber(value), `${PLUGIN_NAME} options.${optionName} object attribute values should strings, booleans or numbers`);
+        assert(isString(value) || isBoolean(value) || isNumber(value), `${optionPath}.${optionName} object attribute values should strings, booleans or numbers`);
       });
     }
     if (isDefined(tag.glob) || isDefined(tag.globPath)) {
       const { glob: assetGlob, globPath, ...otherAssetProperties } = tag;
-      assert(isString(assetGlob), `${PLUGIN_NAME} options.${optionName} object should have a string glob property`);
-      assert(isString(globPath), `${PLUGIN_NAME} options.${optionName} object should have a string globPath property`);
+      assert(isString(assetGlob), `${optionPath}.${optionName} object should have a string glob property`);
+      assert(isString(globPath), `${optionPath}.${optionName} object should have a string globPath property`);
       const globAssets = glob.sync(assetGlob, { cwd: globPath });
       const globAssetPaths = globAssets.map(globAsset => slash(path.join(tag.path, globAsset)));
-      assert(globAssetPaths.length > 0, `${PLUGIN_NAME} options.${optionName} object glob found no files (${tag.path} ${assetGlob} ${globPath})`);
+      assert(globAssetPaths.length > 0, `${optionPath}.${optionName} object glob found no files (${tag.path} ${assetGlob} ${globPath})`);
       tagObjects = [];
       globAssetPaths.forEach(globAssetPath => {
         tagObjects.push({
@@ -165,20 +165,37 @@ function getTagObjects (tag, optionName) {
   return tagObjects;
 }
 
-function getAllTagObjects (options, append, optionName) {
+function getValidatedLinksOptions (links, optionPath) {
+  const options = getValidatedTagObjects({ links }, 'links', optionPath);
+  validateTagObjectExternals(options, 'links', 'links', optionPath);
+  return options;
+}
+
+function getValidatedScriptsOptions (scripts, optionPath) {
+  const options = getValidatedTagObjects({ scripts }, 'scripts', optionPath);
+  validateTagObjectExternals(options, 'scripts', 'scripts', optionPath);
+  return options;
+}
+
+function getValidatedTagObjects (options, optionName, optionPath) {
   let tagObjects;
   if (isDefined(options[optionName])) {
     const tags = options[optionName];
-    assert(isString(tags) || isObject(tags) || isArray(tags), `${PLUGIN_NAME} options.${optionName} should be a string, object, or array (${tags})`);
+    assert(isString(tags) || isObject(tags) || isArray(tags), `${optionPath}.${optionName} should be a string, object, or array (${tags})`);
     if (isArray(tags)) {
       tagObjects = [];
       tags.forEach(asset => {
-        tagObjects = tagObjects.concat(getTagObjects(asset, optionName));
+        tagObjects = tagObjects.concat(getTagObjects(asset, optionName, optionPath));
       });
     } else {
-      tagObjects = getTagObjects(tags, optionName);
+      tagObjects = getTagObjects(tags, optionName, optionPath);
     }
   }
+  return tagObjects;
+}
+
+function getAllTagObjects (options, append, optionName, optionPath) {
+  let tagObjects = getValidatedTagObjects(options, optionName, optionPath);
   if (tagObjects) {
     tagObjects = tagObjects.map(tag => {
       if (!isDefined(tag.append)) {
@@ -193,29 +210,24 @@ function getAllTagObjects (options, append, optionName) {
   return tagObjects;
 }
 
-function filterExternalTagObjects (tagObjects, filterName, optionName) {
+function validateTagObjectExternals (tagObjects, filterName, optionName, optionPath) {
   const allowed = filterName === 'scripts';
   if (isArray(tagObjects)) {
     tagObjects.forEach(tagObject => {
       if (isObject(tagObject) && isDefined(tagObject.external)) {
         const { external } = tagObject;
-        try {
-          if (allowed) {
-            assert(isObject(external), `${PLUGIN_NAME} options.${optionName} external should be an object`);
-            const { packageName, variableName } = external;
-            assert(isString(packageName) || isString(variableName), `${PLUGIN_NAME} options.${optionName} external should have a string packageName and variableName property`);
-            assert(isString(packageName), `${PLUGIN_NAME} options.${optionName} external should have a string packageName property`);
-            assert(isString(variableName), `${PLUGIN_NAME} options.${optionName} external should have a string variableName property`);
-          } else {
-            assert(false, `${PLUGIN_NAME} options.${optionName} external should not be used on non script tags`);
-          }
-        } catch (err) {
-          throw err;
+        if (allowed) {
+          assert(isObject(external), `${optionPath}.${optionName}.external should be an object`);
+          const { packageName, variableName } = external;
+          assert(isString(packageName) || isString(variableName), `${optionPath}.${optionName}.external should have a string packageName and variableName property`);
+          assert(isString(packageName), `${optionPath}.${optionName}.external should have a string packageName property`);
+          assert(isString(variableName), `${optionPath}.${optionName}.external should have a string variableName property`);
+        } else {
+          assert(false, `${optionPath}.${optionName}.external should not be used on non script tags`);
         }
       }
     });
   }
-  return tagObjects;
 }
 
 function getShouldSkip (files, optionPath) {
@@ -311,26 +323,28 @@ function getValidatedMainOptions (options, optionPath, defaultOptions = DEFAULT_
 function getValidatedOptions (options, pluginName) {
   assert(isObject(options), `${pluginName} options should be an object`);
 
-  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, pluginName + '.options');
+  const optionPath = pluginName + '.options';
+
+  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, optionPath);
 
   let links = [];
   let scripts = [];
   if (isDefined(options.tags)) {
-    const tagObjects = getAllTagObjects(options, append, 'tags');
-    let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags');
-    linkObjects = filterExternalTagObjects(linkObjects, 'links', 'tags');
-    scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'tags');
+    const tagObjects = getAllTagObjects(options, append, 'tags', optionPath);
+    let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags', optionPath);
+    validateTagObjectExternals(linkObjects, 'links', 'tags', optionPath);
+    validateTagObjectExternals(scriptObjects, 'scripts', 'tags', optionPath);
     links = links.concat(linkObjects);
     scripts = scripts.concat(scriptObjects);
   }
   if (isDefined(options.links)) {
-    let linkObjects = getAllTagObjects(options, append, 'links');
-    linkObjects = filterExternalTagObjects(linkObjects, 'links', 'links');
+    let linkObjects = getAllTagObjects(options, append, 'links', optionPath);
+    validateTagObjectExternals(linkObjects, 'links', 'links', optionPath);
     links = links.concat(linkObjects);
   }
   if (isDefined(options.scripts)) {
-    let scriptObjects = getAllTagObjects(options, append, 'scripts');
-    scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'scripts');
+    let scriptObjects = getAllTagObjects(options, append, 'scripts', optionPath);
+    validateTagObjectExternals(scriptObjects, 'scripts', 'scripts', optionPath);
     scripts = scripts.concat(scriptObjects);
   }
   const linksPrepend = links.filter(({ append }) => !append);
@@ -338,7 +352,7 @@ function getValidatedOptions (options, pluginName) {
   const scriptsPrepend = scripts.filter(({ append }) => !append);
   const scriptsAppend = scripts.filter(({ append }) => append);
 
-  const shouldSkip = getShouldSkip(options.files, pluginName + ' options.files');
+  const shouldSkip = getShouldSkip(options.files, optionPath + '.files');
 
   return {
     links,
@@ -548,7 +562,9 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 HtmlWebpackTagsPlugin.api = {
   IS,
   getShouldSkip,
-  getValidatedMainOptions
+  getValidatedMainOptions,
+  getValidatedLinksOptions,
+  getValidatedScriptsOptions
 };
 
 module.exports = HtmlWebpackTagsPlugin;
