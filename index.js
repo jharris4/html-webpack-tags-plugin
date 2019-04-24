@@ -30,33 +30,17 @@ function isCss (type) {
   return type === ASSET_TYPE_CSS;
 }
 
-function isDefined (v) {
-  return v !== void 0;
-}
+const IS = {
+  isDefined: v => v !== void 0,
+  isObject: v => v !== null && v !== void 0 && typeof v === 'object' && !Array.isArray(v),
+  isBoolean: v => v === true || v === false,
+  isNumber: v => v !== void 0 && (typeof v === 'number' || v instanceof Number) && isFinite(v),
+  isString: v => v !== null && v !== void 0 && (typeof v === 'string' || v instanceof String),
+  isArray: v => Array.isArray(v),
+  isFunction: v => typeof v === 'function'
+};
 
-function isObject (v) {
-  return v !== null && v !== void 0 && typeof v === 'object' && !isArray(v);
-}
-
-function isBoolean (v) {
-  return v === true || v === false;
-}
-
-function isNumber (v) {
-  return v !== void 0 && (typeof v === 'number' || v instanceof Number) && isFinite(v);
-}
-
-function isString (v) {
-  return v !== null && v !== void 0 && (typeof v === 'string' || v instanceof String);
-}
-
-function isArray (v) {
-  return Array.isArray(v);
-}
-
-function isFunction (v) {
-  return typeof v === 'function';
-}
+const { isDefined, isObject, isBoolean, isNumber, isString, isArray, isFunction } = IS;
 
 function getExtensions (options, optionExtensionName) {
   let extensions = DEFAULT_OPTIONS[optionExtensionName];
@@ -234,130 +218,153 @@ function filterExternalTagObjects (tagObjects, filterName, optionName) {
   return tagObjects;
 }
 
-function HtmlWebpackTagsPlugin (options) {
-  assert(isObject(options), `${PLUGIN_NAME} options should be an object`);
-  if (isObject(options)) {
-    let append = DEFAULT_OPTIONS.append;
-    if (isDefined(options.append)) {
-      assert(isBoolean(options.append), `${PLUGIN_NAME} options.append should be a boolean`);
-      append = options.append;
-    }
-
-    let usePublicPath = DEFAULT_OPTIONS.usePublicPath;
-    let addPublicPath = DEFAULT_OPTIONS.addPublicPath;
-    if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
-      assert(!isDefined(options.publicPath), `${PLUGIN_NAME} options.publicPath should not be used with either usePublicPath or addPublicPath`);
-      if (isDefined(options.usePublicPath)) {
-        assert(isBoolean(options.usePublicPath), `${PLUGIN_NAME} options.usePublicPath should be a boolean`);
-        usePublicPath = options.usePublicPath;
-      }
-      if (isDefined(options.addPublicPath)) {
-        assert(isFunction(options.addPublicPath), `${PLUGIN_NAME} options.addPublicPath should be a function`);
-        assert(isString(options.addPublicPath('', '')), `${PLUGIN_NAME} options.addPublicPath should be a function that returns a string`);
-        addPublicPath = options.addPublicPath;
-      }
-    } else if (isDefined(options.publicPath)) {
-      const { publicPath } = options;
-      assert(isBoolean(publicPath) || isString(publicPath) || isFunction(publicPath),
-        `${PLUGIN_NAME} options should specify a publicPath that is either a boolean or a string or a function`);
-      if (isBoolean(publicPath)) {
-        usePublicPath = publicPath;
-      } else if (isString(publicPath)) {
-        // create function that injects the string
-        usePublicPath = true;
-        const oldAddPublicPath = addPublicPath;
-        addPublicPath = path => oldAddPublicPath(path, publicPath);
-      } else {
-        assert(isString(publicPath('', '')), `${PLUGIN_NAME} options.publicPath should be a function that returns a string`);
-        usePublicPath = true;
-        addPublicPath = publicPath;
-      }
-    }
-
-    let useHash = DEFAULT_OPTIONS.useHash;
-    let addHash = DEFAULT_OPTIONS.addHash;
-    if (isDefined(options.useHash) || isDefined(options.addHash)) {
-      assert(!isDefined(options.hash), `${PLUGIN_NAME} options.hash should not be used with either useHash or addHash`);
-      if (isDefined(options.useHash)) {
-        assert(isBoolean(options.useHash), `${PLUGIN_NAME} options.useHash should be a boolean`);
-        useHash = options.useHash;
-      }
-      if (isDefined(options.addHash)) {
-        assert(isFunction(options.addHash), `${PLUGIN_NAME} options.addHash should be a function`);
-        assert(isString(options.addHash('', '')), `${PLUGIN_NAME} options.addHash should be a function that returns a string`);
-        addHash = options.addHash;
-      }
-    } else if (isDefined(options.hash)) {
-      const { hash } = options;
-      assert(isBoolean(hash) || isFunction(hash), `${PLUGIN_NAME} options.hash should be a boolean or a function`);
-      if (isBoolean(hash)) {
-        useHash = hash;
-      } else {
-        assert(isString(hash('', '')), `${PLUGIN_NAME} options.hash should be a function that returns a string`);
-        useHash = true;
-        addHash = hash;
-      }
-    }
-
-    let links = [];
-    let scripts = [];
-    if (isDefined(options.tags)) {
-      const tagObjects = getAllTagObjects(options, append, 'tags');
-      let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags');
-      linkObjects = filterExternalTagObjects(linkObjects, 'links', 'tags');
-      scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'tags');
-      links = links.concat(linkObjects);
-      scripts = scripts.concat(scriptObjects);
-    }
-    if (isDefined(options.links)) {
-      let linkObjects = getAllTagObjects(options, append, 'links');
-      linkObjects = filterExternalTagObjects(linkObjects, 'links', 'links');
-      links = links.concat(linkObjects);
-    }
-    if (isDefined(options.scripts)) {
-      let scriptObjects = getAllTagObjects(options, append, 'scripts');
-      scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'scripts');
-      scripts = scripts.concat(scriptObjects);
-    }
-    const linksPrepend = links.filter(({ append }) => !append);
-    const linksAppend = links.filter(({ append }) => append);
-    const scriptsPrepend = scripts.filter(({ append }) => !append);
-    const scriptsAppend = scripts.filter(({ append }) => append);
-
-    let shouldSkip = () => false;
-    if (isDefined(options.files)) {
-      let { files } = options;
-      assert((isString(files) || isArray(files)), `${PLUGIN_NAME} options.files should be a string or array`);
-      if (isString(files)) {
-        files = [files];
-      } else if (isArray(files)) {
-        files.forEach(file => {
-          assert(isString(file), `${PLUGIN_NAME} options.files should be an array of strings`);
-        });
-      }
-      shouldSkip = htmlPluginData => !files.some(function (file) {
-        return minimatch(htmlPluginData.outputName, file);
+function getShouldSkip (files, pluginName) {
+  let shouldSkip = () => false;
+  if (isDefined(files)) {
+    assert((isString(files) || isArray(files)), `${pluginName}options.files should be a string or array`);
+    if (isString(files)) {
+      files = [files];
+    } else if (isArray(files)) {
+      files.forEach(file => {
+        assert(isString(file), `${pluginName}options.files should be an array of strings`);
       });
     }
-
-    const htmlPluginName = isDefined(options.htmlPluginName) ? options.htmlPluginName : 'html-webpack-plugin';
-
-    this.options = {
-      links,
-      linksPrepend,
-      linksAppend,
-      scripts,
-      scriptsPrepend,
-      scriptsAppend,
-      append,
-      usePublicPath,
-      addPublicPath,
-      useHash,
-      addHash,
-      shouldSkip,
-      htmlPluginName
-    };
+    shouldSkip = htmlPluginData => !files.some(function (file) {
+      return minimatch(htmlPluginData.outputName, file);
+    });
   }
+  return shouldSkip;
+}
+
+function getValidatedMainOptions (options, pluginName) {
+  assert(isObject(options), `${pluginName} options should be an object`);
+  let append = DEFAULT_OPTIONS.append;
+  if (isDefined(options.append)) {
+    assert(isBoolean(options.append), `${pluginName}options.append should be a boolean`);
+    append = options.append;
+  }
+
+  let usePublicPath = DEFAULT_OPTIONS.usePublicPath;
+  let addPublicPath = DEFAULT_OPTIONS.addPublicPath;
+  if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
+    assert(!isDefined(options.publicPath), `${pluginName}options.publicPath should not be used with either usePublicPath or addPublicPath`);
+    if (isDefined(options.usePublicPath)) {
+      assert(isBoolean(options.usePublicPath), `${pluginName}options.usePublicPath should be a boolean`);
+      usePublicPath = options.usePublicPath;
+    }
+    if (isDefined(options.addPublicPath)) {
+      assert(isFunction(options.addPublicPath), `${pluginName}options.addPublicPath should be a function`);
+      assert(isString(options.addPublicPath('', '')), `${pluginName}options.addPublicPath should be a function that returns a string`);
+      addPublicPath = options.addPublicPath;
+    }
+  } else if (isDefined(options.publicPath)) {
+    const { publicPath } = options;
+    assert(isBoolean(publicPath) || isString(publicPath) || isFunction(publicPath),
+      `${pluginName}options should specify a publicPath that is either a boolean or a string or a function`);
+    if (isBoolean(publicPath)) {
+      usePublicPath = publicPath;
+    } else if (isString(publicPath)) {
+      // create function that injects the string
+      usePublicPath = true;
+      const oldAddPublicPath = addPublicPath;
+      addPublicPath = path => oldAddPublicPath(path, publicPath);
+    } else {
+      assert(isString(publicPath('', '')), `${pluginName}options.publicPath should be a function that returns a string`);
+      usePublicPath = true;
+      addPublicPath = publicPath;
+    }
+  }
+
+  let useHash = DEFAULT_OPTIONS.useHash;
+  let addHash = DEFAULT_OPTIONS.addHash;
+  if (isDefined(options.useHash) || isDefined(options.addHash)) {
+    assert(!isDefined(options.hash), `${pluginName}options.hash should not be used with either useHash or addHash`);
+    if (isDefined(options.useHash)) {
+      assert(isBoolean(options.useHash), `${pluginName}options.useHash should be a boolean`);
+      useHash = options.useHash;
+    }
+    if (isDefined(options.addHash)) {
+      assert(isFunction(options.addHash), `${pluginName}options.addHash should be a function`);
+      assert(isString(options.addHash('', '')), `${pluginName}options.addHash should be a function that returns a string`);
+      addHash = options.addHash;
+    }
+  } else if (isDefined(options.hash)) {
+    const { hash } = options;
+    assert(isBoolean(hash) || isFunction(hash), `${pluginName}options.hash should be a boolean or a function`);
+    if (isBoolean(hash)) {
+      useHash = hash;
+    } else {
+      assert(isString(hash('', '')), `${pluginName}options.hash should be a function that returns a string`);
+      useHash = true;
+      addHash = hash;
+    }
+  }
+  return {
+    append,
+    usePublicPath,
+    addPublicPath,
+    useHash,
+    addHash
+  };
+}
+
+function getValidatedOptions (options, pluginName) {
+  assert(isObject(options), `${pluginName} options should be an object`);
+
+  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, pluginName);
+
+  let links = [];
+  let scripts = [];
+  if (isDefined(options.tags)) {
+    const tagObjects = getAllTagObjects(options, append, 'tags');
+    let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags');
+    linkObjects = filterExternalTagObjects(linkObjects, 'links', 'tags');
+    scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'tags');
+    links = links.concat(linkObjects);
+    scripts = scripts.concat(scriptObjects);
+  }
+  if (isDefined(options.links)) {
+    let linkObjects = getAllTagObjects(options, append, 'links');
+    linkObjects = filterExternalTagObjects(linkObjects, 'links', 'links');
+    links = links.concat(linkObjects);
+  }
+  if (isDefined(options.scripts)) {
+    let scriptObjects = getAllTagObjects(options, append, 'scripts');
+    scriptObjects = filterExternalTagObjects(scriptObjects, 'scripts', 'scripts');
+    scripts = scripts.concat(scriptObjects);
+  }
+  const linksPrepend = links.filter(({ append }) => !append);
+  const linksAppend = links.filter(({ append }) => append);
+  const scriptsPrepend = scripts.filter(({ append }) => !append);
+  const scriptsAppend = scripts.filter(({ append }) => append);
+
+  const shouldSkip = getShouldSkip(options.files, pluginName);
+
+  return {
+    links,
+    linksPrepend,
+    linksAppend,
+    scripts,
+    scriptsPrepend,
+    scriptsAppend,
+    append,
+    usePublicPath,
+    addPublicPath,
+    useHash,
+    addHash,
+    shouldSkip
+  };
+}
+
+function HtmlWebpackTagsPlugin (options) {
+  this.options = getValidatedOptions(options, PLUGIN_NAME);
+
+  const htmlPluginName = isDefined(options.htmlPluginName) ? options.htmlPluginName : 'html-webpack-plugin';
+
+  this.options = {
+    ...this.options,
+    htmlPluginName
+  };
 }
 
 function getTagPath (tagObject, usePublicPath, addPublicPath, useHash, addHash, webpackPublicPath, compilationHash) {
@@ -536,6 +543,12 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
     // Webpack 3
     compiler.plugin('compilation', onCompilation);
   }
+};
+
+HtmlWebpackTagsPlugin.api = {
+  IS,
+  getShouldSkip,
+  getValidatedMainOptions
 };
 
 module.exports = HtmlWebpackTagsPlugin;
