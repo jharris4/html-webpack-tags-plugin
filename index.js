@@ -522,8 +522,8 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
             const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
             throw new Error(message);
           }
-          hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackIncludeAssetsPlugin', onBeforeHtmlGeneration);
-          hooks.alterAssetTagGroups.tapAsync('htmlWebpackIncludeAssetsPlugin', onAlterAssetTag);
+          hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackTagsPlugin', onBeforeHtmlGeneration);
+          hooks.alterAssetTagGroups.tapAsync('htmlWebpackTagsPlugin', onAlterAssetTag);
         } else {
           const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
           throw new Error(message);
