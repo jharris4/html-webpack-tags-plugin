@@ -7,29 +7,6 @@ const slash = require('slash'); // fixes slashes in file paths for windows
 
 const PLUGIN_NAME = 'HtmlWebpackTagsPlugin';
 
-const DEFAULT_OPTIONS = {
-  append: true,
-  useHash: false,
-  addHash: (assetPath, hash) => assetPath + '?' + hash,
-  usePublicPath: true,
-  addPublicPath: (assetPath, publicPath) => path.join(publicPath, assetPath),
-  jsExtensions: ['.js'],
-  cssExtensions: ['.css']
-};
-
-const ASSET_TYPE_CSS = 'css';
-const ASSET_TYPE_JS = 'js';
-
-const ASSET_TYPES = [ASSET_TYPE_CSS, ASSET_TYPE_JS];
-
-function isType (type) {
-  return ASSET_TYPES.indexOf(type) !== -1;
-}
-
-function isCss (type) {
-  return type === ASSET_TYPE_CSS;
-}
-
 const IS = {
   isDefined: v => v !== void 0,
   isObject: v => v !== null && v !== void 0 && typeof v === 'object' && !Array.isArray(v),
@@ -42,7 +19,39 @@ const IS = {
 
 const { isDefined, isObject, isBoolean, isNumber, isString, isArray, isFunction } = IS;
 
-function getExtensions (options, optionExtensionName, optionPath) {
+const DEFAULT_OPTIONS = {
+  append: true,
+  useHash: false,
+  addHash: (assetPath, hash) => assetPath + '?' + hash,
+  usePublicPath: true,
+  addPublicPath: (assetPath, publicPath) => path.join(publicPath, assetPath),
+  jsExtensions: ['.js'],
+  cssExtensions: ['.css'],
+  tags: [],
+  links: [],
+  scripts: []
+};
+
+const ASSET_TYPE_CSS = 'css';
+const ASSET_TYPE_JS = 'js';
+
+const ASSET_TYPES = [ASSET_TYPE_CSS, ASSET_TYPE_JS];
+
+const ATTRIBUTES_TEXT = 'strings, booleans or numbers';
+
+const isValidAttributeValue = v => isString(v) || isBoolean(v) || isNumber(v);
+
+const isType = type => ASSET_TYPES.indexOf(type) !== -1;
+
+const isTypeCss = type => type === ASSET_TYPE_CSS;
+
+const isFunctionReturningString = v => isFunction(v) && isString(v('', ''));
+
+const isArrayOfString = v => isArray(v) && v.every(i => isString(i));
+
+const createExtensionsRegex = extensions => new RegExp(`.*(${extensions.join('|')})$`);
+
+const getExtensions = (options, optionExtensionName, optionPath) => {
   let extensions = DEFAULT_OPTIONS[optionExtensionName];
   if (isDefined(options[optionExtensionName])) {
     if (isString(options[optionExtensionName])) {
@@ -56,18 +65,14 @@ function getExtensions (options, optionExtensionName, optionPath) {
     }
   }
   return extensions;
-}
+};
 
-function createExtensionsRegex (extensions) {
-  return new RegExp(`.*(${extensions.join('|')})$`);
-}
-
-function getHasExtensions (options, optionExtensionName, optionPath) {
+const getHasExtensions = (options, optionExtensionName, optionPath) => {
   const regexp = createExtensionsRegex(getExtensions(options, optionExtensionName, optionPath));
   return value => regexp.test(value);
-}
+};
 
-function getAssetTypeCheckers (options, optionPath) {
+const getAssetTypeCheckers = (options, optionPath) => {
   const hasJsExtensions = getHasExtensions(options, 'jsExtensions', optionPath);
   const hasCssExtensions = getHasExtensions(options, 'cssExtensions', optionPath);
   return {
@@ -78,9 +83,9 @@ function getAssetTypeCheckers (options, optionPath) {
       return hasJsExtensions(value);
     }
   };
-}
+};
 
-function splitLinkScriptTags (tagObjects, options, optionName, optionPath) {
+const splitLinkScriptTags = (tagObjects, options, optionName, optionPath) => {
   const linkObjects = [];
   const scriptObjects = [];
   const { isAssetTypeCss, isAssetTypeJs } = getAssetTypeCheckers(options, optionPath);
@@ -89,7 +94,7 @@ function splitLinkScriptTags (tagObjects, options, optionName, optionPath) {
     if (isDefined(tagObject.type)) {
       const { type, ...others } = tagObject;
       assert(isType(type), `${optionPath}.${optionName} type must be css or js (${type})`);
-      (isCss(type) ? linkObjects : scriptObjects).push({
+      (isTypeCss(type) ? linkObjects : scriptObjects).push({
         ...others
       });
     } else {
@@ -105,9 +110,9 @@ function splitLinkScriptTags (tagObjects, options, optionName, optionPath) {
   });
 
   return [linkObjects, scriptObjects];
-}
+};
 
-function getTagObjects (tag, optionName, optionPath) {
+const getTagObjects = (tag, optionName, optionPath) => {
   let tagObjects;
   assert(isString(tag) || isObject(tag), `${optionPath}.${optionName} items must be an object or string`);
   if (isString(tag)) {
@@ -121,17 +126,11 @@ function getTagObjects (tag, optionName, optionPath) {
     }
     if (isDefined(tag.publicPath)) {
       const { publicPath } = tag;
-      assert(isBoolean(publicPath) || isFunction(publicPath), `${optionPath}.${optionName} object publicPath should be a boolean or function`);
-      if (isFunction(publicPath)) {
-        assert(isString(publicPath('', '')), `${optionPath}.${optionName} object publicPath should be a function that returns a string`);
-      }
+      assert(isBoolean(publicPath) || isFunctionReturningString(publicPath), `${optionPath}.${optionName} object publicPath should be a boolean or function that returns a string`);
     }
     if (isDefined(tag.hash)) {
       const { hash } = tag;
-      assert(isBoolean(hash) || isFunction(hash), `${optionPath}.${optionName} object hash should be a boolean or function`);
-      if (isFunction(hash)) {
-        assert(isString(hash('', '')), `${optionPath}.${optionName} object hash should be a function that returns a string`);
-      }
+      assert(isBoolean(hash) || isFunctionReturningString(hash), `${optionPath}.${optionName} object hash should be a boolean or function that returns a string`);
     }
     if (isDefined(tag.sourcePath)) {
       assert(isString(tag.sourcePath), `${optionPath}.${optionName} object should have a string sourcePath property`);
@@ -141,7 +140,7 @@ function getTagObjects (tag, optionName, optionPath) {
       assert(isObject(attributes), `${optionPath}.${optionName} object should have an object attributes property`);
       Object.keys(attributes).forEach(attribute => {
         const value = attributes[attribute];
-        assert(isString(value) || isBoolean(value) || isNumber(value), `${optionPath}.${optionName} object attribute values should strings, booleans or numbers`);
+        assert(isValidAttributeValue(value), `${optionPath}.${optionName} object attribute values should be ` + ATTRIBUTES_TEXT);
       });
     }
     if (isDefined(tag.glob) || isDefined(tag.globPath)) {
@@ -163,21 +162,9 @@ function getTagObjects (tag, optionName, optionPath) {
     }
   }
   return tagObjects;
-}
+};
 
-function getValidatedLinksOptions (links, optionPath) {
-  const options = getValidatedTagObjects({ links }, 'links', optionPath);
-  validateTagObjectExternals(options, 'links', 'links', optionPath);
-  return options;
-}
-
-function getValidatedScriptsOptions (scripts, optionPath) {
-  const options = getValidatedTagObjects({ scripts }, 'scripts', optionPath);
-  validateTagObjectExternals(options, 'scripts', 'scripts', optionPath);
-  return options;
-}
-
-function getValidatedTagObjects (options, optionName, optionPath) {
+const getValidatedTagObjects = (options, optionName, optionPath) => {
   let tagObjects;
   if (isDefined(options[optionName])) {
     const tags = options[optionName];
@@ -192,9 +179,9 @@ function getValidatedTagObjects (options, optionName, optionPath) {
     }
   }
   return tagObjects;
-}
+};
 
-function getAllTagObjects (options, append, optionName, optionPath) {
+const getAllTagObjects = (options, append, optionName, optionPath) => {
   let tagObjects = getValidatedTagObjects(options, optionName, optionPath);
   if (tagObjects) {
     tagObjects = tagObjects.map(tag => {
@@ -208,15 +195,14 @@ function getAllTagObjects (options, append, optionName, optionPath) {
     });
   }
   return tagObjects;
-}
+};
 
-function validateTagObjectExternals (tagObjects, filterName, optionName, optionPath) {
-  const allowed = filterName === 'scripts';
+const validateTagObjectExternals = (tagObjects, isScript, optionName, optionPath) => {
   if (isArray(tagObjects)) {
     tagObjects.forEach(tagObject => {
       if (isObject(tagObject) && isDefined(tagObject.external)) {
         const { external } = tagObject;
-        if (allowed) {
+        if (isScript) {
           assert(isObject(external), `${optionPath}.${optionName}.external should be an object`);
           const { packageName, variableName } = external;
           assert(isString(packageName) || isString(variableName), `${optionPath}.${optionName}.external should have a string packageName and variableName property`);
@@ -228,131 +214,107 @@ function validateTagObjectExternals (tagObjects, filterName, optionName, optionP
       }
     });
   }
-}
+};
 
-function getShouldSkip (files, optionPath) {
+const getShouldSkip = files => {
   let shouldSkip = () => false;
   if (isDefined(files)) {
-    assert((isString(files) || isArray(files)), `${optionPath} should be a string or array`);
-    if (isString(files)) {
-      files = [files];
-    } else if (isArray(files)) {
-      files.forEach(file => {
-        assert(isString(file), `${optionPath} should be an array of strings`);
-      });
-    }
     shouldSkip = htmlPluginData => !files.some(function (file) {
       return minimatch(htmlPluginData.outputName, file);
     });
   }
   return shouldSkip;
-}
+};
 
-function getValidatedMainOptions (options, optionPath, defaultOptions = DEFAULT_OPTIONS) {
+const processShortcuts = (options, optionPath, keyShortcut, keyUse, keyAdd, add) => {
+  const processedOptions = {};
+  if (isDefined(options[keyUse]) || isDefined(options[keyAdd])) {
+    assert(!isDefined(options[keyShortcut]), `${optionPath}.${keyShortcut} should not be used with either ${keyUse} or ${keyAdd}`);
+    if (isDefined(options[keyUse])) {
+      assert(isBoolean(options[keyUse]), `${optionPath}.${keyUse} should be a boolean`);
+      processedOptions[keyUse] = options[keyUse];
+    }
+    if (isDefined(options[keyAdd])) {
+      assert(isFunctionReturningString(options[keyAdd]), `${optionPath}.${keyAdd} should be a function that returns a string`);
+      processedOptions[keyAdd] = options[keyAdd];
+    }
+  } else if (isDefined(options[keyShortcut])) {
+    const shortcut = options[keyShortcut];
+    assert(isBoolean(shortcut) || isString(shortcut) || isFunctionReturningString(shortcut),
+      `${optionPath}.${keyShortcut} should be a boolean or a string or a function that returns a string`);
+    if (isBoolean(shortcut)) {
+      processedOptions[keyUse] = shortcut;
+    } else if (isString(shortcut)) {
+      processedOptions[keyUse] = true;
+      processedOptions[keyAdd] = path => add(path, shortcut);
+    } else {
+      processedOptions[keyUse] = true;
+      processedOptions[keyAdd] = shortcut;
+    }
+  }
+  return processedOptions;
+};
+
+const getValidatedMainOptions = (options, optionPath, defaultOptions = {}) => {
   assert(isObject(options), `${optionPath} should be an object`);
   let { append, usePublicPath, addPublicPath, useHash, addHash } = defaultOptions;
   if (isDefined(options.append)) {
     assert(isBoolean(options.append), `${optionPath}.append should be a boolean`);
     append = options.append;
   }
-  if (isDefined(options.usePublicPath) || isDefined(options.addPublicPath)) {
-    assert(!isDefined(options.publicPath), `${optionPath}.publicPath should not be used with either usePublicPath or addPublicPath`);
-    if (isDefined(options.usePublicPath)) {
-      assert(isBoolean(options.usePublicPath), `${optionPath}.usePublicPath should be a boolean`);
-      usePublicPath = options.usePublicPath;
-    }
-    if (isDefined(options.addPublicPath)) {
-      assert(isFunction(options.addPublicPath), `${optionPath}.addPublicPath should be a function`);
-      assert(isString(options.addPublicPath('', '')), `${optionPath}.addPublicPath should be a function that returns a string`);
-      addPublicPath = options.addPublicPath;
-    }
-  } else if (isDefined(options.publicPath)) {
-    const { publicPath } = options;
-    assert(isBoolean(publicPath) || isString(publicPath) || isFunction(publicPath),
-      `${optionPath}.publicPath should be either a boolean or a string or a function`);
-    if (isBoolean(publicPath)) {
-      usePublicPath = publicPath;
-    } else if (isString(publicPath)) {
-      // create function that injects the string
-      usePublicPath = true;
-      const oldAddPublicPath = addPublicPath;
-      addPublicPath = path => oldAddPublicPath(path, publicPath);
-    } else {
-      assert(isString(publicPath('', '')), `${optionPath}.publicPath should be a function that returns a string`);
-      usePublicPath = true;
-      addPublicPath = publicPath;
-    }
+  const publicPathOptions = processShortcuts(options, optionPath, 'publicPath', 'usePublicPath', 'addPublicPath', addPublicPath);
+  if (isDefined(publicPathOptions.usePublicPath)) {
+    usePublicPath = publicPathOptions.usePublicPath;
   }
-  if (isDefined(options.useHash) || isDefined(options.addHash)) {
-    assert(!isDefined(options.hash), `${optionPath}.hash should not be used with either useHash or addHash`);
-    if (isDefined(options.useHash)) {
-      assert(isBoolean(options.useHash), `${optionPath}.useHash should be a boolean`);
-      useHash = options.useHash;
-    }
-    if (isDefined(options.addHash)) {
-      assert(isFunction(options.addHash), `${optionPath}.addHash should be a function`);
-      assert(isString(options.addHash('', '')), `${optionPath}.addHash should be a function that returns a string`);
-      addHash = options.addHash;
-    }
-  } else if (isDefined(options.hash)) {
-    const { hash } = options;
-    assert(isBoolean(hash) || isFunction(hash), `${optionPath}.hash should be a boolean or a function`);
-    if (isBoolean(hash)) {
-      useHash = hash;
-    } else {
-      assert(isString(hash('', '')), `${optionPath}.hash should be a function that returns a string`);
-      useHash = true;
-      addHash = hash;
-    }
+  if (isDefined(publicPathOptions.addPublicPath)) {
+    addPublicPath = publicPathOptions.addPublicPath;
   }
-
-  const cleanOptions = { ...options };
-  delete cleanOptions['publicPath'];
-  delete cleanOptions['hash'];
+  const hashOptions = processShortcuts(options, optionPath, 'hash', 'useHash', 'addHash', addHash);
+  if (isDefined(hashOptions.useHash)) {
+    useHash = hashOptions.useHash;
+  }
+  if (isDefined(hashOptions.addHash)) {
+    addHash = hashOptions.addHash;
+  }
 
   return {
-    ...cleanOptions,
+    ...defaultOptions,
     append,
     usePublicPath,
     addPublicPath,
     useHash,
     addHash
   };
-}
+};
 
-function getValidatedOptions (options, pluginName) {
-  assert(isObject(options), `${pluginName} options should be an object`);
+const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIONS) => {
+  assert(isObject(options), `${optionPath} should be an object`);
 
-  const optionPath = pluginName + '.options';
+  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, optionPath, defaultOptions);
 
-  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, optionPath);
-
-  let links = [];
-  let scripts = [];
+  let { links, scripts } = defaultOptions;
   if (isDefined(options.tags)) {
     const tagObjects = getAllTagObjects(options, append, 'tags', optionPath);
     let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags', optionPath);
-    validateTagObjectExternals(linkObjects, 'links', 'tags', optionPath);
-    validateTagObjectExternals(scriptObjects, 'scripts', 'tags', optionPath);
+    validateTagObjectExternals(linkObjects, false, 'tags', optionPath);
+    validateTagObjectExternals(scriptObjects, true, 'tags', optionPath);
     links = links.concat(linkObjects);
     scripts = scripts.concat(scriptObjects);
   }
   if (isDefined(options.links)) {
     let linkObjects = getAllTagObjects(options, append, 'links', optionPath);
-    validateTagObjectExternals(linkObjects, 'links', 'links', optionPath);
+    validateTagObjectExternals(linkObjects, false, 'links', optionPath);
     links = links.concat(linkObjects);
   }
   if (isDefined(options.scripts)) {
     let scriptObjects = getAllTagObjects(options, append, 'scripts', optionPath);
-    validateTagObjectExternals(scriptObjects, 'scripts', 'scripts', optionPath);
+    validateTagObjectExternals(scriptObjects, true, 'scripts', optionPath);
     scripts = scripts.concat(scriptObjects);
   }
   const linksPrepend = links.filter(({ append }) => !append);
   const linksAppend = links.filter(({ append }) => append);
   const scriptsPrepend = scripts.filter(({ append }) => !append);
   const scriptsAppend = scripts.filter(({ append }) => append);
-
-  const shouldSkip = getShouldSkip(options.files, optionPath + '.files');
 
   return {
     links,
@@ -365,50 +327,70 @@ function getValidatedOptions (options, pluginName) {
     usePublicPath,
     addPublicPath,
     useHash,
-    addHash,
-    shouldSkip
+    addHash
   };
-}
+};
 
-function HtmlWebpackTagsPlugin (options) {
-  this.options = getValidatedOptions(options, PLUGIN_NAME);
-
-  const htmlPluginName = isDefined(options.htmlPluginName) ? options.htmlPluginName : 'html-webpack-plugin';
-
-  this.options = {
-    ...this.options,
-    htmlPluginName
-  };
-}
-
-function getTagPath (tagObject, usePublicPath, addPublicPath, useHash, addHash, webpackPublicPath, compilationHash) {
+const getTagPath = (tagObject, options, webpackPublicPath, compilationHash) => {
+  const { usePublicPath, addPublicPath, useHash, addHash } = options;
   const { publicPath, hash } = tagObject;
   let { path } = tagObject;
 
   if (isDefined(publicPath)) {
     if (publicPath === true) {
-      path = slash(addPublicPath(path, webpackPublicPath));
+      path = addPublicPath(path, webpackPublicPath);
     } else if (isFunction(publicPath)) {
-      path = slash(publicPath(path, webpackPublicPath));
+      path = publicPath(path, webpackPublicPath);
     }
   } else if (usePublicPath) {
-    path = slash(addPublicPath(path, webpackPublicPath));
+    path = addPublicPath(path, webpackPublicPath);
   }
   if (isDefined(hash)) {
     if (hash === true) {
-      path = slash(addHash(path, compilationHash));
+      path = addHash(path, compilationHash);
     } else if (isFunction(hash)) {
-      path = slash(hash(path, compilationHash));
+      path = hash(path, compilationHash);
     }
   } else if (useHash) {
-    path = slash(addHash(path, compilationHash));
+    path = addHash(path, compilationHash);
   }
-  return path;
+  return slash(path);
+};
+
+const getAllValidatedOptions = (options, optionPath) => {
+  const validatedOptions = getValidatedOptions(options, optionPath);
+  let { files } = options;
+  if (isDefined(files)) {
+    assert((isString(files) || isArrayOfString(files)), `${optionPath}.files should be a string or array of strings`);
+    if (isString(files)) {
+      files = [files];
+    }
+    return {
+      ...validatedOptions,
+      files
+    };
+  }
+  return validatedOptions;
+};
+
+function HtmlWebpackTagsPlugin (options) {
+  const validatedOptions = getAllValidatedOptions(options, PLUGIN_NAME + '.options');
+
+  const shouldSkip = getShouldSkip(validatedOptions.files);
+
+  // Allows tests to be run with html-webpack-plugin v4
+  const htmlPluginName = isDefined(options.htmlPluginName) ? options.htmlPluginName : 'html-webpack-plugin';
+
+  this.options = {
+    ...validatedOptions,
+    shouldSkip,
+    htmlPluginName
+  };
 }
 
 HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
-  const { usePublicPath, addPublicPath, useHash, addHash, shouldSkip, htmlPluginName } = options;
+  const { shouldSkip, htmlPluginName } = options;
   const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend } = options;
 
   const externals = compiler.options.externals || {};
@@ -448,7 +430,7 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         if (isString(tag.sourcePath)) {
           assetPromises.push(addAsset(tag.sourcePath));
         }
-        return getTagPath(tag, usePublicPath, addPublicPath, useHash, addHash, pluginPublicPath, compilationHash);
+        return getTagPath(tag, options, pluginPublicPath, compilationHash);
       };
 
       const jsPrependPaths = scriptsPrepend.map(getPath);
@@ -561,10 +543,7 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 
 HtmlWebpackTagsPlugin.api = {
   IS,
-  getShouldSkip,
-  getValidatedMainOptions,
-  getValidatedLinksOptions,
-  getValidatedScriptsOptions
+  getValidatedOptions
 };
 
 module.exports = HtmlWebpackTagsPlugin;

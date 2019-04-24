@@ -91,12 +91,12 @@ describe('option validation', () => {
   });
 
   describe('options.publicPath', () => {
-    it('should throw an error if the publicPath flag is not a boolean or string or a function', done => {
+    it('should throw an error if the publicPath option is not a boolean or string or a function', done => {
       const theFunction = () => {
         return new HtmlWebpackTagsPlugin({ publicPath: 123 });
       };
 
-      expect(theFunction).toThrowError(/(options.publicPath should be either a boolean or a string or a function)/);
+      expect(theFunction).toThrowError(/(options.publicPath should be a boolean or a string or a function)/);
       done();
     });
 
@@ -138,24 +138,24 @@ describe('option validation', () => {
   });
 
   describe('options.hash', () => {
-    it('should throw an error if the hash option is not a boolean or function', done => {
-      const nonBooleanCheck = [123, 'not a boolean', /regex/, [], {}];
+    it('should throw an error if the hash option is not a boolean or string or a function', done => {
+      const nonBooleanCheck = [123, /regex/, [], {}];
 
       nonBooleanCheck.forEach(val => {
         const theCheck = () => {
           return new HtmlWebpackTagsPlugin({ tags: [], append: true, publicPath: true, hash: val });
         };
-        expect(theCheck).toThrowError(/(options.hash should be a boolean or a function)/);
+        expect(theCheck).toThrowError(/(options.hash should be a boolean or a string or a function that returns a string)/);
       });
       done();
     });
 
-    it('should throw an error if the hash is a string', done => {
+    it('should throw an error if the hash is a number', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ hash: 'my-hash' });
+        return new HtmlWebpackTagsPlugin({ hash: 123 });
       };
 
-      expect(theFunction).toThrowError(/(options.hash should be a boolean or a function)/);
+      expect(theFunction).toThrowError(/(options.hash should be a boolean or a string or a function that returns a string)/);
       done();
     });
 
@@ -173,7 +173,7 @@ describe('option validation', () => {
         return new HtmlWebpackTagsPlugin({ addHash: 123 });
       };
 
-      expect(theFunction).toThrowError(/(options.addHash should be a function)/);
+      expect(theFunction).toThrowError(/(options.addHash should be a function that returns a string)/);
       done();
     });
 
@@ -205,7 +205,7 @@ describe('option validation', () => {
           return new HtmlWebpackTagsPlugin({ tags: [], append: true, publicPath: true, files: val });
         };
 
-        expect(theCheck).toThrowError(/(options\.files should be a string or array)/);
+        expect(theCheck).toThrowError(/(options\.files should be a string or array of strings)/);
       });
 
       done();
@@ -215,7 +215,7 @@ describe('option validation', () => {
       const theFunction = () => {
         return new HtmlWebpackTagsPlugin({ tags: ['foo.js', 'bar.css'], append: false, files: ['abc', true, 'def'] });
       };
-      expect(theFunction).toThrowError(/(options\.files should be an array of strings)/);
+      expect(theFunction).toThrowError(/(options\.files should be a string or array of strings)/);
       done();
     });
   });
@@ -423,7 +423,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
       const theFunction = () => {
         return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `pathWithExtension${ext}`, attributes: { crossorigin: 'crossorigin', id: null, enabled: true } }, `bar${ext}`] });
       };
-      expect(theFunction).toThrowError(/(options\.tags object attribute values should strings, booleans or numbers)/);
+      expect(theFunction).toThrowError(/(options\.tags object attribute values should be strings, booleans or numbers)/);
       done();
     });
 
