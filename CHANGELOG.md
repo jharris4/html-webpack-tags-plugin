@@ -2,44 +2,70 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.9"></a>
+# [2.0.9](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.8...2.0.9) (2019-04-24)
+
+### Bug Fixes
+
+* More robust validation logic for all options across the board.
+
+### Features
+
+* Adds support for all `top` level options to be specified at the `tag` level.
+* `HtmlWebpackTagsPlugin.api` now ready for use by any plugins wanting to extend this plugin's options.
+
 <a name="2.0.8"></a>
 # [2.0.8](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.7...2.0.8) (2019-04-23)
 
-Version `2.0.8` adds an `api` property to the plugin constructor, allowing reuse of option validation by other plugins.
+### Features
+
+* Adds an `api` property to the plugin constructor, allowing reuse of option validation by other plugins.
 
 <a name="2.0.7"></a>
 # [2.0.7](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.6...2.0.7) (2019-04-23)
 
-Version `2.0.7` adds stricter/better option validation
+### Features
+
+* Adds stricter/better option validation.
 
 <a name="2.0.6"></a>
 # [2.0.6](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.5...2.0.6) (2019-04-23)
 
-Version `2.0.6` fixes use of this plugin with [html-webpack-plugin@4.x](https://github.com/jantimon/html-webpack-plugin). [[#45](https://github.com/jharris4/html-webpack-tags-plugin/issues/45)]
+### Bug Fixes
+
+* Fixes use of this plugin with [html-webpack-plugin@4.x](https://github.com/jantimon/html-webpack-plugin). [[#45](https://github.com/jharris4/html-webpack-tags-plugin/issues/45)].
 
 <a name="2.0.5"></a>
 # [2.0.5](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.4...2.0.5) (2019-04-23)
 
-Version `2.0.5` adds support for specifying the append option at the tag level.
+### Features
+
+* Adds support for specifying the append option at the tag level.
 
 <a name="2.0.4"></a>
 # [2.0.4](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.3...2.0.4) (2019-04-22)
 
-Version `2.0.4` includes adding browser tests to this package, updated documentation and windows bug fixes.
+### Features
+
+* Added browser tests to this package (using [puppeteer](https://github.com/GoogleChrome/puppeteer)).
 
 ### Bug Fixes
 
-* Fix **windows** `path` formatting issues introduced in the `2.x` version rewrite. [[#44](https://github.com/jharris4/html-webpack-tags-plugin/issues/44)]
+* Fix **windows** `path` formatting issues introduced in the `2.x` version rewrite. [[#44](https://github.com/jharris4/html-webpack-tags-plugin/issues/44)].
 
 <a name="2.0.3"></a>
 # [2.0.3](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.2...2.0.3) (2019-04-19)
 
-Version `2.0.3` adds support for new **external** script tag options that can control webpack's external config.
+### Features
+
+* Adds support for new **external** script tag options that can control webpack's external config.
 
 <a name="2.0.2"></a>
 # [2.0.2](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.1...2.0.2) (2019-04-19)
 
-Version `2.0.2` fixes bugs related to renaming the **assets** option name to **tags**.
+### Bug Fixes
+
+* Fix bugs related to renaming the **assets** option name to **tags**.
 
 <a name="2.0.1"></a>
 # [2.0.1](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.0...2.0.1) (2019-04-19)
