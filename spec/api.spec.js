@@ -1,5 +1,4 @@
 /* eslint-env jasmine */
-// const path = require('path');
 require('jasmine-expect');
 
 const HtmlWebpackTagsPlugin = require('../');
@@ -48,73 +47,71 @@ describe('api', () => {
     });
   });
 
-  describe('remove-me-later-but-not-my-contents', () => {
-    it('should throw with the right error for bad links options', done => {
-      const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
-      expect(typeof getValidatedOptions === 'function');
-      const theFunction = () => {
-        return getValidatedOptions({ links: ['a', true, 'false'] }, 'pluginName.options');
-      };
+  it('should throw with the right error for bad links options', done => {
+    const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
+    expect(typeof getValidatedOptions === 'function');
+    const theFunction = () => {
+      return getValidatedOptions({ links: ['a', true, 'false'] }, 'pluginName.options');
+    };
 
-      expect(theFunction).toThrowError(/(pluginName.options.links items must be an object or string)/);
-      done();
-    });
+    expect(theFunction).toThrowError(/(pluginName.options.links items must be an object or string)/);
+    done();
+  });
 
-    it('should throw with the right error for links with external', done => {
-      const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
-      expect(typeof getValidatedOptions === 'function');
-      const theFunction = () => {
-        return getValidatedOptions({ links: ['a', { path: 'b', external: { packageName: 'b', variableName: 'B' } }, 'c'] }, 'pluginName.options');
-      };
+  it('should throw with the right error for links with external', done => {
+    const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
+    expect(typeof getValidatedOptions === 'function');
+    const theFunction = () => {
+      return getValidatedOptions({ links: ['a', { path: 'b', external: { packageName: 'b', variableName: 'B' } }, 'c'] }, 'pluginName.options');
+    };
 
-      expect(theFunction).toThrowError(/(pluginName.options.links.external should not be used on non script tags)/);
-      done();
-    });
+    expect(theFunction).toThrowError(/(pluginName.options.links.external should not be used on non script tags)/);
+    done();
+  });
 
-    it('should throw with the right error for scripts with bad external', done => {
-      const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
-      expect(typeof getValidatedOptions === 'function');
-      const theFunction = () => {
-        return getValidatedOptions({ scripts: ['a', { path: 'b', external: 'abc' }, 'c'] }, 'pluginName.options');
-      };
+  it('should throw with the right error for scripts with bad external', done => {
+    const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
+    expect(typeof getValidatedOptions === 'function');
+    const theFunction = () => {
+      return getValidatedOptions({ scripts: ['a', { path: 'b', external: 'abc' }, 'c'] }, 'pluginName.options');
+    };
 
-      expect(theFunction).toThrowError(/(pluginName.options.scripts.external should be an object)/);
-      done();
-    });
+    expect(theFunction).toThrowError(/(pluginName.options.scripts.external should be an object)/);
+    done();
+  });
 
-    it('should return the right options for valid options', done => {
-      const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
-      expect(typeof getValidatedOptions === 'function');
-      const theFunction = () => {
-        return getValidatedOptions({ append: false, links: ['a', 'b', 'c'], scripts: [] }, 'pluginName.options');
-      };
+  it('should return the right options for valid options', done => {
+    const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
+    expect(typeof getValidatedOptions === 'function');
+    const theFunction = () => {
+      return getValidatedOptions({ append: false, links: ['a', 'b', 'c'], scripts: [] }, 'pluginName.options');
+    };
 
-      expect(theFunction).not.toThrowError();
-      const result = theFunction();
-      expect(result.links).toEqual([
-        { path: 'a', append: false },
-        { path: 'b', append: false },
-        { path: 'c', append: false }
-      ]);
-      expect(result.scripts).toEqual([]);
-      done();
-    });
+    expect(theFunction).not.toThrowError();
+    const result = theFunction();
+    expect(result.links).toEqual([
+      { path: 'a' },
+      { path: 'b' },
+      { path: 'c' }
+    ]);
+    expect(result.scripts).toEqual([]);
+    done();
+  });
 
-    it('should return the right options for scripts with valid external', done => {
-      const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
-      expect(typeof getValidatedOptions === 'function');
-      const theFunction = () => {
-        return getValidatedOptions({ append: true, scripts: ['a', { path: 'b', external: { variableName: 'B', packageName: 'b' } }, 'c'] }, 'pluginName.options');
-      };
+  it('should return the right options for scripts with valid external', done => {
+    const { getValidatedOptions } = HtmlWebpackTagsPlugin.api;
+    expect(typeof getValidatedOptions === 'function');
+    const theFunction = () => {
+      return getValidatedOptions({ scripts: ['a', { path: 'b', external: { variableName: 'B', packageName: 'b' } }, 'c'] }, 'pluginName.options');
+    };
 
-      expect(theFunction).not.toThrowError();
-      const result = theFunction();
-      expect(result.scripts).toEqual([
-        { path: 'a', append: true },
-        { path: 'b', append: true, external: { variableName: 'B', packageName: 'b' } },
-        { path: 'c', append: true }
-      ]);
-      done();
-    });
+    expect(theFunction).not.toThrowError();
+    const result = theFunction();
+    expect(result.scripts).toEqual([
+      { path: 'a' },
+      { path: 'b', external: { variableName: 'B', packageName: 'b' } },
+      { path: 'c' }
+    ]);
+    done();
   });
 });

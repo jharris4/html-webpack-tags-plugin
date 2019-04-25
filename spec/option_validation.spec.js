@@ -304,7 +304,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, append: 123 }, { path: `c${ext}` }] });
       };
 
-      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object append should be a boolean)`));
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.append should be a boolean)`));
       done();
     });
 
@@ -319,12 +319,12 @@ function runTestsForOption (optionName, type, runExtraTests) {
   });
 
   describe(`options.${optionName} publicPath`, () => {
-    it(`should throw an error if the ${optionName} contains an element that is an object with publicPath set to string`, done => {
+    it(`should not throw an error if the ${optionName} contains an element that is an object with publicPath set to string`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: 'string' }, { path: `c${ext}` }] });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: 'my-public-path' }, { path: `c${ext}` }] });
       };
 
-      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
+      expect(theFunction).not.toThrowError();
       done();
     });
 
@@ -333,7 +333,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: {} }, { path: `c${ext}` }] });
       };
 
-      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.publicPath should be a boolean or a string or a function that returns a string)`));
       done();
     });
 
@@ -342,7 +342,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: 0 }, { path: `c${ext}` }] });
       };
 
-      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.publicPath should be a boolean or a string or a function that returns a string)`));
       done();
     });
 
@@ -351,7 +351,7 @@ function runTestsForOption (optionName, type, runExtraTests) {
         return new HtmlWebpackTagsPlugin({ [optionName]: [{ path: `a${ext}` }, { path: `b${ext}`, publicPath: [] }, { path: `c${ext}` }] });
       };
 
-      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object publicPath should be a boolean or function)`));
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName}.publicPath should be a boolean or a string or a function that returns a string)`));
       done();
     });
 

@@ -1639,7 +1639,7 @@ function runTestsForOption (options, createWebpackConfig) {
       };
 
       theFunction();
-      // No error thrown, the error is in the webpack result
+      // The error used to be thrown, but now the error is in the webpack compilation result
       // expect(theFunction).toThrowError(/(HtmlWebpackPlugin: could not load file)/);
     });
   });
