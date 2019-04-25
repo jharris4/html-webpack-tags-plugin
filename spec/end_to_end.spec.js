@@ -61,9 +61,14 @@ const WEBPACK_MODULE = {
   rules: [WEBPACK_CSS_RULE]
 };
 
+// This is for debugging. It should always be set to true
+const RUN_ALL_TESTS = true;
+
 describe('end to end', () => {
   runTestsForHtmlVersion({ isHtmlNext: false });
-  runTestsForHtmlVersion({ isHtmlNext: true });
+  if (RUN_ALL_TESTS) {
+    runTestsForHtmlVersion({ isHtmlNext: true });
+  }
 });
 
 function runTestsForHtmlVersion ({ isHtmlNext }) {
@@ -891,8 +896,10 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
 
     runTestsForOption({ optionName: 'tags', optionTag: 'link' }, createWebpackConfig);
     runTestsForOption({ optionName: 'tags', optionTag: 'script' }, createWebpackConfig);
-    runTestsForOption({ optionName: 'links', optionTag: 'link' }, createWebpackConfig);
-    runTestsForOption({ optionName: 'scripts', optionTag: 'script' }, createWebpackConfig);
+    if (RUN_ALL_TESTS) {
+      runTestsForOption({ optionName: 'links', optionTag: 'link' }, createWebpackConfig);
+      runTestsForOption({ optionName: 'scripts', optionTag: 'script' }, createWebpackConfig);
+    }
 
     describe('option.tags', () => {
       it('should include a mixture of js and css files', done => {
