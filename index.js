@@ -133,11 +133,7 @@ const getTagObjects = (tag, optionName, optionPath) => {
       });
     }
 
-    const { hash, publicPath, ...nonShortcutKeys } = tag;
-    tag = {
-      ...nonShortcutKeys,
-      ...getValidatedMainOptions(tag, `${optionPath}.${optionName}`, {})
-    };
+    tag = getValidatedMainOptions(tag, `${optionPath}.${optionName}`, {});
 
     if (isDefined(tag.glob) || isDefined(tag.globPath)) {
       const { glob: assetGlob, globPath, ...otherAssetProperties } = tag;
@@ -178,22 +174,20 @@ const getValidatedTagObjects = (options, optionName, optionPath) => {
 };
 
 const validateTagObjectExternals = (tagObjects, isScript, optionName, optionPath) => {
-  if (isArray(tagObjects)) {
-    tagObjects.forEach(tagObject => {
-      if (isObject(tagObject) && isDefined(tagObject.external)) {
-        const { external } = tagObject;
-        if (isScript) {
-          assert(isObject(external), `${optionPath}.${optionName}.external should be an object`);
-          const { packageName, variableName } = external;
-          assert(isString(packageName) || isString(variableName), `${optionPath}.${optionName}.external should have a string packageName and variableName property`);
-          assert(isString(packageName), `${optionPath}.${optionName}.external should have a string packageName property`);
-          assert(isString(variableName), `${optionPath}.${optionName}.external should have a string variableName property`);
-        } else {
-          assert(false, `${optionPath}.${optionName}.external should not be used on non script tags`);
-        }
+  tagObjects.forEach(tagObject => {
+    if (isObject(tagObject) && isDefined(tagObject.external)) {
+      const { external } = tagObject;
+      if (isScript) {
+        assert(isObject(external), `${optionPath}.${optionName}.external should be an object`);
+        const { packageName, variableName } = external;
+        assert(isString(packageName) || isString(variableName), `${optionPath}.${optionName}.external should have a string packageName and variableName property`);
+        assert(isString(packageName), `${optionPath}.${optionName}.external should have a string packageName property`);
+        assert(isString(variableName), `${optionPath}.${optionName}.external should have a string variableName property`);
+      } else {
+        assert(false, `${optionPath}.${optionName}.external should not be used on non script tags`);
       }
-    });
-  }
+    }
+  });
 };
 
 const getShouldSkip = files => {
@@ -236,9 +230,10 @@ const processShortcuts = (options, optionPath, keyShortcut, keyUse, keyAdd, add)
 };
 
 const getValidatedMainOptions = (options, optionPath, defaultOptions = {}) => {
-  const validatedOptions = { ...defaultOptions };
-  if (isDefined(options.append)) {
-    assert(isBoolean(options.append), `${optionPath}.append should be a boolean`);
+  const { append, publicPath, usePublicPath, addPublicPath, hash, useHash, addHash, ...otherOptions } = options;
+  const validatedOptions = { ...defaultOptions, ...otherOptions };
+  if (isDefined(append)) {
+    assert(isBoolean(append), `${optionPath}.append should be a boolean`);
     validatedOptions.append = options.append;
   }
   const publicPathOptions = processShortcuts(options, optionPath, 'publicPath', 'usePublicPath', 'addPublicPath', DEFAULT_OPTIONS.addPublicPath);
@@ -260,51 +255,44 @@ const getValidatedMainOptions = (options, optionPath, defaultOptions = {}) => {
 
 const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIONS) => {
   assert(isObject(options), `${optionPath} should be an object`);
+  let validatedOptions = { ...defaultOptions };
+  validatedOptions = {
+    ...validatedOptions,
+    ...getValidatedMainOptions(options, optionPath, defaultOptions)
+  };
+  const { append: globalAppend } = validatedOptions;
+  const isTagPrepend = ({ append }) => append !== void 0 ? !append : !globalAppend;
+  const isTagAppend = ({ append }) => append !== void 0 ? append : globalAppend;
 
-  const { append, usePublicPath, addPublicPath, useHash, addHash } = getValidatedMainOptions(options, optionPath, defaultOptions);
-
-  let { links, scripts } = defaultOptions;
-  if (isDefined(options.tags)) {
+  const hasTags = isDefined(options.tags);
+  if (hasTags) {
     const tagObjects = getValidatedTagObjects(options, 'tags', optionPath);
     let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags', optionPath);
     validateTagObjectExternals(linkObjects, false, 'tags', optionPath);
     validateTagObjectExternals(scriptObjects, true, 'tags', optionPath);
-    links = links.concat(linkObjects);
-    scripts = scripts.concat(scriptObjects);
+    validatedOptions.links = linkObjects;
+    validatedOptions.scripts = scriptObjects;
   }
   if (isDefined(options.links)) {
     let linkObjects = getValidatedTagObjects(options, 'links', optionPath);
     validateTagObjectExternals(linkObjects, false, 'links', optionPath);
-    links = links.concat(linkObjects);
+    validatedOptions.links = hasTags ? validatedOptions.links.concat(linkObjects) : linkObjects;
   }
   if (isDefined(options.scripts)) {
     let scriptObjects = getValidatedTagObjects(options, 'scripts', optionPath);
     validateTagObjectExternals(scriptObjects, true, 'scripts', optionPath);
-    scripts = scripts.concat(scriptObjects);
+    validatedOptions.scripts = hasTags ? validatedOptions.scripts.concat(scriptObjects) : scriptObjects;
+  }
+  if (isDefined(validatedOptions.links)) {
+    validatedOptions.linksPrepend = validatedOptions.links.filter(isTagPrepend);
+    validatedOptions.linksAppend = validatedOptions.links.filter(isTagAppend);
+  }
+  if (isDefined(validatedOptions.scripts)) {
+    validatedOptions.scriptsPrepend = validatedOptions.scripts.filter(isTagPrepend);
+    validatedOptions.scriptsAppend = validatedOptions.scripts.filter(isTagAppend);
   }
 
-  const globalAppend = append;
-  const isTagPrepend = ({ append }) => append !== void 0 ? !append : !globalAppend;
-  const isTagAppend = ({ append }) => append !== void 0 ? append : globalAppend;
-
-  const linksPrepend = links.filter(isTagPrepend);
-  const linksAppend = links.filter(isTagAppend);
-  const scriptsPrepend = scripts.filter(isTagPrepend);
-  const scriptsAppend = scripts.filter(isTagAppend);
-
-  return {
-    links,
-    linksPrepend,
-    linksAppend,
-    scripts,
-    scriptsPrepend,
-    scriptsAppend,
-    append,
-    usePublicPath,
-    addPublicPath,
-    useHash,
-    addHash
-  };
+  return validatedOptions;
 };
 
 const getTagPath = (tagObject, options, webpackPublicPath, compilationHash) => {
