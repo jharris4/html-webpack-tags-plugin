@@ -221,15 +221,14 @@ describe('option validation', () => {
   });
 
   describe('options[tags|links|scripts]', () => {
-    runTestsForOption('tags', 'link', runTestsForAssetType);
-    runTestsForOption('tags', 'script', runTestsForAssetType);
-    runTestsForOption('links', 'link');
-    runTestsForOption('scripts', 'script');
+    runTestsForOption('tags', false, runTestsForAssetType);
+    runTestsForOption('tags', true, runTestsForAssetType);
+    runTestsForOption('links', false);
+    runTestsForOption('scripts', true);
   });
 });
 
-function runTestsForOption (optionName, type, runExtraTests) {
-  const isScript = type === 'script';
+function runTestsForOption (optionName, isScript, runExtraTests) {
   const ext = isScript ? '.js' : '.css';
   describe(`options.${optionName}`, () => {
     it(`should throw an error if the ${optionName} are not an array or string or object`, done => {
