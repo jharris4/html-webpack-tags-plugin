@@ -268,7 +268,7 @@ const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIO
   };
   const { append: globalAppend, prependExternals } = validatedOptions;
 
-  const getAppend = prependExternals ? external => !isDefined(external) : () => globalAppend;
+  const getAppend = prependExternals ? external => (isDefined(external) ? false : globalAppend) : () => globalAppend;
 
   const isTagPrepend = ({ append, external }) => isDefined(append) ? !append : !getAppend(external);
   const isTagAppend = ({ append, external }) => isDefined(append) ? append : getAppend(external);

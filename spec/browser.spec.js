@@ -235,6 +235,7 @@ describe('browser', () => {
           }
         },
         append: true,
+        prependExternals: false,
         publicPath: false,
         hash: false
       }
@@ -361,6 +362,7 @@ describe('browser', () => {
               rel: 'icon'
             }
           },
+          prependExternals: false,
           append: false,
           publicPath: false,
           hash: false
@@ -373,6 +375,7 @@ describe('browser', () => {
               variableName: 'FakeOther'
             }
           },
+          prependExternals: false,
           append: true,
           publicPath: false,
           hash: false

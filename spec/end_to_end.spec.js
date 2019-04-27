@@ -1829,7 +1829,8 @@ function runTestsForOption (options, createWebpackConfig) {
                 variableName: 'MyPackage'
               },
               sourcePath: path.join(FIXTURES_PATH, 'other')
-            }
+            },
+            prependExternals: true
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
@@ -1844,7 +1845,7 @@ function runTestsForOption (options, createWebpackConfig) {
             expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
             expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
             expect($(`${optionTag}[${optionAttr}="foobar${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
-            expect($($(optionTag).get(optionTag === 'script' ? 2 : 1))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
+            expect($($(optionTag).get(0))).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `foobar${ext}` } });
             done();
           });
         });
