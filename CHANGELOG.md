@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.10"></a>
+# [2.0.10](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.9...2.0.10) (2019-04-27)
+
+### Features
+
+* Add new **`prependExternals`** option (default **true**) that auto-prepends (**`append`**: false) any scripts with the **`external`** option specified.
+
 <a name="2.0.9"></a>
 # [2.0.9](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.8...2.0.9) (2019-04-24)
 
