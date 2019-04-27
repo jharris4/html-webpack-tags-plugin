@@ -290,6 +290,7 @@ describe('browser', () => {
             }
           },
           append: false,
+          prependExternals: false,
           publicPath: false,
           hash: false
         },
@@ -302,6 +303,7 @@ describe('browser', () => {
             }
           },
           append: false,
+          prependExternals: false,
           publicPath: false,
           hash: false
         }
