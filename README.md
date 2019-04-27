@@ -760,6 +760,8 @@ Note that `script` tags with **`external`** specified need to be placed **before
 
 This means that you should always set **`append`** to **false** when using the `script` **`external`** option.
 
+The **`prependExternals`** option was added in `2.0.10` to handle this case automatically.
+
 
 _____
 
