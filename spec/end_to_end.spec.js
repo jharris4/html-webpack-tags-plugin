@@ -379,6 +379,168 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
         });
       });
 
+      describe('options.prependExternals', () => {
+        it('should auto prepend a script when it has an external and prependExternals is true', done => {
+          webpack(createWebpackConfig({
+            options: {
+              tags: {
+                path: 'foobar.js',
+                external: {
+                  packageName: 'foobar',
+                  variableName: 'FooBar'
+                }
+              },
+              append: true,
+              prependExternals: true,
+              publicPath: false
+            }
+          }), (err, result) => {
+            expect(err).toBeFalsy();
+            expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+            fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+              expect(er).toBeFalsy();
+              const $ = cheerio.load(data);
+              expect($('script').length).toBe(3);
+              expect($('link').length).toBe(1);
+              expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+              expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+              expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+              expect($('script[src="foobar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              expect($($('script').get(0))).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              done();
+            });
+          });
+        });
+
+        it('should not auto prepend a script when it has an external and prependExternals is false', done => {
+          webpack(createWebpackConfig({
+            options: {
+              tags: {
+                path: 'foobar.js',
+                external: {
+                  packageName: 'foobar',
+                  variableName: 'FooBar'
+                }
+              },
+              append: true,
+              prependExternals: false,
+              publicPath: false
+            }
+          }), (err, result) => {
+            expect(err).toBeFalsy();
+            expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+            fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+              expect(er).toBeFalsy();
+              const $ = cheerio.load(data);
+              expect($('script').length).toBe(3);
+              expect($('link').length).toBe(1);
+              expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+              expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+              expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+              expect($('script[src="foobar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              expect($($('script').get(2))).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              done();
+            });
+          });
+        });
+
+        it('should not auto prepend a script that specifies append even when it has an external and prependExternals is false', done => {
+          webpack(createWebpackConfig({
+            options: {
+              tags: {
+                append: true,
+                path: 'foobar.js',
+                external: {
+                  packageName: 'foobar',
+                  variableName: 'FooBar'
+                }
+              },
+              append: true,
+              prependExternals: true,
+              publicPath: false
+            }
+          }), (err, result) => {
+            expect(err).toBeFalsy();
+            expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+            fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+              expect(er).toBeFalsy();
+              const $ = cheerio.load(data);
+              expect($('script').length).toBe(3);
+              expect($('link').length).toBe(1);
+              expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+              expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+              expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+              expect($('script[src="foobar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              expect($($('script').get(2))).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              done();
+            });
+          });
+        });
+
+        it('should auto prepend a script when append is set to false', done => {
+          webpack(createWebpackConfig({
+            options: {
+              tags: {
+                path: 'foobar.js',
+                external: {
+                  packageName: 'foobar',
+                  variableName: 'FooBar'
+                }
+              },
+              append: false,
+              prependExternals: true,
+              publicPath: false
+            }
+          }), (err, result) => {
+            expect(err).toBeFalsy();
+            expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+            fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+              expect(er).toBeFalsy();
+              const $ = cheerio.load(data);
+              expect($('script').length).toBe(3);
+              expect($('link').length).toBe(1);
+              expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+              expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+              expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+              expect($('script[src="foobar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              expect($($('script').get(0))).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              done();
+            });
+          });
+        });
+
+        it('should auto prepend a script when append is not specified', done => {
+          webpack(createWebpackConfig({
+            options: {
+              tags: {
+                path: 'foobar.js',
+                external: {
+                  packageName: 'foobar',
+                  variableName: 'FooBar'
+                }
+              },
+              prependExternals: true,
+              publicPath: false
+            }
+          }), (err, result) => {
+            expect(err).toBeFalsy();
+            expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+            fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+              expect(er).toBeFalsy();
+              const $ = cheerio.load(data);
+              expect($('script').length).toBe(3);
+              expect($('link').length).toBe(1);
+              expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+              expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+              expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+              expect($('script[src="foobar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              expect($($('script').get(0))).toBeTag({ tagName: 'script', attributes: { src: 'foobar.js' } });
+              done();
+            });
+          });
+        });
+      });
+
       describe('options.files', () => {
         it('should not include if not present in defined files', done => {
           webpack(createWebpackConfig({

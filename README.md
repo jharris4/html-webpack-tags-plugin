@@ -84,6 +84,7 @@ const path = require('path');
 
 const DEFAULT_OPTIONS = {
   append: true,
+  prependExternals: true,
   jsExtensions: ['.js'],
   cssExtensions: ['.css'],
   useHash: false,
@@ -108,6 +109,7 @@ The available options are:
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
 |**`append`**|`{Boolean}`|`true`|Whether to prepend or append the injected tags relative to any existing or webpack bundle tags (should be set to **false** when using any `script` tag **`external`**) |
+|**`prependExternals`**|`{Boolean}`|`true`|Whether to default **`append`** to **false** for any `<script>` `tag` that has an **`external`** option specified|
 |**`files`**|`{Array<String>}`|`[]`|If specified this plugin will only inject tags into the html-webpack-plugin instances that are injecting into these files  (uses [minimatch](https://github.com/isaacs/minimatch))|
 |**`jsExtensions`**|`{String\|Array<String>}`|`['.js']`|The file extensions to use when determining if a `tag` in the `tags` option is a `script`|
 |**`cssExtensions`**|`{String\|Array<String>}`|`['.css']`|The file extensions to use when determining if a `tag` in the `tags` option is a `link`|

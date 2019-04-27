@@ -21,6 +21,7 @@ const { isDefined, isObject, isBoolean, isNumber, isString, isArray, isFunction 
 
 const DEFAULT_OPTIONS = {
   append: true,
+  prependExternals: true,
   useHash: false,
   addHash: (assetPath, hash) => assetPath + '?' + hash,
   usePublicPath: true,
@@ -173,8 +174,8 @@ const getValidatedTagObjects = (options, optionName, optionPath) => {
   return tagObjects;
 };
 
-const validateTagObjectExternals = (tagObjects, isScript, optionName, optionPath) => {
-  tagObjects.forEach(tagObject => {
+const getValidatedTagObjectExternals = (tagObjects, isScript, optionName, optionPath) => {
+  return tagObjects.map(tagObject => {
     if (isObject(tagObject) && isDefined(tagObject.external)) {
       const { external } = tagObject;
       if (isScript) {
@@ -187,6 +188,7 @@ const validateTagObjectExternals = (tagObjects, isScript, optionName, optionPath
         assert(false, `${optionPath}.${optionName}.external should not be used on non script tags`);
       }
     }
+    return tagObject;
   });
 };
 
@@ -230,11 +232,15 @@ const processShortcuts = (options, optionPath, keyShortcut, keyUse, keyAdd, add)
 };
 
 const getValidatedMainOptions = (options, optionPath, defaultOptions = {}) => {
-  const { append, publicPath, usePublicPath, addPublicPath, hash, useHash, addHash, ...otherOptions } = options;
+  const { append, prependExternals, publicPath, usePublicPath, addPublicPath, hash, useHash, addHash, ...otherOptions } = options;
   const validatedOptions = { ...defaultOptions, ...otherOptions };
   if (isDefined(append)) {
     assert(isBoolean(append), `${optionPath}.append should be a boolean`);
-    validatedOptions.append = options.append;
+    validatedOptions.append = append;
+  }
+  if (isDefined(prependExternals)) {
+    assert(isBoolean(prependExternals), `${optionPath}.prependExternals should be a boolean`);
+    validatedOptions.prependExternals = prependExternals;
   }
   const publicPathOptions = processShortcuts(options, optionPath, 'publicPath', 'usePublicPath', 'addPublicPath', DEFAULT_OPTIONS.addPublicPath);
   if (isDefined(publicPathOptions.usePublicPath)) {
@@ -260,27 +266,30 @@ const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIO
     ...validatedOptions,
     ...getValidatedMainOptions(options, optionPath, defaultOptions)
   };
-  const { append: globalAppend } = validatedOptions;
-  const isTagPrepend = ({ append }) => append !== void 0 ? !append : !globalAppend;
-  const isTagAppend = ({ append }) => append !== void 0 ? append : globalAppend;
+  const { append: globalAppend, prependExternals } = validatedOptions;
+
+  const getAppend = prependExternals ? external => !isDefined(external) : () => globalAppend;
+
+  const isTagPrepend = ({ append, external }) => isDefined(append) ? !append : !getAppend(external);
+  const isTagAppend = ({ append, external }) => isDefined(append) ? append : getAppend(external);
 
   const hasTags = isDefined(options.tags);
   if (hasTags) {
     const tagObjects = getValidatedTagObjects(options, 'tags', optionPath);
     let [linkObjects, scriptObjects] = splitLinkScriptTags(tagObjects, options, 'tags', optionPath);
-    validateTagObjectExternals(linkObjects, false, 'tags', optionPath);
-    validateTagObjectExternals(scriptObjects, true, 'tags', optionPath);
+    linkObjects = getValidatedTagObjectExternals(linkObjects, false, 'tags', optionPath);
+    scriptObjects = getValidatedTagObjectExternals(scriptObjects, true, 'tags', optionPath);
     validatedOptions.links = linkObjects;
     validatedOptions.scripts = scriptObjects;
   }
   if (isDefined(options.links)) {
     let linkObjects = getValidatedTagObjects(options, 'links', optionPath);
-    validateTagObjectExternals(linkObjects, false, 'links', optionPath);
+    linkObjects = getValidatedTagObjectExternals(linkObjects, false, 'links', optionPath);
     validatedOptions.links = hasTags ? validatedOptions.links.concat(linkObjects) : linkObjects;
   }
   if (isDefined(options.scripts)) {
     let scriptObjects = getValidatedTagObjects(options, 'scripts', optionPath);
-    validateTagObjectExternals(scriptObjects, true, 'scripts', optionPath);
+    scriptObjects = getValidatedTagObjectExternals(scriptObjects, true, 'scripts', optionPath);
     validatedOptions.scripts = hasTags ? validatedOptions.scripts.concat(scriptObjects) : scriptObjects;
   }
   if (isDefined(validatedOptions.links)) {
@@ -297,7 +306,7 @@ const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIO
 
 const getTagPath = (tagObject, options, webpackPublicPath, compilationHash) => {
   const mergedOptions = { ...options };
-  Object.keys(tagObject).filter(key => tagObject[key] !== void 0).forEach(key => {
+  Object.keys(tagObject).filter(key => isDefined(tagObject[key])).forEach(key => {
     mergedOptions[key] = tagObject[key];
   });
   const { usePublicPath, addPublicPath, useHash, addHash } = mergedOptions;

@@ -196,6 +196,50 @@ describe('option validation', () => {
     });
   });
 
+  describe('options.prependExternals', () => {
+    it('should throw an error if prependExternals is not a boolean', done => {
+      const nonBooleanCheck = [123, 'true', /regex/, {}];
+
+      nonBooleanCheck.forEach(val => {
+        const theCheck = () => {
+          return new HtmlWebpackTagsPlugin({ prependExternals: val });
+        };
+
+        expect(theCheck).toThrowError(/(options\.prependExternals should be a boolean)/);
+      });
+
+      done();
+    });
+
+    it('should not throw an error if prependExternals is true', done => {
+      const nonStringCheck = [123, true, /regex/, {}];
+
+      nonStringCheck.forEach(val => {
+        const theCheck = () => {
+          return new HtmlWebpackTagsPlugin({ prependExternals: true });
+        };
+
+        expect(theCheck).not.toThrowError();
+      });
+
+      done();
+    });
+
+    it('should not throw an error if prependExternals is false', done => {
+      const nonStringCheck = [123, true, /regex/, {}];
+
+      nonStringCheck.forEach(val => {
+        const theCheck = () => {
+          return new HtmlWebpackTagsPlugin({ prependExternals: false });
+        };
+
+        expect(theCheck).not.toThrowError();
+      });
+
+      done();
+    });
+  });
+
   describe('options.files', () => {
     it('should throw an error if the files option is not a string', done => {
       const nonStringCheck = [123, true, /regex/, {}];
