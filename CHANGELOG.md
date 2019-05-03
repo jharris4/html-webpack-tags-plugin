@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
+<a name="2.0.11"></a>
+# [2.0.11](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.10...2.0.11) (2019-05-03)
+
+### Features
+
+* Add new **`globFlatten`** tag option (default **false**) that allows paths to be stripped from glob matched file paths.
+
 <a name="2.0.10"></a>
 # [2.0.10](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.9...2.0.10) (2019-04-27)
 
