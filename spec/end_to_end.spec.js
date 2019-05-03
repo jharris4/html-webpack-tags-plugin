@@ -1717,6 +1717,62 @@ function runTestsForOption (options, createWebpackConfig) {
         });
       });
     });
+
+    it(`should include any files for a ${optionName} glob that does match files and has globFlatten false`, done => {
+      webpack(createWebpackConfig({
+        copyOptions: [{ from: 'spec/fixtures/a-dir*', to: 'assets/a-dir', flatten: false }],
+        options: {
+          [optionName]: [
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: `**/file-a*${ext}`, globFlatten: false },
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: `**/file-b*${ext}`, globFlatten: false }
+          ],
+          append: true
+        }
+      }), (err, result) => {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+          expect(er).toBeFalsy();
+          const $ = cheerio.load(data);
+          expect($('script').length).toBe(2 + (optionTag === 'script' ? 2 : 0));
+          expect($('link').length).toBe(1 + (optionTag === 'link' ? 2 : 0));
+          expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+          expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+          expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+          expect($(`${optionTag}[${optionAttr}="assets/a-dir/file-a${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/a-dir/file-a${ext}` } });
+          expect($(`${optionTag}[${optionAttr}="assets/a-dir/file-b${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/a-dir/file-b${ext}` } });
+          done();
+        });
+      });
+    });
+
+    it(`should include any files for a ${optionName} glob that does match files and has globFlatten true`, done => {
+      webpack(createWebpackConfig({
+        copyOptions: [{ from: 'spec/fixtures/a-dir*', to: 'assets', flatten: true }],
+        options: {
+          [optionName]: [
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: `**/file-a*${ext}`, globFlatten: true },
+            { path: 'assets/', globPath: 'spec/fixtures/', glob: `**/file-b*${ext}`, globFlatten: true }
+          ],
+          append: true
+        }
+      }), (err, result) => {
+        expect(err).toBeFalsy();
+        expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+        fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+          expect(er).toBeFalsy();
+          const $ = cheerio.load(data);
+          expect($('script').length).toBe(2 + (optionTag === 'script' ? 2 : 0));
+          expect($('link').length).toBe(1 + (optionTag === 'link' ? 2 : 0));
+          expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+          expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+          expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+          expect($(`${optionTag}[${optionAttr}="assets/file-a${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/file-a${ext}` } });
+          expect($(`${optionTag}[${optionAttr}="assets/file-b${ext}"]`)).toBeTag({ tagName: optionTag, attributes: { [optionAttr]: `assets/file-b${ext}` } });
+          done();
+        });
+      });
+    });
   });
 
   describe(`options.${optionName} sourcePath`, () => {

@@ -506,6 +506,15 @@ function runTestsForOption (optionName, isScript, runExtraTests) {
       done();
     });
 
+    it(`should throw an error if any of the ${optionName} options are objects with a globFlatten property that is not a boolean`, done => {
+      const theFunction = () => {
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: '', globPath: FIXTURES_PATH, glob: `*${ext}`, globFlatten: 123 }, `bar${ext}`] });
+      };
+
+      expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a boolean globFlatten property)`));
+      done();
+    });
+
     it(`should throw an error if any of the ${optionName} options are objects with glob specified but globPath missing`, done => {
       const theFunction = () => {
         return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, glob: `withoutExtensions*` }, `bar${ext}`], append: false });

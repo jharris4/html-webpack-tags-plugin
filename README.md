@@ -303,6 +303,7 @@ When tags are specified as **Object**s, the following `tag object` options are a
 |**`append`**|`{Boolean}`|`undefined`| This can be used to override the plugin level **`append`** option at a tag level|
 |**`type`**|`{'js'\|'css'}`|`undefined`|For **`tags`** assets this may be used to specify whether the tag is a `link` or a `script`|
 |**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together these two options specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with path for each match result|
+|**`globFlatten`**|`{Boolean}`|`false`|When used with **`glob`** and **`globPath`** this flag controls whether glob-matched files are output with with full path (`false`) or just the filename (`true`)|
 |**`attributes`**|`{Object}`|`undefined`|The attributes to be injected into the html tags. Some attributes are filtered out by `html-webpack-plugin`. **(Recommended:** set `html-webpack-plugin` option: `{ inject: true }`**)**|
 |**`sourcePath`**|`{String}`|`undefined`|Specify a source path to be added as an entry to `html-webpack-plugin`. Useful to trigger webpack recompilation after the asset has changed|
 |**`hash`**|`{Boolean\|Function}`|`undefined`|Whether to inject the the webpack `compilation.hash` into the tag's path|

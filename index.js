@@ -136,12 +136,16 @@ const getTagObjects = (tag, optionName, optionPath) => {
 
     tag = getValidatedMainOptions(tag, `${optionPath}.${optionName}`, {});
 
-    if (isDefined(tag.glob) || isDefined(tag.globPath)) {
-      const { glob: assetGlob, globPath, ...otherAssetProperties } = tag;
+    if (isDefined(tag.glob) || isDefined(tag.globPath) || isDefined(tag.globFlatten)) {
+      const { glob: assetGlob, globPath, globFlatten, ...otherAssetProperties } = tag;
       assert(isString(assetGlob), `${optionPath}.${optionName} object should have a string glob property`);
       assert(isString(globPath), `${optionPath}.${optionName} object should have a string globPath property`);
+      if (isDefined(globFlatten)) {
+        assert(isBoolean(globFlatten), `${optionPath}.${optionName} object should have a boolean globFlatten property`);
+      }
+      const flatten = isDefined(globFlatten) ? globFlatten : false;
       const globAssets = glob.sync(assetGlob, { cwd: globPath });
-      const globAssetPaths = globAssets.map(globAsset => slash(path.join(tag.path, globAsset)));
+      const globAssetPaths = globAssets.map(globAsset => slash(path.join(tag.path, flatten ? path.basename(globAsset) : globAsset)));
       assert(globAssetPaths.length > 0, `${optionPath}.${optionName} object glob found no files (${tag.path} ${assetGlob} ${globPath})`);
       tagObjects = [];
       globAssetPaths.forEach(globAssetPath => {
