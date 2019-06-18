@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
 
+<a name="2.0.13"></a>
+# [2.0.13](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.12...2.0.13) (2019-06-18)
+
+### Bug Fixes
+
+* Use `url.resolve` instead of `path.join` to fix a bug when the publicPath contains `//`. [[#47](https://github.com/jharris4/html-webpack-tags-plugin/issues/47)].
+
+### Features
+
+* Update all dependency packages to latest.
+
 <a name="2.0.12"></a>
 # [2.0.12](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.11...2.0.12) (2019-05-03)
 
