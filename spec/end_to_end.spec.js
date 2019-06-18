@@ -774,6 +774,32 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
             });
           });
         });
+
+        it('should prefix the value of the publicPath option if the publicPath option is set to a string starting with http://', done => {
+          webpack(createWebpackConfig({
+            webpackPublicPath: 'thePublicPath',
+            options: {
+              tags: 'foobar.js',
+              append: false,
+              publicPath: 'http://www.foo.com'
+            }
+          }), (err, result) => {
+            expect(err).toBeFalsy();
+            expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+            fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+              expect(er).toBeFalsy();
+              const $ = cheerio.load(data);
+              expect($('script').length).toBe(3);
+              expect($('link').length).toBe(1);
+              expect($('script[src="thePublicPath/style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'thePublicPath/style.js' } });
+              expect($('script[src="thePublicPath/app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'thePublicPath/app.js' } });
+              expect($('link[href="thePublicPath/style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'thePublicPath/style.css', rel: 'stylesheet' } });
+              expect($('script[src="http://www.foo.com/foobar.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'http://www.foo.com/foobar.js' } });
+              expect($($('script').get(0))).toBeTag({ tagName: 'script', attributes: { src: 'http://www.foo.com/foobar.js' } });
+              done();
+            });
+          });
+        });
       });
 
       describe('options.hash', () => {
