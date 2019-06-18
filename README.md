@@ -80,7 +80,7 @@ This plugin will run and do nothing if no options are provided.
 The default options for this plugin are shown below:
 
 ```js
-const path = require('path');
+const url = require('url');
 
 const DEFAULT_OPTIONS = {
   append: true,
@@ -91,7 +91,7 @@ const DEFAULT_OPTIONS = {
   addHash: (assetPath, hash) => assetPath + '?' + hash,
   hash: undefined,
   usePublicPath: true,
-  addPublicPath: (assetPath, publicPath) => path.join(publicPath, assetPath),
+  addPublicPath: (assetPath, publicPath) => url.resolve(publicPath, assetPath),
   publicPath: undefined,
   tags: [],
   links: [],
