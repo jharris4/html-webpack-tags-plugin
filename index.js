@@ -3,6 +3,7 @@ const assert = require('assert');
 const minimatch = require('minimatch');
 const glob = require('glob');
 const path = require('path');
+const url = require('url');
 const slash = require('slash'); // fixes slashes in file paths for windows
 
 const PLUGIN_NAME = 'HtmlWebpackTagsPlugin';
@@ -25,7 +26,7 @@ const DEFAULT_OPTIONS = {
   useHash: false,
   addHash: (assetPath, hash) => assetPath + '?' + hash,
   usePublicPath: true,
-  addPublicPath: (assetPath, publicPath) => path.join(publicPath, assetPath),
+  addPublicPath: (assetPath, publicPath) => url.resolve(publicPath, assetPath),
   jsExtensions: ['.js'],
   cssExtensions: ['.css'],
   tags: [],
