@@ -1089,7 +1089,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       runTestsForOption({ optionName: 'scripts', optionTag: 'script' }, createWebpackConfig);
     }
 
-    describe('option.tags', () => {
+    describe('options.tags', () => {
       it('should include a mixture of js and css files', done => {
         webpack(createWebpackConfig({
           options: {
@@ -1127,7 +1127,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       });
     });
 
-    describe('option.meta', () => {
+    describe('options.meta', () => {
       const appendHash = (v, hash) => {
         if (hash.length > 0) hash = '?' + hash;
         return v + hash;
@@ -1376,7 +1376,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       });
     });
 
-    describe('options.links', () => {
+    describe('options.links & options.tags', () => {
       it('should prepend links and tags together with a custom index.html template when inject is false and append is set to false', done => {
         webpack(createWebpackConfig({
           htmlOptions: {
@@ -1635,6 +1635,57 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
         });
       });
     });
+
+    describe('options.tags & options.scripts & options.links & options.meta', () => {
+      it('should output all the tags for the options', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: {
+            tags: [
+              {
+                path: 'a.js'
+              },
+              {
+                path: 'a.css'
+              }
+            ],
+            scripts: [{
+              path: 'b.js'
+            }],
+            links: [{
+              path: 'b.css',
+              attributes: { rel: 'the-rel', sizes: '16x16' }
+            }],
+            meta: [{
+              path: 'c',
+              attributes: { name: 'the-name' }
+            }]
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(3);
+            expect($('meta').length).toBe(4);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            expect($('link[href="a.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'a.css' } });
+            expect($('link[href="b.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'b.css', rel: 'the-rel', sizes: '16x16' } });
+            expect($('meta[content="c"]')).toBeTag({ tagName: 'meta', attributes: { content: 'c', name: 'the-name' } });
+            done();
+          });
+        });
+      });
+    });
   });
 }
 
@@ -1685,7 +1736,7 @@ function runTestsForOption (options, createWebpackConfig) {
     });
   });
 
-  describe(`option.${optionName} and options.append`, () => {
+  describe(`options.${optionName} and options.append`, () => {
     it(`should prepend when the ${optionName} are all valid and append is set to false`, done => {
       webpack(createWebpackConfig({
         options: {
@@ -1741,7 +1792,7 @@ function runTestsForOption (options, createWebpackConfig) {
     });
   });
 
-  describe(`option.${optionName} attributes`, () => {
+  describe(`options.${optionName} attributes`, () => {
     it(`should add the given ${optionName} attributes to the matching tag`, done => {
       webpack(createWebpackConfig({
         options: {
@@ -1904,7 +1955,7 @@ function runTestsForOption (options, createWebpackConfig) {
     }
   });
 
-  describe(`option.${optionName} glob`, () => {
+  describe(`options.${optionName} glob`, () => {
     it(`should include any files for a ${optionName} glob that does match files`, done => {
       webpack(createWebpackConfig({
         copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
