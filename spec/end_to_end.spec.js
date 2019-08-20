@@ -1127,6 +1127,195 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       });
     });
 
+    describe('option.meta', () => {
+      const appendHash = (v, hash) => {
+        if (hash.length > 0) hash = '?' + hash;
+        return v + hash;
+      };
+
+      it('should output meta tags when the meta has no path', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html'),
+            inject: true
+          },
+          options: {
+            meta: {
+              attributes: {
+                'a': 'some string',
+                'b': 234
+              }
+            }
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(3);
+            expect($('link').length).toBe(1);
+            expect($('meta').length).toBe(4);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('meta[a="some string"]')).toBeTag({ tagName: 'meta', attributes: { a: 'some string', b: '234' } });
+            done();
+          });
+        });
+      });
+
+      it('should output meta tags and set the content attribute to the path', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html'),
+            inject: true
+          },
+          options: {
+            meta: {
+              path: 'meta-path',
+              attributes: {
+                'a': 'some string',
+                'b': 234
+              }
+            }
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(3);
+            expect($('link').length).toBe(1);
+            expect($('meta').length).toBe(4);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('meta[content="meta-path"]')).toBeTag({ tagName: 'meta', attributes: { content: 'meta-path', a: 'some string', b: '234' } });
+            done();
+          });
+        });
+      });
+
+      it('should output meta tags and set the content attribute to the path with publicPath', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html'),
+            inject: true
+          },
+          options: {
+            publicPath: '/publicPath/',
+            meta: {
+              path: 'meta-path',
+              attributes: {
+                'a': 'some string',
+                'b': 234
+              }
+            }
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(3);
+            expect($('link').length).toBe(1);
+            expect($('meta').length).toBe(4);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('meta[content="/publicPath/meta-path"]')).toBeTag({ tagName: 'meta', attributes: { content: '/publicPath/meta-path', a: 'some string', b: '234' } });
+            done();
+          });
+        });
+      });
+
+      it('should output meta tags and set the content attribute to the path with hash', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html'),
+            inject: true
+          },
+          options: {
+            hash: true,
+            meta: {
+              path: 'meta-path',
+              attributes: {
+                'a': 'some string',
+                'b': 234
+              }
+            }
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          const hash = result.compilation.hash;
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(3);
+            expect($('link').length).toBe(1);
+            expect($('meta').length).toBe(4);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('meta[content^="meta-path"]')).toBeTag({ tagName: 'meta', attributes: { content: appendHash('meta-path', hash), a: 'some string', b: '234' } });
+            done();
+          });
+        });
+      });
+
+      it('should output multiple meta tags and set the content attribute to the path with publicPath or hash', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html'),
+            inject: true
+          },
+          options: {
+            hash: false,
+            publicPath: false,
+            meta: [
+              {
+                path: 'meta-path-a',
+                publicPath: '/thePublicPath/',
+                attributes: {
+                  'a': 'some string a',
+                  'b': 123
+                }
+              },
+              {
+                path: 'meta-path-b',
+                hash: true,
+                attributes: {
+                  'a': 'some string b',
+                  'b': 456
+                }
+              }
+            ]
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          const hash = result.compilation.hash;
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(3);
+            expect($('link').length).toBe(1);
+            expect($('meta').length).toBe(5);
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('meta[content^="/thePublicPath/meta-path-a"]')).toBeTag({ tagName: 'meta', attributes: { content: '/thePublicPath/meta-path-a', a: 'some string a', b: '123' } });
+            expect($('meta[content^="meta-path-b"]')).toBeTag({ tagName: 'meta', attributes: { content: appendHash('meta-path-b', hash), a: 'some string b', b: '456' } });
+            done();
+          });
+        });
+      });
+    });
+
     describe('multiple plugins', () => {
       it('should output all files when multiple plugins are used with varying append', done => {
         webpack(createWebpackConfig({

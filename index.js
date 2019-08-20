@@ -114,17 +114,31 @@ const splitLinkScriptTags = (tagObjects, options, optionName, optionPath) => {
   return [linkObjects, scriptObjects];
 };
 
-const getTagObjects = (tag, optionName, optionPath) => {
+const getTagObjects = (tag, optionName, optionPath, isMetaTag = false) => {
   let tagObjects;
-  assert(isString(tag) || isObject(tag), `${optionPath}.${optionName} items must be an object or string`);
-  if (isString(tag)) {
+  if (isMetaTag) {
+    assert(isObject(tag), `${optionPath}.${optionName} items must be an object`);
+  } else {
+    assert(isString(tag) || isObject(tag), `${optionPath}.${optionName} items must be an object or string`);
+  }
+  if (!isMetaTag && isString(tag)) {
     tagObjects = [{
       path: tag
     }];
   } else {
-    assert(isString(tag.path), `${optionPath}.${optionName} object must have a string path property`);
+    if (isMetaTag) {
+      if (isDefined(tag.path)) {
+        assert(isString(tag.path), `${optionPath}.${optionName} object should have a string path property`);
+      }
+    } else {
+      assert(isString(tag.path), `${optionPath}.${optionName} object must have a string path property`);
+    }
     if (isDefined(tag.sourcePath)) {
       assert(isString(tag.sourcePath), `${optionPath}.${optionName} object should have a string sourcePath property`);
+    }
+    if (isMetaTag) {
+      assert(isDefined(tag.attributes), `${optionPath}.${optionName} object must have an object attributes property`);
+      assert(Object.keys(tag.attributes).length > 0, `${optionPath}.${optionName} object must have a non empty object attributes property`);
     }
     if (isDefined(tag.attributes)) {
       const { attributes } = tag;
@@ -138,6 +152,9 @@ const getTagObjects = (tag, optionName, optionPath) => {
     tag = getValidatedMainOptions(tag, `${optionPath}.${optionName}`, {});
 
     if (isDefined(tag.glob) || isDefined(tag.globPath) || isDefined(tag.globFlatten)) {
+      if (isMetaTag) {
+        assert(isDefined(tag.path), `${optionPath}.${optionName} object must have a path property when glob is used`);
+      }
       const { glob: assetGlob, globPath, globFlatten, ...otherAssetProperties } = tag;
       assert(isString(assetGlob), `${optionPath}.${optionName} object should have a string glob property`);
       assert(isString(globPath), `${optionPath}.${optionName} object should have a string globPath property`);
@@ -177,6 +194,23 @@ const getValidatedTagObjects = (options, optionName, optionPath) => {
     }
   }
   return tagObjects;
+};
+
+const getValidatedMetaObjects = (options, optionName, optionPath) => {
+  let metaObjects;
+  if (isDefined(options[optionName])) {
+    const tags = options[optionName];
+    assert(isObject(tags) || isArray(tags), `${optionPath}.${optionName} should be an object or array (${tags})`);
+    if (isArray(tags)) {
+      metaObjects = [];
+      tags.forEach(asset => {
+        metaObjects = metaObjects.concat(getTagObjects(asset, optionName, optionPath, true));
+      });
+    } else {
+      metaObjects = getTagObjects(tags, optionName, optionPath, true);
+    }
+  }
+  return metaObjects;
 };
 
 const getValidatedTagObjectExternals = (tagObjects, isScript, optionName, optionPath) => {
@@ -305,6 +339,11 @@ const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIO
     validatedOptions.scriptsPrepend = validatedOptions.scripts.filter(isTagPrepend);
     validatedOptions.scriptsAppend = validatedOptions.scripts.filter(isTagAppend);
   }
+  if (isDefined(options.meta)) {
+    let metaObjects = getValidatedMetaObjects(options, 'meta', optionPath);
+    metaObjects = getValidatedTagObjectExternals(metaObjects, false, 'meta', optionPath);
+    validatedOptions.meta = metaObjects;
+  }
 
   return validatedOptions;
 };
@@ -315,8 +354,8 @@ const getTagPath = (tagObject, options, webpackPublicPath, compilationHash) => {
     mergedOptions[key] = tagObject[key];
   });
   const { usePublicPath, addPublicPath, useHash, addHash } = mergedOptions;
-  let { path } = tagObject;
 
+  let { path } = tagObject;
   if (usePublicPath) {
     path = addPublicPath(path, webpackPublicPath);
   }
@@ -360,7 +399,7 @@ function HtmlWebpackTagsPlugin (options) {
 HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
   const { shouldSkip, htmlPluginName } = options;
-  const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend } = options;
+  const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend, meta } = options;
 
   const externals = compiler.options.externals || {};
   scripts.forEach(script => {
@@ -410,6 +449,29 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 
       assets.js = jsPrependPaths.concat(assets.js).concat(jsAppendPaths);
       assets.css = cssPrependPaths.concat(assets.css).concat(cssAppendPaths);
+
+      if (meta) {
+        const getMeta = tag => {
+          if (isString(tag.sourcePath)) {
+            assetPromises.push(addAsset(tag.sourcePath));
+          }
+          if (isDefined(tag.path)) {
+            return {
+              content: getTagPath(tag, options, pluginPublicPath, compilationHash),
+              ...tag.attributes
+            };
+          } else {
+            return tag.attributes;
+          }
+        };
+
+        const oldOptionsMeta = htmlPluginData.plugin.options.meta || {};
+
+        htmlPluginData.plugin.options.meta = {
+          ...oldOptionsMeta,
+          ...meta.map(getMeta)
+        };
+      }
 
       Promise.all(assetPromises).then(
         () => {
