@@ -95,7 +95,8 @@ const DEFAULT_OPTIONS = {
   publicPath: undefined,
   tags: [],
   links: [],
-  scripts: []
+  scripts: [],
+  meta: undefined
 };
 ```
 
@@ -122,12 +123,15 @@ The available options are:
 |**`links`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` html tags|
 |**`scripts`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<script>` html tags|
 |**`tags`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` or `<script>` html tags depending on the tag `type`|
+|**`meta`**|`{Object\|Array<Object>}`|`undefined`|The tags to inject as `<meta>` html tags|
 
 ---
 
 The **`append`** option controls whether tags are injected before or after `webpack` or `template` tags.
 
 If multiple plugins are used with **`append`** set to **false** then the **tags will be injected in reverse order**.
+
+This option has no effect on **`meta`** tags.
 
 This sample `index.html` template:
 
@@ -704,13 +708,11 @@ plugins: [
 Will append the following `<script>` element into the index template html
 
 ```html
-<head>
-  <!-- previous header content -->
+<body>
+  <!-- previous body content -->
   <script src="/my-public-path/asset/path" type="text/javascript"></script>
-</head>
+</body>
 ```
-
-Note that the second link's href was not prefixed with the webpack `publicPath` because the second link asset's **`publicPath`** was set to `false`.
 
 
 _____
@@ -762,6 +764,44 @@ Note that `script` tags with **`external`** specified need to be placed **before
 This means that you should always set **`append`** to **false** when using the `script` **`external`** option.
 
 The **`prependExternals`** option was added in `2.0.10` to handle this case automatically.
+
+
+_____
+
+Using the **`meta`** option to inject `meta` tags:
+
+```javascript
+output: {
+  publicPath: '/my-public-path/'
+},
+plugins: [
+  new CopyWebpackPlugin([
+    { from: 'node_modules/bootstrap/dist/js', to: 'js/'}
+  ]),
+  new HtmlWebpackPlugin(),
+  new HtmlWebpackTagsPlugin({
+    meta: [
+      {
+        path: 'asset/path',
+        attributes: {
+          name: 'the-meta-name'
+        }
+      }
+    ]
+  })
+]
+```
+
+Will inject the following `<meta>` element into the index template html
+
+```html
+<head>
+  <!-- previous header content -->
+  <meta content="/my-public-path/asset/path" name="the-meta-name">
+</head>
+```
+
+Note that the **`append`** settings has no effect on how the `<meta>` elements are injected.
 
 
 _____
