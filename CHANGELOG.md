@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
 
+<a name="2.0.14"></a>
+# [2.0.14](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.13...2.0.14) (2019-08-20)
+
+### Features
+
+* Add new **`meta`** option (default **undefined**) that allows `<meta>` tags to be injected.
+
 <a name="2.0.13"></a>
 # [2.0.13](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.12...2.0.13) (2019-06-18)
 
