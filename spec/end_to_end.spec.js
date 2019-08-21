@@ -1127,7 +1127,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       });
     });
 
-    describe('options.meta', () => {
+    describe('options.metas', () => {
       const appendHash = (v, hash) => {
         if (hash.length > 0) hash = '?' + hash;
         return v + hash;
@@ -1140,7 +1140,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
             inject: true
           },
           options: {
-            meta: {
+            metas: {
               attributes: {
                 'a': 'some string',
                 'b': 234
@@ -1172,7 +1172,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
             inject: true
           },
           options: {
-            meta: {
+            metas: {
               path: 'meta-path',
               attributes: {
                 'a': 'some string',
@@ -1206,7 +1206,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
           },
           options: {
             publicPath: '/publicPath/',
-            meta: {
+            metas: {
               path: 'meta-path',
               attributes: {
                 'a': 'some string',
@@ -1240,7 +1240,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
           },
           options: {
             hash: true,
-            meta: {
+            metas: {
               path: 'meta-path',
               attributes: {
                 'a': 'some string',
@@ -1276,7 +1276,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
           options: {
             hash: false,
             publicPath: false,
-            meta: [
+            metas: [
               {
                 path: 'meta-path-a',
                 publicPath: '/thePublicPath/',
@@ -1636,7 +1636,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
       });
     });
 
-    describe('options.tags & options.scripts & options.links & options.meta', () => {
+    describe('options.tags & options.scripts & options.links & options.metas', () => {
       it('should output all the tags for the options', done => {
         webpack(createWebpackConfig({
           htmlOptions: {
@@ -1658,7 +1658,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
               path: 'b.css',
               attributes: { rel: 'the-rel', sizes: '16x16' }
             }],
-            meta: [{
+            metas: [{
               path: 'c',
               attributes: { name: 'the-name' }
             }]

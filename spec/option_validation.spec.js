@@ -264,67 +264,67 @@ describe('option validation', () => {
     });
   });
 
-  describe('options.meta', () => {
-    it('should throw an error if meta is a string', done => {
+  describe('options.metas', () => {
+    it('should throw an error if metas is a string', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: 'a string' });
+        return new HtmlWebpackTagsPlugin({ metas: 'a string' });
       };
 
-      expect(theFunction).toThrowError(/(options.meta should be an object or array)/);
+      expect(theFunction).toThrowError(/(options.metas should be an object or array)/);
       done();
     });
 
-    it('should throw an error if meta is an object without attributes', done => {
+    it('should throw an error if metas is an object without attributes', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: { path: 'abc' } });
+        return new HtmlWebpackTagsPlugin({ metas: { path: 'abc' } });
       };
 
-      expect(theFunction).toThrowError(/(options.meta object must have an object attributes property)/);
+      expect(theFunction).toThrowError(/(options.metas object must have an object attributes property)/);
       done();
     });
 
-    it('should throw an error if meta is an object with non string path', done => {
+    it('should throw an error if metas is an object with non string path', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: { attributes: { 'a': 'b' }, path: 123 } });
+        return new HtmlWebpackTagsPlugin({ metas: { attributes: { 'a': 'b' }, path: 123 } });
       };
 
-      expect(theFunction).toThrowError(/(options.meta object should have a string path property)/);
+      expect(theFunction).toThrowError(/(options.metas object should have a string path property)/);
       done();
     });
 
-    it('should throw an error if meta is an array containing a string', done => {
+    it('should throw an error if metas is an array containing a string', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: [{ attributes: { 'a': 1 }, path: 'a' }, '', { attributes: { 'b': 2 }, path: 'b' }] });
+        return new HtmlWebpackTagsPlugin({ metas: [{ attributes: { 'a': 1 }, path: 'a' }, '', { attributes: { 'b': 2 }, path: 'b' }] });
       };
 
-      expect(theFunction).toThrowError(/(options.meta items must be an object)/);
+      expect(theFunction).toThrowError(/(options.metas items must be an object)/);
       done();
     });
 
-    it('should throw an error if meta is an object with empty attributes', done => {
+    it('should throw an error if metas is an object with empty attributes', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: { attributes: { }, path: 'b' } });
+        return new HtmlWebpackTagsPlugin({ metas: { attributes: { }, path: 'b' } });
       };
 
-      expect(theFunction).toThrowError(/(options.meta object must have a non empty object attributes property)/);
+      expect(theFunction).toThrowError(/(options.metas object must have a non empty object attributes property)/);
       done();
     });
 
-    it('should throw an error if meta is an array containing an object with empty attributes', done => {
+    it('should throw an error if metas is an array containing an object with empty attributes', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: [{ attributes: { 'a': 1 }, path: 'a' }, { attributes: { }, path: 'b' }] });
+        return new HtmlWebpackTagsPlugin({ metas: [{ attributes: { 'a': 1 }, path: 'a' }, { attributes: { }, path: 'b' }] });
       };
 
-      expect(theFunction).toThrowError(/(options.meta object must have a non empty object attributes property)/);
+      expect(theFunction).toThrowError(/(options.metas object must have a non empty object attributes property)/);
       done();
     });
 
-    it('should throw an error if meta has glob without path', done => {
+    it('should throw an error if metas has glob without path', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ meta: { attributes: { 'a': 1 }, glob: 'a' } });
+        return new HtmlWebpackTagsPlugin({ metas: { attributes: { 'a': 1 }, glob: 'a' } });
       };
 
-      expect(theFunction).toThrowError(/(options.meta object must have a path property when glob is used)/);
+      expect(theFunction).toThrowError(/(options.metas object must have a path property when glob is used)/);
       done();
     });
   });

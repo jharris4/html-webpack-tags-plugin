@@ -123,7 +123,7 @@ The available options are:
 |**`links`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` html tags|
 |**`scripts`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<script>` html tags|
 |**`tags`**|`{String\|Object\|Array<String\|Object>}`|`[]`|The tags to inject as `<link>` or `<script>` html tags depending on the tag `type`|
-|**`meta`**|`{Object\|Array<Object>}`|`undefined`|The tags to inject as `<meta>` html tags|
+|**`metas`**|`{Object\|Array<Object>}`|`undefined`|The tags to inject as `<meta>` html tags|
 
 ---
 
@@ -303,7 +303,7 @@ When tags are specified as **Object**s, the following `tag object` options are a
 
 |Name|Type|Default|Description|
 |:--:|:--:|:-----:|:----------|
-|**`path`**|`{String}`|**`required`**|The tag file path (used for the `href` or `src` tag attribute)|
+|**`path`**|`{String}`|**`required*`**|The tag file path (used for `<link href />` or `<script src />` or `<meta content />`) **`(* not required for meta tags)`**|
 |**`append`**|`{Boolean}`|`undefined`| This can be used to override the plugin level **`append`** option at a tag level|
 |**`type`**|`{'js'\|'css'}`|`undefined`|For **`tags`** assets this may be used to specify whether the tag is a `link` or a `script`|
 |**`glob`**, **`globPath`**|`{String, String}`|`undefined`|Together these two options specify a [glob](https://github.com/isaacs/node-glob) to run, inserting a tag with path for each match result|
@@ -768,7 +768,7 @@ The **`prependExternals`** option was added in `2.0.10` to handle this case auto
 
 _____
 
-Using the **`meta`** option to inject `meta` tags:
+Using the **`metas`** option to inject `meta` tags:
 
 ```javascript
 output: {
@@ -780,7 +780,7 @@ plugins: [
   ]),
   new HtmlWebpackPlugin(),
   new HtmlWebpackTagsPlugin({
-    meta: [
+    metas: [
       {
         path: 'asset/path',
         attributes: {

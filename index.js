@@ -339,10 +339,10 @@ const getValidatedOptions = (options, optionPath, defaultOptions = DEFAULT_OPTIO
     validatedOptions.scriptsPrepend = validatedOptions.scripts.filter(isTagPrepend);
     validatedOptions.scriptsAppend = validatedOptions.scripts.filter(isTagAppend);
   }
-  if (isDefined(options.meta)) {
-    let metaObjects = getValidatedMetaObjects(options, 'meta', optionPath);
-    metaObjects = getValidatedTagObjectExternals(metaObjects, false, 'meta', optionPath);
-    validatedOptions.meta = metaObjects;
+  if (isDefined(options.metas)) {
+    let metaObjects = getValidatedMetaObjects(options, 'metas', optionPath);
+    metaObjects = getValidatedTagObjectExternals(metaObjects, false, 'metas', optionPath);
+    validatedOptions.metas = metaObjects;
   }
 
   return validatedOptions;
@@ -399,7 +399,7 @@ function HtmlWebpackTagsPlugin (options) {
 HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
   const { options } = this;
   const { shouldSkip, htmlPluginName } = options;
-  const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend, meta } = options;
+  const { scripts, scriptsPrepend, scriptsAppend, linksPrepend, linksAppend, metas } = options;
 
   const externals = compiler.options.externals || {};
   scripts.forEach(script => {
@@ -450,7 +450,7 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
       assets.js = jsPrependPaths.concat(assets.js).concat(jsAppendPaths);
       assets.css = cssPrependPaths.concat(assets.css).concat(cssAppendPaths);
 
-      if (meta) {
+      if (metas) {
         const getMeta = tag => {
           if (isString(tag.sourcePath)) {
             assetPromises.push(addAsset(tag.sourcePath));
@@ -469,7 +469,7 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 
         htmlPluginData.plugin.options.meta = {
           ...oldOptionsMeta,
-          ...meta.map(getMeta)
+          ...metas.map(getMeta)
         };
       }
 
