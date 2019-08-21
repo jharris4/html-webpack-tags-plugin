@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
 
+<a name="2.0.15"></a>
+# [2.0.15](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.14...2.0.15) (2019-08-20)
+
+### Features
+
+* Renamed the meta option to **`metas`**. The plural version is more consistent with the **`tags`**, **`scripts`** and **`links`** options.
+
 <a name="2.0.14"></a>
 # [2.0.14](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.13...2.0.14) (2019-08-20)
 
