@@ -3,17 +3,16 @@ const assert = require('assert');
 const minimatch = require('minimatch');
 const glob = require('glob');
 const path = require('path');
-const url = require('url');
 const slash = require('slash'); // fixes slashes in file paths for windows
 
 const PLUGIN_NAME = 'HtmlWebpackTagsPlugin';
 
 const IS = {
-  isDefined: v => v !== void 0,
-  isObject: v => v !== null && v !== void 0 && typeof v === 'object' && !Array.isArray(v),
+  isDefined: v => v !== undefined,
+  isObject: v => v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v),
   isBoolean: v => v === true || v === false,
-  isNumber: v => v !== void 0 && (typeof v === 'number' || v instanceof Number) && isFinite(v),
-  isString: v => v !== null && v !== void 0 && (typeof v === 'string' || v instanceof String),
+  isNumber: v => v !== undefined && (typeof v === 'number' || v instanceof Number) && isFinite(v),
+  isString: v => v !== null && v !== undefined && (typeof v === 'string' || v instanceof String),
   isArray: v => Array.isArray(v),
   isFunction: v => typeof v === 'function'
 };
@@ -26,7 +25,7 @@ const DEFAULT_OPTIONS = {
   useHash: false,
   addHash: (assetPath, hash) => assetPath + '?' + hash,
   usePublicPath: true,
-  addPublicPath: (assetPath, publicPath) => url.resolve(publicPath, assetPath),
+  addPublicPath: (assetPath, publicPath) => (publicPath !== '' && !publicPath.endsWith('/') && !assetPath.startsWith('/')) ? publicPath + '/' + assetPath : publicPath + assetPath,
   jsExtensions: ['.js'],
   cssExtensions: ['.css'],
   tags: [],
