@@ -90,13 +90,13 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
     return {
       entry: {
         ...WEBPACK_ENTRY,
-        ...(webpackEntry !== void 0 ? { app: webpackEntry } : {}),
-        ...(webpackStyle !== void 0 ? { style: webpackStyle } : {})
+        ...(webpackEntry !== undefined ? { app: webpackEntry } : {}),
+        ...(webpackStyle !== undefined ? { style: webpackStyle } : {})
       },
       output: {
         ...WEBPACK_OUTPUT,
-        ...(webpackOutput !== void 0 ? { path: webpackOutput } : {}),
-        ...(webpackPublicPath !== void 0 ? { publicPath: webpackPublicPath } : {})
+        ...(webpackOutput !== undefined ? { path: webpackOutput } : {}),
+        ...(webpackPublicPath !== undefined ? { publicPath: webpackPublicPath } : {})
       },
       module: { ...WEBPACK_MODULE },
       plugins: [
@@ -1142,8 +1142,8 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
           options: {
             metas: {
               attributes: {
-                'a': 'some string',
-                'b': 234
+                a: 'some string',
+                b: 234
               }
             }
           }
@@ -1175,8 +1175,8 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
             metas: {
               path: 'meta-path',
               attributes: {
-                'a': 'some string',
-                'b': 234
+                a: 'some string',
+                b: 234
               }
             }
           }
@@ -1209,8 +1209,8 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
             metas: {
               path: 'meta-path',
               attributes: {
-                'a': 'some string',
-                'b': 234
+                a: 'some string',
+                b: 234
               }
             }
           }
@@ -1243,8 +1243,8 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
             metas: {
               path: 'meta-path',
               attributes: {
-                'a': 'some string',
-                'b': 234
+                a: 'some string',
+                b: 234
               }
             }
           }
@@ -1281,16 +1281,16 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
                 path: 'meta-path-a',
                 publicPath: '/thePublicPath/',
                 attributes: {
-                  'a': 'some string a',
-                  'b': 123
+                  a: 'some string a',
+                  b: 123
                 }
               },
               {
                 path: 'meta-path-b',
                 hash: true,
                 attributes: {
-                  'a': 'some string b',
-                  'b': 456
+                  a: 'some string b',
+                  b: 456
                 }
               }
             ]
@@ -2141,7 +2141,7 @@ function runTestsForOption (options, createWebpackConfig) {
         rimraf(EXTERNALS_OUTPUT_DIR, done);
       });
 
-      it(`should add the webpack external when external is used`, done => {
+      it('should add the webpack external when external is used', done => {
         webpack(createWebpackConfig({
           options: {
             [optionName]: {
@@ -2173,7 +2173,7 @@ function runTestsForOption (options, createWebpackConfig) {
         });
       });
 
-      it(`should not add the webpack external when external is not used`, done => {
+      it('should not add the webpack external when external is not used', done => {
         webpack(createWebpackConfig({
           options: {
             [optionName]: {

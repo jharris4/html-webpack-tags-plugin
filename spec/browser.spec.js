@@ -82,12 +82,12 @@ const createWebpackConfig = ({
   return {
     entry: {
       ...WEBPACK_ENTRY,
-      ...(webpackEntry !== void 0 ? { app: webpackEntry } : {})
+      ...(webpackEntry !== undefined ? { app: webpackEntry } : {})
     },
     output: {
       ...WEBPACK_OUTPUT,
-      ...(webpackOutput !== void 0 ? { path: webpackOutput } : {}),
-      ...(webpackPublicPath !== void 0 ? { publicPath: webpackPublicPath } : {})
+      ...(webpackOutput !== undefined ? { path: webpackOutput } : {}),
+      ...(webpackPublicPath !== undefined ? { publicPath: webpackPublicPath } : {})
     },
     module: { ...WEBPACK_MODULE },
     plugins: [
@@ -113,56 +113,48 @@ async function startServer ({ serverPort, secure = false, path = EXTERNALS_OUTPU
       }
     });
   }
-  try {
-    const app = express();
-    app.use(express.static(path));
+  const app = express();
+  app.use(express.static(path));
 
-    if (secure) {
-      const { keyPath, certPath } = secure;
-      theServer = https.createServer({ key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) }, app);
-    } else {
-      theServer = http.createServer(app);
-    }
-
-    return new Promise((resolve, reject) => {
-      theServer = theServer.listen(serverPort, error => {
-        if (error) {
-          reject(error);
-        } else {
-          // theServer.keepAliveTimeout = 0; // FIX for Node > 8.0 < 8.1.1 issue: https://github.com/glenjamin/webpack-hot-middleware/issues/210
-          resolve({ closeServer });
-        }
-      });
-    });
-  } catch (error) {
-    throw error;
+  if (secure) {
+    const { keyPath, certPath } = secure;
+    theServer = https.createServer({ key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) }, app);
+  } else {
+    theServer = http.createServer(app);
   }
+
+  return new Promise((resolve, reject) => {
+    theServer = theServer.listen(serverPort, error => {
+      if (error) {
+        reject(error);
+      } else {
+        // theServer.keepAliveTimeout = 0; // FIX for Node > 8.0 < 8.1.1 issue: https://github.com/glenjamin/webpack-hot-middleware/issues/210
+        resolve({ closeServer });
+      }
+    });
+  });
 }
 
 async function getBrowserContent (options) {
-  try {
-    const { serverHost, serverPort, waitForSelector } = options;
-    const { closeServer } = await startServer(options);
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-    const page = await browser.newPage();
-    const errors = [];
-    page.on('pageerror', err => {
-      errors.push(err);
-    });
-    await page.goto('http://' + serverHost + ':' + serverPort);
-    if (waitForSelector !== void 0) {
-      await page.waitForSelector(waitForSelector);
-    }
-    const content = await page.content();
-    await browser.close();
-    await closeServer();
-    return {
-      content,
-      errors
-    };
-  } catch (error) {
-    throw error;
+  const { serverHost, serverPort, waitForSelector } = options;
+  const { closeServer } = await startServer(options);
+  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const page = await browser.newPage();
+  const errors = [];
+  page.on('pageerror', err => {
+    errors.push(err);
+  });
+  await page.goto('http://' + serverHost + ':' + serverPort);
+  if (waitForSelector !== undefined) {
+    await page.waitForSelector(waitForSelector);
   }
+  const content = await page.content();
+  await browser.close();
+  await closeServer();
+  return {
+    content,
+    errors
+  };
 }
 
 describe('browser', () => {
@@ -578,7 +570,7 @@ describe('browser', () => {
       getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
         .then(({ content, errors }) => {
           expect(errors.length).toBe(1);
-          expect(errors[0].message).toContain(`Cannot read property 'fakeB' of undefined`);
+          expect(errors[0].message).toContain('Cannot read property \'fakeB\' of undefined');
 
           const $ = cheerio.load(content);
           const divs = $('div.fake');
@@ -625,7 +617,7 @@ describe('browser', () => {
       getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
         .then(({ content, errors }) => {
           expect(errors.length).toBe(1);
-          expect(errors[0].message).toContain(`Cannot read property 'fakeB' of undefined`);
+          expect(errors[0].message).toContain('Cannot read property \'fakeB\' of undefined');
 
           const $ = cheerio.load(content);
           const divs = $('div.fake');

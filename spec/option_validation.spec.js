@@ -285,7 +285,7 @@ describe('option validation', () => {
 
     it('should throw an error if metas is an object with non string path', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ metas: { attributes: { 'a': 'b' }, path: 123 } });
+        return new HtmlWebpackTagsPlugin({ metas: { attributes: { a: 'b' }, path: 123 } });
       };
 
       expect(theFunction).toThrowError(/(options.metas object should have a string path property)/);
@@ -294,7 +294,7 @@ describe('option validation', () => {
 
     it('should throw an error if metas is an array containing a string', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ metas: [{ attributes: { 'a': 1 }, path: 'a' }, '', { attributes: { 'b': 2 }, path: 'b' }] });
+        return new HtmlWebpackTagsPlugin({ metas: [{ attributes: { a: 1 }, path: 'a' }, '', { attributes: { b: 2 }, path: 'b' }] });
       };
 
       expect(theFunction).toThrowError(/(options.metas items must be an object)/);
@@ -312,7 +312,7 @@ describe('option validation', () => {
 
     it('should throw an error if metas is an array containing an object with empty attributes', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ metas: [{ attributes: { 'a': 1 }, path: 'a' }, { attributes: { }, path: 'b' }] });
+        return new HtmlWebpackTagsPlugin({ metas: [{ attributes: { a: 1 }, path: 'a' }, { attributes: { }, path: 'b' }] });
       };
 
       expect(theFunction).toThrowError(/(options.metas object must have a non empty object attributes property)/);
@@ -321,7 +321,7 @@ describe('option validation', () => {
 
     it('should throw an error if metas has glob without path', done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ metas: { attributes: { 'a': 1 }, glob: 'a' } });
+        return new HtmlWebpackTagsPlugin({ metas: { attributes: { a: 1 }, glob: 'a' } });
       };
 
       expect(theFunction).toThrowError(/(options.metas object must have a path property when glob is used)/);
@@ -582,7 +582,7 @@ function runTestsForOption (optionName, isScript, runExtraTests) {
 
     it(`should throw an error if any of the ${optionName} options are objects with glob specified but globPath missing`, done => {
       const theFunction = () => {
-        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, glob: `withoutExtensions*` }, `bar${ext}`], append: false });
+        return new HtmlWebpackTagsPlugin({ [optionName]: [`foo${ext}`, { path: `pathWithExtension${ext}`, glob: 'withoutExtensions*' }, `bar${ext}`], append: false });
       };
       expect(theFunction).toThrowError(new RegExp(`(options.${optionName} object should have a string globPath property)`));
       done();
@@ -671,7 +671,7 @@ function runTestsForOption (optionName, isScript, runExtraTests) {
 }
 
 function runTestsForAssetType (ext) {
-  describe(`options.tags type`, () => {
+  describe('options.tags type', () => {
     it('should throw an error if any of the tags options are objects with an invalid type property', done => {
       const theFunction = () => {
         return new HtmlWebpackTagsPlugin({ tags: [`foo${ext}`, { path: `baz${ext}`, type: 'foo' }, `bar${ext}`], append: false });
