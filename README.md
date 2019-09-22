@@ -96,7 +96,7 @@ const DEFAULT_OPTIONS = {
   tags: [],
   links: [],
   scripts: [],
-  meta: undefined
+  metas: undefined
 };
 ```
 
