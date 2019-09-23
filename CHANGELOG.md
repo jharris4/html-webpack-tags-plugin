@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
 
+<a name="2.0.17"></a>
+# [2.0.17](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.16...2.0.17) (2019-09-23)
+
+### Bug Fixes
+
+* Add typings.d.ts to `files` in `package.json` (oops) [[#52](https://github.com/jharris4/html-webpack-tags-plugin/issues/52)].
+
 <a name="2.0.16"></a>
 # [2.0.16](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.15...2.0.16) (2019-09-23)
 
