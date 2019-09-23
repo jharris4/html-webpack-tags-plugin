@@ -3,6 +3,7 @@
   "version": "2.0.15",
   "description": "lets you define html tags to inject with html-webpack-plugin",
   "main": "index.js",
+  "types": "typings.d.ts",
   "engines": {
     "node": ">=8"
   },
