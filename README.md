@@ -116,7 +116,7 @@ The available options are:
 |**`cssExtensions`**|`{String\|Array<String>}`|`['.css']`|The file extensions to use when determining if a `tag` in the `tags` option is a `link`|
 |**`useHash`**|`{Boolean}`|`false`|Whether to inject the webpack `compilation.hash` into the tag paths|
 |**`addHash`**|`{Function(assetPath:String, hash:String):String}`|`see above`|The function to call when injecting the `hash` into the tag paths|
-|**`hash`**|`{Boolean\|Function}`|`undefined`|Shortcut to specifying `useHash` and `addHash`|
+|**`hash`**|`{Boolean\|String\|Function}`|`undefined`|Shortcut to specifying `useHash` and `addHash`|
 |**`usePublicPath`**|`{Boolean}`|`true`|Whether to inject the (webpack) `publicPath` into the tag paths|
 |**`addPublicPath`**|`{Function(assetPath:String, publicPath:String):String}`|`see above`|Whether to inject the `publicPath` into the tag paths|
 |**`publicPath`**|`{Boolean\|String\|Function}`|`undefined`|Shortcut to specifying `usePublicPath` and `addPublicPath`|
@@ -310,8 +310,8 @@ When tags are specified as **Object**s, the following `tag object` options are a
 |**`globFlatten`**|`{Boolean}`|`false`|When used with **`glob`** and **`globPath`** this flag controls whether glob-matched files are output with with full path (`false`) or just the filename (`true`)|
 |**`attributes`**|`{Object}`|`undefined`|The attributes to be injected into the html tags. Some attributes are filtered out by `html-webpack-plugin`. **(Recommended:** set `html-webpack-plugin` option: `{ inject: true }`**)**|
 |**`sourcePath`**|`{String}`|`undefined`|Specify a source path to be added as an entry to `html-webpack-plugin`. Useful to trigger webpack recompilation after the asset has changed|
-|**`hash`**|`{Boolean\|Function}`|`undefined`|Whether to inject the the webpack `compilation.hash` into the tag's path|
-|**`publicPath`**|`{Boolean\|Function}`|`undefined`|Whether to inject the (webpack) `publicPath` into the tag's path|
+|**`hash`**|`{Boolean\|String\|Function}`|`undefined`|Whether & how to inject the the webpack `compilation.hash` into the tag's path|
+|**`publicPath`**|`{Boolean\|String\|Function}`|`undefined`|Whether & how to inject the (webpack) `publicPath` into the tag's path|
 |**`external`**|`{Object({ packageName: String, variableName: String})}`|`undefined`|When specified for **script** tags causes `{ packageName: variableName }` to be added to the [webpack config's externals](https://webpack.js.org/configuration/externals/)|
 
 ---
