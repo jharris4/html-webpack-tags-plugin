@@ -1922,6 +1922,56 @@ function runTestsForOption (options, createWebpackConfig) {
         });
       });
 
+      it(`should output ${optionName} attributes other than path that are booleans`, done => {
+        webpack(createWebpackConfig({
+          options: {
+            append: false,
+            [optionName]: [
+              { path: '/the-href.css', attributes: { aboolean: true, anotherboolean: false } }
+            ]
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(2);
+            expect($('link').length).toBe(2);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('link[href="/the-href.css"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href.css', aboolean: '', anotherboolean: undefined } });
+            done();
+          });
+        });
+      });
+
+      it(`should output ${optionName} attributes other than path that are numbers`, done => {
+        webpack(createWebpackConfig({
+          options: {
+            append: false,
+            [optionName]: [
+              { path: '/the-href.css', attributes: { anumber: 123, anothernumber: -456 } }
+            ]
+          }
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(JSON.stringify(result.compilation.errors)).toBe('[]');
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(2);
+            expect($('link').length).toBe(2);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css', rel: 'stylesheet' } });
+            expect($('link[href="/the-href.css"]')).toBeTag({ tagName: 'link', attributes: { href: '/the-href.css', anumber: '123', anothernumber: '-456' } });
+            done();
+          });
+        });
+      });
+
       it(`should output ${optionName} attributes and inject the publicPath only when ${optionName} object publicPath is not false`, done => {
         const publicPath = '/pub-path/';
         webpack(createWebpackConfig({
