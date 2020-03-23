@@ -28,7 +28,7 @@ const rimraf = require('rimraf');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackPluginNext = require('html-webpack-plugin-4');
+const HtmlWebpackPluginPrev = require('html-webpack-plugin-3');
 const HtmlWebpackTagsPlugin = require('../');
 
 const OUTPUT_FILENAME = '[name].js';
@@ -65,15 +65,15 @@ const WEBPACK_MODULE = {
 const RUN_ALL_TESTS = true;
 
 describe('end to end', () => {
-  runTestsForHtmlVersion({ isHtmlNext: false });
+  runTestsForHtmlVersion({ isHtmlPrev: false });
   if (RUN_ALL_TESTS) {
-    runTestsForHtmlVersion({ isHtmlNext: true });
+    runTestsForHtmlVersion({ isHtmlPrev: true });
   }
 });
 
-function runTestsForHtmlVersion ({ isHtmlNext }) {
-  const createHtmlPlugin = isHtmlNext ? opts => new HtmlWebpackPluginNext(opts) : opts => new HtmlWebpackPlugin(opts);
-  const createTagsPlugin = isHtmlNext ? opts => new HtmlWebpackTagsPlugin({ ...opts, htmlPluginName: 'html-webpack-plugin-4' }) : opts => new HtmlWebpackTagsPlugin(opts);
+function runTestsForHtmlVersion ({ isHtmlPrev }) {
+  const createHtmlPlugin = isHtmlPrev ? opts => new HtmlWebpackPluginPrev(opts) : opts => new HtmlWebpackPlugin(opts);
+  const createTagsPlugin = isHtmlPrev ? opts => new HtmlWebpackTagsPlugin({ ...opts, htmlPluginName: 'html-webpack-plugin-3' }) : opts => new HtmlWebpackTagsPlugin(opts);
   const createWebpackConfig = ({
     webpackEntry,
     webpackStyle,
@@ -108,7 +108,7 @@ function runTestsForHtmlVersion ({ isHtmlNext }) {
     };
   };
 
-  describe(isHtmlNext ? 'html-next' : 'html-latest', () => {
+  describe(isHtmlPrev ? 'html-prev' : 'html-latest', () => {
     beforeEach(done => {
       rimraf(FIXTURES_OUTPUT_DIR, done);
     });
