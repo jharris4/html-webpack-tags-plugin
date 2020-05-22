@@ -75,7 +75,7 @@ const createWebpackConfig = ({
 }) => {
   const createTagsPlugin = opts => new HtmlWebpackTagsPlugin(opts);
 
-  const copyPlugins = copyOptions !== false ? [new CopyWebpackPlugin(copyOptions)] : [];
+  const copyPlugins = copyOptions ? [new CopyWebpackPlugin({ patterns: copyOptions })] : [];
   const htmlPlugins = htmlOptions !== false ? [new HtmlWebpackPlugin(htmlOptions)] : [];
   const tagsPlugins = Array.isArray(options) ? options.map(createTagsPlugin) : options !== false ? [createTagsPlugin(options)] : [];
 
