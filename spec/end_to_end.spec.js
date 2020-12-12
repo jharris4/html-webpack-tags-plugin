@@ -28,7 +28,6 @@ const rimraf = require('rimraf');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackPluginPrev = require('html-webpack-plugin-3');
 const HtmlWebpackTagsPlugin = require('../');
 
 const OUTPUT_FILENAME = '[name].js';
@@ -63,6 +62,14 @@ const WEBPACK_MODULE = {
 
 // This is for debugging. It should always be set to true
 const RUN_ALL_TESTS = true;
+const EMPTY_ERRORS = [];
+
+const getCompilationErrors = result => {
+  if (Array.isArray(result.compilation.errors) && result.compilation.errors.length > 0) {
+    return result.compilation.errors;
+  }
+  return EMPTY_ERRORS;
+};
 
 const hasCompilationErrorText = (result, text) => {
   try {
@@ -81,15 +88,12 @@ const hasNoCompilationErrors = result => {
 };
 
 describe('end to end', () => {
-  runTestsForHtmlVersion({ isHtmlPrev: false });
-  if (RUN_ALL_TESTS) {
-    runTestsForHtmlVersion({ isHtmlPrev: true });
-  }
+  runTestsForHtmlVersion();
 });
 
-function runTestsForHtmlVersion ({ isHtmlPrev }) {
-  const createHtmlPlugin = isHtmlPrev ? opts => new HtmlWebpackPluginPrev(opts) : opts => new HtmlWebpackPlugin(opts);
-  const createTagsPlugin = isHtmlPrev ? opts => new HtmlWebpackTagsPlugin({ ...opts, htmlPluginName: 'html-webpack-plugin-3' }) : opts => new HtmlWebpackTagsPlugin(opts);
+function runTestsForHtmlVersion () {
+  const createHtmlPlugin = opts => new HtmlWebpackPlugin(opts);
+  const createTagsPlugin = opts => new HtmlWebpackTagsPlugin(opts);
   const createWebpackConfig = ({
     webpackEntry,
     webpackStyle,
@@ -124,7 +128,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
     };
   };
 
-  describe(isHtmlPrev ? 'html-prev' : 'html-latest', () => {
+  describe('html-latest', () => {
     beforeEach(done => {
       rimraf(FIXTURES_OUTPUT_DIR, done);
     });
@@ -155,7 +159,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -180,7 +184,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -205,7 +209,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -230,7 +234,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -262,7 +266,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             ]
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -308,7 +312,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             ]
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -347,7 +351,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -376,7 +380,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -412,7 +416,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -444,7 +448,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -477,7 +481,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -509,7 +513,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -540,7 +544,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -568,7 +572,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -592,7 +596,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -619,7 +623,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -646,7 +650,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -674,7 +678,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -710,7 +714,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             ]
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -747,7 +751,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             ]
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -775,7 +779,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -801,7 +805,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -837,7 +841,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             const hash = result.compilation.hash;
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
@@ -882,7 +886,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
               }
             }), (err, result) => {
               expect(err).toBeFalsy();
-              expect(hasNoCompilationErrors(result)).toBe(true);
+              expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
               const hash = result.compilation.hash;
               fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
                 expect(er).toBeFalsy();
@@ -926,7 +930,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             const hash = result.compilation.hash;
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
@@ -970,7 +974,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             const hash = result.compilation.hash;
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
@@ -1014,7 +1018,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
             }
           }), (err, result) => {
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -1045,7 +1049,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }), (err, result) => {
             const theHash = result.compilation.hash;
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -1080,7 +1084,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }), (err, result) => {
             const theHash = result.compilation.hash;
             expect(err).toBeFalsy();
-            expect(hasNoCompilationErrors(result)).toBe(true);
+            expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
             fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
               expect(er).toBeFalsy();
               const $ = cheerio.load(data);
@@ -1099,10 +1103,10 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
     });
 
     runTestsForOption({ optionName: 'tags', optionTag: 'link' }, createWebpackConfig);
-    runTestsForOption({ optionName: 'tags', optionTag: 'script' }, createWebpackConfig);
+    // runTestsForOption({ optionName: 'tags', optionTag: 'script' }, createWebpackConfig);
     if (RUN_ALL_TESTS) {
-      runTestsForOption({ optionName: 'links', optionTag: 'link' }, createWebpackConfig);
-      runTestsForOption({ optionName: 'scripts', optionTag: 'script' }, createWebpackConfig);
+      // runTestsForOption({ optionName: 'links', optionTag: 'link' }, createWebpackConfig);
+      // runTestsForOption({ optionName: 'scripts', optionTag: 'script' }, createWebpackConfig);
     }
 
     describe('options.tags', () => {
@@ -1122,7 +1126,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1165,7 +1169,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1198,7 +1202,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1232,7 +1236,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1266,7 +1270,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           const hash = result.compilation.hash;
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
@@ -1313,7 +1317,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           const hash = result.compilation.hash;
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
@@ -1365,7 +1369,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           ]
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1412,7 +1416,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1448,7 +1452,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1485,7 +1489,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           ]
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1524,7 +1528,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           ]
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1555,7 +1559,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1584,7 +1588,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1610,7 +1614,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1635,7 +1639,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1681,7 +1685,7 @@ function runTestsForHtmlVersion ({ isHtmlPrev }) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1720,7 +1724,7 @@ function runTestsForOption (options, createWebpackConfig) {
     it(`should not include ${optionName} when an empty array is provided`, done => {
       webpack(createWebpackConfig({ options: { [optionName]: [] } }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -1737,7 +1741,7 @@ function runTestsForOption (options, createWebpackConfig) {
     it(`should not include ${optionName} when nothing is provided`, done => {
       webpack(createWebpackConfig({ options: {} }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -1764,7 +1768,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -1791,7 +1795,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -1820,7 +1824,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -1876,7 +1880,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         const hash = result.compilation.hash;
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
@@ -1923,7 +1927,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1948,7 +1952,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -1973,7 +1977,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -2002,7 +2006,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
             const $ = cheerio.load(data);
@@ -2034,7 +2038,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -2062,7 +2066,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -2090,7 +2094,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -2109,7 +2113,7 @@ function runTestsForOption (options, createWebpackConfig) {
 
   describe(`options.${optionName} sourcePath`, () => {
     it(`should not throw an error when the ${optionName} sourcePath points to a valid js file`, done => {
-      webpack(createWebpackConfig({
+      const compiler = webpack(createWebpackConfig({
         options: {
           [optionName]: {
             path: `foobar${ext}`,
@@ -2117,8 +2121,11 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }
       }), (err, result) => {
+        console.log('\n\n\n\n\n########## err: ', err);
+        console.log('\n\n\n\n\n########## result: ', !!result);
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        // console.log('\n\n\n\n\n########## result: ', result);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -2163,7 +2170,7 @@ function runTestsForOption (options, createWebpackConfig) {
         }
       }), (err, result) => {
         expect(err).toBeFalsy();
-        expect(hasNoCompilationErrors(result)).toBe(true);
+        expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
           const $ = cheerio.load(data);
@@ -2222,7 +2229,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           expect(JSON.stringify(result.compilation.options.externals)).toBe('{"@scope/my-package":"MyPackage"}');
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();
@@ -2249,7 +2256,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }), (err, result) => {
           expect(err).toBeFalsy();
-          expect(hasNoCompilationErrors(result)).toBe(true);
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
           expect(JSON.stringify(result.compilation.options.externals)).toBe('{}');
           fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
             expect(er).toBeFalsy();

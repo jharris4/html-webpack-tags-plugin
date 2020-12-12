@@ -1,8 +1,10 @@
 'use strict';
+const path = require('path');
+const fs = require('fs');
+const webpack = require('webpack');
 const assert = require('assert');
 const minimatch = require('minimatch');
 const glob = require('glob');
-const path = require('path');
 const slash = require('slash'); // fixes slashes in file paths for windows
 
 const PLUGIN_NAME = 'HtmlWebpackTagsPlugin';
@@ -427,7 +429,37 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 
       const addAsset = assetPath => {
         try {
-          return htmlPluginData.plugin.addFileToAssets(assetPath, compilation);
+          if (htmlPluginData.plugin && htmlPluginData.plugin.addFileToAssets) {
+            return htmlPluginData.plugin.addFileToAssets(assetPath, compilation);
+          } else {
+            assetPath = path.resolve(compilation.compiler.context, assetPath);
+            return Promise.all([
+              new Promise((resolve, reject) => {
+                fs.stat(assetPath, (err, stats) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve(stats);
+                  }
+                });
+              }),
+              new Promise((resolve, reject) => {
+                fs.readFile(assetPath, (err, data) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve(data);
+                  }
+                });
+              })
+            ]).then(([stat, source]) => {
+              const { size } = stat;
+              const basename = path.basename(assetPath);
+              source = new webpack.sources.RawSource(source, true);
+              compilation.fileDependencies.add(assetPath);
+              compilation.emitAsset(basename, source, { size });
+            });
+          }
         } catch (err) {
           return Promise.reject(err);
         }
