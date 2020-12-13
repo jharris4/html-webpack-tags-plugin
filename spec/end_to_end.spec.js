@@ -135,17 +135,17 @@ function runTestsForHtmlVersion () {
 
     it('should throw an error if html-webpack-plugin is not in the webpack config', done => {
       const theError = /(are you sure you have html-webpack-plugin before it in your webpack config's plugins)/;
-      const theFunction = () => {
-        webpack(createWebpackConfig({
-          htmlOptions: false,
-          options: {
-            tags: 'foobar.js',
-            publicPath: false
-          }
-        }), () => { });
-      };
-      expect(theFunction).toThrowError(theError);
-      done();
+      webpack(createWebpackConfig({
+        htmlOptions: false,
+        options: {
+          tags: 'foobar.js',
+          publicPath: false
+        }
+      }), (err) => {
+        expect(err).toBeTruthy();
+        expect(err.message).toMatch(theError);
+        done();
+      });
     });
 
     describe('main options', () => {
@@ -1072,7 +1072,7 @@ function runTestsForHtmlVersion () {
           };
           webpack(createWebpackConfig({
             webpackPublicPath: 'myPublic/',
-            copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
+            copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/[name].[ext]' }],
             options: {
               tags: [
                 { path: 'assets/', globPath: 'spec/fixtures/', glob: 'g*-a.js' },
@@ -2028,7 +2028,7 @@ function runTestsForOption (options, createWebpackConfig) {
   describe(`options.${optionName} glob`, () => {
     it(`should include any files for a ${optionName} glob that does match files`, done => {
       webpack(createWebpackConfig({
-        copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/', flatten: true }],
+        copyOptions: [{ from: 'spec/fixtures/g*', to: 'assets/[name].[ext]' }],
         options: {
           [optionName]: [
             { path: 'assets/', globPath: 'spec/fixtures/', glob: `glob-a*${ext}` },
@@ -2056,7 +2056,7 @@ function runTestsForOption (options, createWebpackConfig) {
 
     it(`should include any files for a ${optionName} glob that does match files and has globFlatten false`, done => {
       webpack(createWebpackConfig({
-        copyOptions: [{ from: 'spec/fixtures/a-dir/*', to: 'assets/a-dir', flatten: false }],
+        copyOptions: [{ from: 'spec/fixtures/a-dir/*', to: 'assets/a-dir' }],
         options: {
           [optionName]: [
             { path: 'assets/', globPath: 'spec/fixtures/', glob: `**/file-a*${ext}`, globFlatten: false },
@@ -2084,7 +2084,7 @@ function runTestsForOption (options, createWebpackConfig) {
 
     it(`should include any files for a ${optionName} glob that does match files and has globFlatten true`, done => {
       webpack(createWebpackConfig({
-        copyOptions: [{ from: 'spec/fixtures/a-dir/*', to: 'assets', flatten: true }],
+        copyOptions: [{ from: 'spec/fixtures/a-dir/*', to: 'assets/[name].[ext]' }],
         options: {
           [optionName]: [
             { path: 'assets/', globPath: 'spec/fixtures/', glob: `**/file-a*${ext}`, globFlatten: true },
@@ -2113,7 +2113,7 @@ function runTestsForOption (options, createWebpackConfig) {
 
   describe(`options.${optionName} sourcePath`, () => {
     it(`should not throw an error when the ${optionName} sourcePath points to a valid js file`, done => {
-      const compiler = webpack(createWebpackConfig({
+      webpack(createWebpackConfig({
         options: {
           [optionName]: {
             path: `foobar${ext}`,
@@ -2121,10 +2121,7 @@ function runTestsForOption (options, createWebpackConfig) {
           }
         }
       }), (err, result) => {
-        console.log('\n\n\n\n\n########## err: ', err);
-        console.log('\n\n\n\n\n########## result: ', !!result);
         expect(err).toBeFalsy();
-        // console.log('\n\n\n\n\n########## result: ', result);
         expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
         fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
           expect(er).toBeFalsy();
@@ -2153,7 +2150,7 @@ function runTestsForOption (options, createWebpackConfig) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(hasNoCompilationErrors(result)).toBe(false);
-        expect(hasCompilationErrorText(result, 'could not load file')).toBe(true);
+        expect(hasCompilationErrorText(result, 'no such file')).toBe(true);
         expect(hasCompilationErrorText(result, badFilename)).toBe(true);
         done();
       });

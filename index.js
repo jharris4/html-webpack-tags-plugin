@@ -411,6 +411,8 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
   });
   compiler.options.externals = externals;
 
+  let savedAssetsPublicPath = null;
+
   // Hook into the html-webpack-plugin processing
   const onCompilation = compilation => {
     const onBeforeHtmlGeneration = (htmlPluginData, callback) => {
@@ -423,7 +425,7 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
       }
 
       const { assets } = htmlPluginData;
-      const pluginPublicPath = assets.publicPath;
+      const pluginPublicPath = savedAssetsPublicPath = assets.publicPath;
       const compilationHash = compilation.hash;
       const assetPromises = [];
 
@@ -482,26 +484,11 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
       assets.css = cssPrependPaths.concat(assets.css).concat(cssAppendPaths);
 
       if (metas) {
-        const getMeta = tag => {
+        metas.forEach(tag => {
           if (isString(tag.sourcePath)) {
             assetPromises.push(addAsset(tag.sourcePath));
           }
-          if (isDefined(tag.path)) {
-            return {
-              content: getTagPath(tag, options, pluginPublicPath, compilationHash),
-              ...tag.attributes
-            };
-          } else {
-            return tag.attributes;
-          }
-        };
-
-        const oldOptionsMeta = htmlPluginData.plugin.options.meta || {};
-
-        htmlPluginData.plugin.options.meta = {
-          ...oldOptionsMeta,
-          ...metas.map(getMeta)
-        };
+        });
       }
 
       Promise.all(assetPromises).then(
@@ -522,7 +509,7 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
       );
     };
 
-    const onAlterAssetTag = (htmlPluginData, callback) => {
+    const onAlterAssetTagGroups = (htmlPluginData, callback) => {
       if (shouldSkip(htmlPluginData)) {
         if (callback) {
           return callback(null, htmlPluginData);
@@ -533,6 +520,29 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
 
       const pluginHead = htmlPluginData.head ? htmlPluginData.head : htmlPluginData.headTags;
       const pluginBody = htmlPluginData.body ? htmlPluginData.body : htmlPluginData.bodyTags;
+
+      if (metas) {
+        const pluginPublicPath = savedAssetsPublicPath;
+        const compilationHash = compilation.hash;
+
+        const getMeta = tag => {
+          if (isDefined(tag.path)) {
+            return {
+              tagName: 'meta',
+              attributes: {
+                content: getTagPath(tag, options, pluginPublicPath, compilationHash),
+                ...tag.attributes
+              }
+            };
+          } else {
+            return {
+              tagName: 'meta',
+              attributes: tag.attributes
+            };
+          }
+        };
+        pluginHead.push(...metas.map(getMeta));
+      }
 
       const pluginLinks = pluginHead.filter(({ tagName }) => tagName === 'link');
       const pluginScripts = pluginBody.filter(({ tagName }) => tagName === 'script');
@@ -565,42 +575,23 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
       }
     };
 
-    // Webpack >= 4
-    if (compilation.hooks) {
-      // HtmlWebPackPlugin - new
-      if (compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration) {
-        compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('htmlWebpackTagsPlugin', onBeforeHtmlGeneration);
-        compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync('htmlWebpackTagsPlugin', onAlterAssetTag);
-      } else {
-        const HtmlWebpackPlugin = require(htmlPluginName);
-        if (HtmlWebpackPlugin.getHooks) {
-          const hooks = HtmlWebpackPlugin.getHooks(compilation);
-          const htmlPlugins = compilation.options.plugins.filter(plugin => plugin instanceof HtmlWebpackPlugin);
-          if (htmlPlugins.length === 0) {
-            const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
-            throw new Error(message);
-          }
-          hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackTagsPlugin', onBeforeHtmlGeneration);
-          hooks.alterAssetTagGroups.tapAsync('htmlWebpackTagsPlugin', onAlterAssetTag);
-        } else {
-          const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
-          throw new Error(message);
-        }
+    const HtmlWebpackPlugin = require(htmlPluginName);
+    if (HtmlWebpackPlugin.getHooks) {
+      const hooks = HtmlWebpackPlugin.getHooks(compilation);
+      const htmlPlugins = compilation.options.plugins.filter(plugin => plugin instanceof HtmlWebpackPlugin);
+      if (htmlPlugins.length === 0) {
+        const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
+        throw new Error(message);
       }
+      hooks.beforeAssetTagGeneration.tapAsync('htmlWebpackTagsPlugin', onBeforeHtmlGeneration);
+      hooks.alterAssetTagGroups.tapAsync('htmlWebpackTagsPlugin', onAlterAssetTagGroups);
     } else {
-      // Webpack < 4
-      compilation.plugin('html-webpack-plugin-before-html-generation', onBeforeHtmlGeneration);
-      compilation.plugin('html-webpack-plugin-alter-asset-tags', onAlterAssetTag);
+      const message = "Error running html-webpack-tags-plugin, are you sure you have html-webpack-plugin before it in your webpack config's plugins?";
+      throw new Error(message);
     }
   };
 
-  // Webpack 4+
-  if (compiler.hooks) {
-    compiler.hooks.compilation.tap('htmlWebpackTagsPlugin', onCompilation);
-  } else {
-    // Webpack 3
-    compiler.plugin('compilation', onCompilation);
-  }
+  compiler.hooks.compilation.tap('htmlWebpackTagsPlugin', onCompilation);
 };
 
 HtmlWebpackTagsPlugin.api = {
