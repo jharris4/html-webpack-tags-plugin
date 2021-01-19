@@ -151,16 +151,16 @@ And this sample `webpack` config:
   },
   plugins: [
     new HtmlWebpackTagsPlugin({
-      append: false, links: 'plugin-a-link', script: 'plugin-a-script'
+      append: false, links: 'plugin-a-link', scripts: 'plugin-a-script'
     }),
     new HtmlWebpackTagsPlugin({
-      append: false, links: 'plugin-b-link', script: 'plugin-b-script'
+      append: false, links: 'plugin-b-link', scripts: 'plugin-b-script'
     }),
     new HtmlWebpackTagsPlugin({
-      append: true, links: 'plugin-c-link', script: 'plugin-c-script'
+      append: true, links: 'plugin-c-link', scripts: 'plugin-c-script'
     }),
     new HtmlWebpackTagsPlugin({
-      append: true, links: 'plugin-d-link', script: 'plugin-d-script'
+      append: true, links: 'plugin-d-link', scripts: 'plugin-d-script'
     })
   ]
 }
