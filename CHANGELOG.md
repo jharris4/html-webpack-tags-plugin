@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
 
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.17...3.0.0) (2021-02-03)
+
+### Features
+
+* Updated to support `webpack` & `html-webpack-plugin` version **`5`**.
+
+### BREAKING CHANGES
+
+* webpack` & `html-webpack-plugin` version **`5`** are now required.
+* Node version **`>=10`** is now required.
+
+
 <a name="2.0.17"></a>
 # [2.0.17](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.16...2.0.17) (2019-09-23)
 

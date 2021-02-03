@@ -8,9 +8,10 @@ by letting you specify script or link tags to inject.
 Prior Version
 ------------
 
-- `html-webpack-tags-plugin` requires **Node >= 8.6**.
+- `html-webpack-tags-plugin` requires **Node >= 10** and `webpack` & `html-webpack-plugin` versions **>= 5**.
+- For older versions of webpack and node, please use **version 2.x** of this plugin.
 - This plugin used to be called `html-webpack-include-assets-plugin`.
-- For older version of Node, please install [html-webpack-include-assets-plugin version 1.x](https://github.com/jharris4/html-webpack-tags-plugin/releases/tag/1.0.10).
+- For versions of Node older than `8.6`, please install [html-webpack-include-assets-plugin version 1.x](https://github.com/jharris4/html-webpack-tags-plugin/releases/tag/1.0.10).
 
 Motivation
 ------------

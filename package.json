@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "typings.d.ts",
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   },
   "files": [
     "index.js",
