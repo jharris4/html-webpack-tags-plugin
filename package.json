@@ -51,15 +51,15 @@
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^5.0.2",
     "express": "^4.17.1",
-    "html-webpack-plugin": "^5.1.0",
+    "html-webpack-plugin": "^5.2.0",
     "jasmine": "^3.6.4",
     "jasmine-expect": "^5.0.0",
-    "mini-css-extract-plugin": "^1.3.6",
+    "mini-css-extract-plugin": "^1.3.8",
     "puppeteer": "^7.1.0",
     "rimraf": "^3.0.2",
     "semistandard": "^16.0.0",
     "style-loader": "^2.0.0",
-    "webpack": "^5.21.2"
+    "webpack": "^5.23.0"
   },
   "dependencies": {
     "glob": "^7.1.6",
