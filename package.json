@@ -46,6 +46,9 @@
     "url": "https://github.com/jharris4/html-webpack-tags-plugin/issues"
   },
   "homepage": "https://github.com/jharris4/html-webpack-tags-plugin",
+  "peerDependencies": {
+    "webpack": "^5.0.0"
+  },
   "devDependencies": {
     "cheerio": "^1.0.0-rc.5",
     "copy-webpack-plugin": "^7.0.0",
