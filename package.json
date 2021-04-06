@@ -47,6 +47,7 @@
   },
   "homepage": "https://github.com/jharris4/html-webpack-tags-plugin",
   "peerDependencies": {
+    "html-webpack-plugin": "^5.0.0",
     "webpack": "^5.0.0"
   },
   "devDependencies": {
