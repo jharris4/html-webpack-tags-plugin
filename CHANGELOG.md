@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 https://github.com/jharris4/html-webpack-tags-plugin
 
+<a name="3.0.1"></a>
+# [3.0.1](https://github.com/jharris4/html-webpack-tags-plugin/compare/3.0.0...3.0.1) (2021-04-07)
+
+### Features
+
+* Added `webpack` & `html-webpack-plugin` to peerDependencies.
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/jharris4/html-webpack-tags-plugin/compare/2.0.17...3.0.0) (2021-02-03)
 
