@@ -73,7 +73,12 @@ const getCompilationErrors = result => {
 
 const hasCompilationErrorText = (result, text) => {
   try {
-    return JSON.stringify(result.compilation.errors).includes(text);
+    const errorText = JSON.stringify(result.compilation.errors);
+    if (Array.isArray(text)) {
+      return text.some(aText => errorText.includes(aText));
+    } else {
+      return errorText.includes(text);
+    }
   } catch (ex) {
     return false;
   }
@@ -2150,7 +2155,7 @@ function runTestsForOption (options, createWebpackConfig) {
       }), (err, result) => {
         expect(err).toBeFalsy();
         expect(hasNoCompilationErrors(result)).toBe(false);
-        expect(hasCompilationErrorText(result, 'no such file')).toBe(true);
+        expect(hasCompilationErrorText(result, ['no such file', 'could not load file'])).toBe(true);
         expect(hasCompilationErrorText(result, badFilename)).toBe(true);
         done();
       });
