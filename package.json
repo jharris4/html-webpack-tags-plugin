@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "cheerio": "^1.0.0-rc.5",
-    "copy-webpack-plugin": "^8.1.0",
+    "copy-webpack-plugin": "^8.1.1",
     "css-loader": "^5.2.0",
     "express": "^4.17.1",
     "html-webpack-plugin": "^5.3.1",
@@ -63,7 +63,7 @@
     "rimraf": "^3.0.2",
     "semistandard": "^16.0.0",
     "style-loader": "^2.0.0",
-    "webpack": "^5.28.0"
+    "webpack": "^5.30.0"
   },
   "dependencies": {
     "glob": "^7.1.6",
