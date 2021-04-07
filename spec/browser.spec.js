@@ -128,7 +128,6 @@ async function startServer ({ serverPort, secure = false, path = EXTERNALS_OUTPU
       if (error) {
         reject(error);
       } else {
-        // theServer.keepAliveTimeout = 0; // FIX for Node > 8.0 < 8.1.1 issue: https://github.com/glenjamin/webpack-hot-middleware/issues/210
         resolve({ closeServer });
       }
     });
