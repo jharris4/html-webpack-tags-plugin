@@ -1,6 +1,6 @@
 {
   "name": "html-webpack-tags-plugin",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "lets you define html tags to inject with html-webpack-plugin",
   "main": "index.js",
   "types": "typings.d.ts",
