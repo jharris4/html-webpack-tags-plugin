@@ -15,6 +15,7 @@
     "prepublish": "npm run test",
     "pretest": "semistandard",
     "test": "jasmine",
+    "testfilter": "jasmine --filter=\"name of suite or test\"",
     "debug": "node-debug jasmine"
   },
   "semistandard": {
