@@ -1711,6 +1711,330 @@ function runTestsForHtmlVersion () {
         });
       });
     });
+
+    describe('options.scripts with attributes', () => {
+      it('should output all the attributes for scripts when html options inject is the default', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+
+      it('should output all the attributes for scripts when html options inject is true', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            inject: true,
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+
+      it('should not output scripts when html options inject is false', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            inject: false,
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(1);
+            expect($('link').length).toBe(0);
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            done();
+          });
+        });
+      });
+
+      it('should output all the attributes for scripts when html options inject is head', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            inject: 'head',
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+
+      it('should output all the attributes for scripts when html options inject is body', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            inject: 'body',
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+
+      it('should output all the attributes for scripts when html options inject is the default and html options scriptLoading is blocking', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            scriptLoading: 'blocking',
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+
+      it('should output all the attributes for scripts when html options inject is the default and html options scriptLoading is defer', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            scriptLoading: 'defer',
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+
+      it('should output all the attributes for scripts when html options inject is the default and html options scriptLoading is module', done => {
+        webpack(createWebpackConfig({
+          htmlOptions: {
+            scriptLoading: 'module',
+            template: path.join(__dirname, 'fixtures', 'index.html')
+          },
+          options: [
+            {
+              append: true,
+              scripts: [{
+                path: 'b.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            },
+            {
+              append: false,
+              scripts: [{
+                path: 'a.js',
+                attributes: { crossorigin: 'anonymous' }
+              }]
+            }
+          ]
+        }), (err, result) => {
+          expect(err).toBeFalsy();
+          expect(getCompilationErrors(result)).toBe(EMPTY_ERRORS);
+          fs.readFile(FIXTURES_HTML_FILE, 'utf8', (er, data) => {
+            expect(er).toBeFalsy();
+            const $ = cheerio.load(data);
+            expect($('script').length).toBe(5);
+            expect($('link').length).toBe(1);
+            expect($('script[src="app.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'app.js' } });
+            expect($('script[src="style.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'style.js' } });
+            expect($('script[id="loading-script"]').toString()).toContain('<script id="loading-script"');
+            expect($('script[src="a.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'a.js', crossorigin: 'anonymous' } });
+            expect($('script[src="b.js"]')).toBeTag({ tagName: 'script', attributes: { src: 'b.js', crossorigin: 'anonymous' } });
+            expect($('link[href="style.css"]')).toBeTag({ tagName: 'link', attributes: { href: 'style.css' } });
+            done();
+          });
+        });
+      });
+    });
   });
 }
 

@@ -544,8 +544,11 @@ HtmlWebpackTagsPlugin.prototype.apply = function (compiler) {
         pluginHead.push(...metas.map(getMeta));
       }
 
+      const injectOption = htmlPluginData.plugin.options.inject;
+      const sourceScripts = injectOption === 'body' ? pluginBody : pluginHead;
+
       const pluginLinks = pluginHead.filter(({ tagName }) => tagName === 'link');
-      const pluginScripts = pluginBody.filter(({ tagName }) => tagName === 'script');
+      const pluginScripts = sourceScripts.filter(({ tagName }) => tagName === 'script');
 
       const headPrepend = pluginLinks.slice(0, linksPrepend.length);
       const headAppend = pluginLinks.slice(pluginLinks.length - linksAppend.length);
