@@ -569,7 +569,9 @@ describe('browser', () => {
       getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
         .then(({ content, errors }) => {
           expect(errors.length).toBe(1);
-          expect(errors[0].message).toContain('Cannot read property \'fakeB\' of undefined');
+          expect(errors[0].message).toContain('Cannot read propert');
+          expect(errors[0].message).toContain('\'fakeB\'');
+          expect(errors[0].message).toContain('of undefined');
 
           const $ = cheerio.load(content);
           const divs = $('div.fake');
@@ -616,7 +618,9 @@ describe('browser', () => {
       getBrowserContent({ serverHost: SERVER_HOST, serverPort: SERVER_PORT })
         .then(({ content, errors }) => {
           expect(errors.length).toBe(1);
-          expect(errors[0].message).toContain('Cannot read property \'fakeB\' of undefined');
+          expect(errors[0].message).toContain('Cannot read propert');
+          expect(errors[0].message).toContain('\'fakeB\'');
+          expect(errors[0].message).toContain('of undefined');
 
           const $ = cheerio.load(content);
           const divs = $('div.fake');

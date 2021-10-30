@@ -51,22 +51,22 @@
     "webpack": "^5.0.0"
   },
   "devDependencies": {
-    "cheerio": "^1.0.0-rc.5",
-    "copy-webpack-plugin": "^8.1.1",
-    "css-loader": "^5.2.0",
+    "cheerio": "1.0.0-rc.10",
+    "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.2.0",
     "express": "^4.17.1",
-    "html-webpack-plugin": "^5.3.1",
-    "jasmine": "^3.7.0",
+    "html-webpack-plugin": "^5.5.0",
+    "jasmine": "^3.10.0",
     "jasmine-expect": "^5.0.0",
-    "mini-css-extract-plugin": "^1.4.0",
-    "puppeteer": "^8.0.0",
+    "mini-css-extract-plugin": "^2.4.3",
+    "puppeteer": "^10.4.0",
     "rimraf": "^3.0.2",
-    "semistandard": "^16.0.0",
-    "style-loader": "^2.0.0",
-    "webpack": "^5.30.0"
+    "semistandard": "^16.0.1",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.61.0"
   },
   "dependencies": {
-    "glob": "^7.1.6",
+    "glob": "^7.2.0",
     "minimatch": "^3.0.4",
     "slash": "^3.0.0"
   }
